@@ -1,0 +1,68 @@
+services:
+    _defaults:
+        public: false
+
+    a2b.data_migration_manager:
+        class: DragoonBoots\A2B\DataMigration\DataMigrationManager
+        public: true
+        arguments:
+        - '@annotation_reader'
+    DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface: '@a2b.data_migration_manager'
+
+    a2b.driver_manager:
+        class: DragoonBoots\A2B\Drivers\DriverManager
+        public: true
+        arguments:
+            - '@annotation_reader'
+    DragoonBoots\A2B\Drivers\DriverManagerInterface: '@a2b.driver_manager'
+
+    a2b.executor:
+        class: DragoonBoots\A2B\DataMigration\DataMigrationExecutor
+        arguments:
+            - '@event_dispatcher'
+    DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
+
+    a2b.source.dbal:
+        parent: a2b.source.abstract_source_driver
+        class: DragoonBoots\A2B\Drivers\Source\DbalSourceDriver
+        public: true
+        tags:
+            - a2b.driver.source
+        arguments:
+            $connectionFactory: '@doctrine.dbal.connection_factory'
+
+    a2b.destination.debug:
+        parent: a2b.destination.abstract_destination_driver
+        class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver
+        public: true
+        tags:
+            - a2b.driver.destination
+
+    a2b.source.abstract_source_driver:
+        class: DragoonBoots\A2B\Drivers\AbstractSourceDriver
+        abstract: true
+        public: false
+        arguments:
+            $uriParser: '@league.uri.parser'
+
+    a2b.destination.abstract_destination_driver:
+        class: DragoonBoots\A2B\Drivers\AbstractDestinationDriver
+        abstract: true
+        public: false
+        arguments:
+            - '@league.uri.parser'
+
+    a2b.command.migrate:
+        class: DragoonBoots\A2B\Command\MigrateCommand
+        arguments:
+            - '@a2b.data_migration_manager'
+            - '@a2b.driver_manager'
+            - '@a2b.executor'
+            - '@league.uri.parser'
+            - '@parameter_bag'
+        tags:
+            - console.command
+
+    # Vendors
+    league.uri.parser:
+        class: League\Uri\Parser

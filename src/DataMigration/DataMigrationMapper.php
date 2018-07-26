@@ -51,19 +51,20 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * DataMigrationMapper constructor.
      *
+     * @param string                        $dbConfig
      * @param ConnectionFactory             $connectionFactory
      * @param ParameterBagInterface         $parameterBag
      * @param Inflector                     $inflector
      * @param DataMigrationManagerInterface $dataMigrationManager
      */
     public function __construct(
+      string $dbConfig,
       ConnectionFactory $connectionFactory,
       ParameterBagInterface $parameterBag,
       Inflector $inflector,
       DataMigrationManagerInterface $dataMigrationManager
     ) {
-        $dbPath = $parameterBag->resolveValue(['url' => 'sqlite:///%kernel.project_dir%/var/data_migration_map.sqlite']);
-        $this->connection = $connectionFactory->createConnection($dbPath);
+        $this->connection = $connectionFactory->createConnection(['url' => $dbConfig]);
 
         $this->inflector = $inflector;
         $this->dataMigrationManager = $dataMigrationManager;
@@ -88,6 +89,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
             $columnName = $this->getMappingColumnName($destId, self::MAPPING_DEST);
             $q->setValue($columnName, $q->createNamedParameter($value));
         }
+        $q->setValue('updated', $q->createNamedParameter(date('c')));
         $q->execute();
     }
 
@@ -125,6 +127,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
                 $table = $toSchema->createTable($tableName);
                 $table->addOption('comment', sprintf('Data migration map for "%s"', $migrationId));
                 $table->addColumn('id', Type::INTEGER);
+                $table->addColumn('updated', Type::DATETIMETZ_IMMUTABLE);
                 $table->setPrimaryKey(['id']);
             } else {
                 throw $e;

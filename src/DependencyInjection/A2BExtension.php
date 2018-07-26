@@ -37,8 +37,18 @@ class A2BExtension extends Extension implements CompilerPassInterface
         $container->registerForAutoconfiguration(DestinationDriverInterface::class)
           ->addTag('a2b.driver.destination')
           ->setParent('a2b.destination.abstract_destination_driver');
+
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
+
+        // Configure the migration mapper
+        $migrationMapperDefinition = $container->getDefinition('a2b.mapper');
+        $migrationMapperDefinition->replaceArgument('$dbConfig', $config['mapper']['db']);
     }
 
+    /**
+     * @param ContainerBuilder $container
+     */
     public function process(ContainerBuilder $container)
     {
         if ($container->has('a2b.data_migration_manager')) {
@@ -49,6 +59,11 @@ class A2BExtension extends Extension implements CompilerPassInterface
         }
     }
 
+    /**
+     * Add migrations to the migration manager.
+     *
+     * @param ContainerBuilder $container
+     */
     protected function configureDataMigrationManager(ContainerBuilder $container)
     {
         $definition = $container->findDefinition('a2b.data_migration_manager');
@@ -59,6 +74,11 @@ class A2BExtension extends Extension implements CompilerPassInterface
         }
     }
 
+    /**
+     * Add drivers to the driver manager.
+     *
+     * @param ContainerBuilder $container
+     */
     protected function configureDriverManager(ContainerBuilder $container)
     {
         $definition = $container->findDefinition('a2b.driver_manager');
@@ -72,5 +92,13 @@ class A2BExtension extends Extension implements CompilerPassInterface
         foreach ($destinationDrivers as $id => $tags) {
             $definition->addMethodCall('addDestinationDriver', [new Reference($id)]);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAlias()
+    {
+        return 'a2b';
     }
 }

@@ -9,6 +9,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\Driver\Statement;
+use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractSourceDriver;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
@@ -71,21 +72,11 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     }
 
     /**
-     * Set the source of this driver.
-     *
-     * @param string $source
-     *   A source URI.
-     *
-     * @throws BadUriException
-     *   Thrown when the given URI is not valid.
+     * {@inheritdoc}
      */
-    public function setSource(?string $source)
+    public function configure(DataMigration $definition)
     {
-        if (is_null($source)) {
-            unset($this->connection);
-
-            return;
-        }
+        $source = $definition->source;
 
         try {
             $this->connection = $this->connectionFactory->createConnection(['url' => $source]);

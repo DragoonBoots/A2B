@@ -75,8 +75,16 @@ class DataMigration
     /**
      * The source unique ids
      *
-     * @var array<string>
+     * @var \DragoonBoots\A2B\Annotations\IdField[]
      * @Annotation\Required
      */
-    public $ids = ['id'];
+    public $sourceIds;
+
+    /**
+     * The destination unique ids
+     *
+     * @var \DragoonBoots\A2B\Annotations\IdField[]
+     * @Annotation\Required
+     */
+    public $destinationIds;
 }

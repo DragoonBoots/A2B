@@ -3,6 +3,7 @@
 
 namespace DragoonBoots\A2B\Drivers;
 
+use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Exception\BadUriException;
 
 /**
@@ -17,11 +18,11 @@ interface SourceDriverInterface extends \IteratorAggregate
     /**
      * Set the source of this driver.
      *
-     * @param string $source
-     *   A source URI.
+     * @param DataMigration $definition
+     *   The migration definition.
      *
      * @throws BadUriException
      *   Thrown when the given URI is not valid.
      */
-    public function setSource(string $source);
+    public function configure(DataMigration $definition);
 }

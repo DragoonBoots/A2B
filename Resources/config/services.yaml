@@ -18,9 +18,21 @@ services:
 
     a2b.executor:
         class: DragoonBoots\A2B\DataMigration\DataMigrationExecutor
+        public: true
         arguments:
             - '@event_dispatcher'
+            - '@a2b.mapper'
     DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
+
+    a2b.mapper:
+        class: DragoonBoots\A2B\DataMigration\DataMigrationMapper
+        public: true
+        arguments:
+        - '@doctrine.dbal.connection_factory'
+        - '@parameter_bag'
+        - '@doctrine.inflector'
+        - '@a2b.data_migration_manager'
+    DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
 
     a2b.source.dbal:
         parent: a2b.source.abstract_source_driver
@@ -34,6 +46,13 @@ services:
     a2b.destination.debug:
         parent: a2b.destination.abstract_destination_driver
         class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver
+        public: true
+        tags:
+            - a2b.driver.destination
+
+    a2b.destination.csv:
+        parent: a2b.destination.abstract_destination_driver
+        class: DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver
         public: true
         tags:
             - a2b.driver.destination
@@ -64,5 +83,7 @@ services:
             - console.command
 
     # Vendors
+    doctrine.inflector:
+        class: Doctrine\Common\Inflector\Inflector
     league.uri.parser:
         class: League\Uri\Parser

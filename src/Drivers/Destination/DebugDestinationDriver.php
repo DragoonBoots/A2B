@@ -4,10 +4,12 @@
 namespace DragoonBoots\A2B\Drivers\Destination;
 
 
+use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
+use DragoonBoots\A2B\Exception\NoDestinationException;
 
 /**
  * Destination driver to print result to a stream.
@@ -27,8 +29,10 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     /**
      * {@inheritdoc}
      */
-    public function setDestination(string $destination)
+    public function configure(DataMigration $definition)
     {
+        $destination = $definition->destination;
+
         $uri = $this->uriParser->parse($destination);
         switch ($uri['path']) {
             case 'stdout':
@@ -49,14 +53,19 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
      */
     public function write($data)
     {
+        if (!isset($this->stream)) {
+            throw new NoDestinationException();
+        }
         $printable = var_export($data, true)."\n\n";
         fwrite($this->stream, $printable);
+
+        return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getCurrentEntity(array $ids)
+    public function getCurrentEntity(array $destIds)
     {
         return null;
     }

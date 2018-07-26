@@ -95,8 +95,7 @@ class MigrateCommand extends Command
             'simulate',
             null,
             InputOption::VALUE_NONE,
-            'Simulate results by writing output to the terminal instead of the destination.',
-            false
+            'Simulate results by writing output to the terminal instead of the destination.'
           )->addArgument(
             'migrations', InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
             'A list of migration classes to run.  Do not specify any migrations to run all migrations.',
@@ -134,6 +133,10 @@ class MigrateCommand extends Command
         foreach ($migrations as $migrationId => $migration) {
             $definition = $definitions[$migrationId];
 
+            // Resolve container parameters source/destination urls
+            $definition->source = $this->parameterBag->resolveValue($definition->source);
+            $definition->destination = $this->parameterBag->resolveValue($definition->destination);
+
             // Get source driver
             if (isset($definition->sourceDriver)) {
                 $sourceDriver = $this->driverManager->getSourceDriver($definition->sourceDriver);
@@ -141,23 +144,27 @@ class MigrateCommand extends Command
                 $sourceUri = $this->uriParser->parse($definition->source);
                 $sourceDriver = $this->driverManager->getSourceDriverForScheme($sourceUri['scheme']);
             }
-            $sourceDriver->setSource($this->parameterBag->resolveValue($definition->source));
+            $sourceDriver->configure($definition);
+            $migration->configureSource($sourceDriver);
 
             // Get destination driver
             if ($input->getOption('simulate') === true) {
                 $destinationDriver = $this->driverManager->getDestinationDriver(DebugDestinationDriver::class);
-            } elseif (isset($definition->destinationDriver)) {
-                $destinationDriver = $this->driverManager->getDestinationDriver($definition->destinationDriver);
+                $fakeDefinition = new DataMigration();
+                $fakeDefinition->destination = 'debug:stderr';
+                $destinationDriver->configure($fakeDefinition);
             } else {
-                $destinationUri = $this->uriParser->parse($definition->destination);
-                $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
+                if (isset($definition->destinationDriver)) {
+                $destinationDriver = $this->driverManager->getDestinationDriver($definition->destinationDriver);
+                } else {
+                    $destinationUri = $this->uriParser->parse($definition->destination);
+                    $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
+                }
+                $destinationDriver->configure($definition);
+                $migration->configureDestination($destinationDriver);
             }
 
-            $destinationDriver->setDestination($this->parameterBag->resolveValue($definition->destination));
-
-            // Configure and execute migration
-            $migration->configureSource($sourceDriver);
-            $migration->configureDestination($destinationDriver);
+            // Run migration
             $this->executor->execute($migration, $definition, $sourceDriver, $destinationDriver);
         }
     }
@@ -171,9 +178,8 @@ class MigrateCommand extends Command
      *
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      */
-    protected function getMigrations(
-      array $groups, array $migrationIds
-    ) {
+    protected function getMigrations(array $groups, array $migrationIds)
+    {
         $migrations = [];
         $definitions = [];
         if (empty($migrationIds)) {

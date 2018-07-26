@@ -27,6 +27,14 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
         $this->uriParser = $uriParser;
     }
 
+    /**
+     * Perform the necessary typecasting on the destination id value.
+     *
+     * @param IdField $idField
+     * @param         $value
+     *
+     * @return int|mixed
+     */
     protected function resolveDestId(IdField $idField, $value)
     {
         if ($idField->type == 'int') {
@@ -34,5 +42,15 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
         }
 
         return $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flush()
+    {
+        // Do nothing, allowing drivers that don't have a buffer to avoid
+        // implementing nothing.
+        return;
     }
 }

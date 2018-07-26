@@ -39,6 +39,13 @@ interface DestinationDriverInterface
     public function write($data);
 
     /**
+     * Flush remaining data that has not been written.
+     *
+     * Implementors should also perform any cleanup that needs to be done here.
+     */
+    public function flush();
+
+    /**
      * Get the entity as last migrated from the destination for updating.
      *
      * @param array $destIds

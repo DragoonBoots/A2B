@@ -93,6 +93,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         }
 
         // Cleanup
+        $this->destinationDriver->flush();
         unset(
           $this->migration,
           $this->definition,

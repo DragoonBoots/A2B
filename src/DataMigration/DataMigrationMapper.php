@@ -7,6 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
@@ -70,6 +71,9 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $this->dataMigrationManager = $dataMigrationManager;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function addMapping($migrationId, DataMigration $migrationDefinition, array $sourceIds, array $destIds)
     {
         $tableName = $this->getMappingTableName($migrationId);
@@ -80,17 +84,62 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         }
 
         $q = $this->connection->createQueryBuilder();
-        $q->insert($tableName);
-        foreach ($sourceIds as $sourceId => $value) {
-            $columnName = $this->getMappingColumnName($sourceId, self::MAPPING_SOURCE);
-            $q->setValue($columnName, $q->createNamedParameter($value));
+        if ($this->isUpdateMigration($migrationId) && $this->rowMigratedPreviously($migrationId, $sourceIds)) {
+            // Update existing mapping
+            $q->update($tableName);
+            foreach ($sourceIds as $sourceId => $value) {
+                $columnName = $this->getMappingColumnName($sourceId, self::MAPPING_SOURCE);
+                $q->andWhere(
+                  sprintf(
+                    '"%s" = %s',
+                    $columnName,
+                    $q->createNamedParameter($value)
+                  )
+                );
+            }
+            $setFunction = 'set';
+        } else {
+            // Create a new mapping.
+            $q->insert($tableName);
+            foreach ($sourceIds as $sourceId => $value) {
+                $columnName = $this->getMappingColumnName($sourceId, self::MAPPING_SOURCE);
+                $q->setValue($columnName, $q->createNamedParameter($value));
+            }
+            $setFunction = 'setValue';
         }
         foreach ($destIds as $destId => $value) {
             $columnName = $this->getMappingColumnName($destId, self::MAPPING_DEST);
-            $q->setValue($columnName, $q->createNamedParameter($value));
+            $q->$setFunction($columnName, $q->createNamedParameter($value));
         }
-        $q->setValue('updated', $q->createNamedParameter(date('c')));
+        $q->$setFunction('updated', $q->createNamedParameter(date('c')));
         $q->execute();
+    }
+
+    /**
+     * @param string $migrationId
+     * @param array  $sourceIds
+     *
+     * @return bool
+     */
+    protected function rowMigratedPreviously(string $migrationId, array $sourceIds): bool
+    {
+        $tableName = $this->getMappingTableName($migrationId);
+        $q = $this->connection->createQueryBuilder();
+        $q->select('COUNT(*)')
+          ->from($tableName);
+        foreach ($sourceIds as $sourceId => $value) {
+            $columnName = $this->getMappingColumnName($sourceId, self::MAPPING_SOURCE);
+            $q->andWhere(
+              sprintf(
+                '"%s" = %s',
+                $columnName,
+                $q->createNamedParameter($value)
+              )
+            );
+        }
+        $count = (int)($q->execute()->fetch(FetchMode::COLUMN));
+
+        return $count > 0;
     }
 
     /**
@@ -98,11 +147,16 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      *
      * @return string
      */
-    protected function getMappingTableName($migrationId): string
+    protected function getMappingTableName(string $migrationId): string
     {
-        return $this->inflector::tableize(
-          str_replace(['/', '\\'], '_', $migrationId)
-        );
+        static $tableNames = [];
+        if (!isset($tableNames[$migrationId])) {
+            $tableNames[$migrationId] = $this->inflector::tableize(
+              str_replace(['/', '\\'], '_', $migrationId)
+            );
+        }
+
+        return $tableNames[$migrationId];
     }
 
     /**
@@ -205,8 +259,14 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         if ($idField instanceof IdField) {
             $idField = $idField->name;
         }
+        $type = strtolower($type);
 
-        return sprintf('%s_%s', strtolower($type), $this->inflector::tableize($idField));
+        static $columnNames = [];
+        if (!isset($columnNames[$type][$idField])) {
+            $columnNames[$type][$idField] = sprintf('%s_%s', $type, $this->inflector::tableize($idField));
+        }
+
+        return $columnNames[$type][$idField];
     }
 
     /**
@@ -256,19 +316,21 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     {
         $definition = $this->dataMigrationManager->getMigrationDefinition($migrationId);
 
-        return $this->getMatchingIds($migrationId, $sourceIds, $definition->destinationIds);
+        return $this->getMatchingIds($migrationId, $sourceIds, $definition->destinationIds, self::MAPPING_DEST);
     }
 
     /**
      * @param           $migrationId
      * @param array     $sourceIds
      * @param IdField[] $destIdFields
+     * @param string    $type
+     *   One of MAPPING_SOURCE or MAPPING_DEST.
      *
      * @return array
      *   An array with the resulting ids.
      * @throws NoMappingForIdsException
      */
-    protected function getMatchingIds($migrationId, array $sourceIds, array $destIdFields): array
+    protected function getMatchingIds($migrationId, array $sourceIds, array $destIdFields, string $type): array
     {
         // Important thing to remember in this function: "Source" and "Dest"
         // don't mean what you think they do.  It really means "querying ids"
@@ -279,15 +341,15 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $q->from($tableName);
 
         foreach ($destIdFields as $destIdField) {
-            $q->addSelect($q->createNamedParameter($this->getMappingColumnName($destIdField, self::MAPPING_DEST)));
+            $q->addSelect($this->getMappingColumnName($destIdField, self::MAPPING_DEST));
         }
 
         foreach ($sourceIds as $sourceId => $value) {
             $columnName = $this->getMappingColumnName($sourceId, self::MAPPING_SOURCE);
             $q->andWhere(
               sprintf(
-                '%s = %s',
-                $q->createNamedParameter($columnName),
+                '"%s" = %s',
+                $columnName,
                 $q->createNamedParameter($value)
               )
             );
@@ -302,7 +364,14 @@ class DataMigrationMapper implements DataMigrationMapperInterface
             throw new NoMappingForIdsException($sourceIds);
         }
 
-        return $result;
+        // Need to remove the column prefix from the keys for use elsewhere.
+        $destIds = [];
+        foreach ($result as $key => $value) {
+            $newKey = str_replace($this->getMappingColumnName('', $type), '', $key);
+            $destIds[$newKey] = $value;
+        }
+
+        return $destIds;
     }
 
     /**
@@ -318,6 +387,27 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     {
         $definition = $this->dataMigrationManager->getMigrationDefinition($migrationId);
 
-        return $this->getMatchingIds($migrationId, $destIds, $definition->sourceIds);
+        return $this->getMatchingIds($migrationId, $destIds, $definition->sourceIds, self::MAPPING_SOURCE);
+    }
+
+    /**
+     * @param $migrationId
+     *
+     * @return bool
+     */
+    protected function isUpdateMigration($migrationId): bool
+    {
+        $tableName = $this->getMappingTableName($migrationId);
+
+        static $updateMigrations = [];
+        if (!isset($updateMigrations[$migrationId])) {
+            $q = $this->connection->createQueryBuilder();
+            $q->select('COUNT(*)')
+              ->from($tableName);
+            $count = (int)($q->execute()->fetch(FetchMode::COLUMN));
+            $updateMigrations[$migrationId] = (bool)($count > 0);
+        }
+
+        return $updateMigrations[$migrationId];
     }
 }

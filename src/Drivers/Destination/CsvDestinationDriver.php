@@ -9,6 +9,7 @@ use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
+use DragoonBoots\A2B\Exception\MigrationException;
 use DragoonBoots\A2B\Exception\NoDestinationException;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 use League\Csv\ColumnConsistency;
@@ -52,10 +53,24 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     protected $newFile = false;
 
     /**
+     * The temporary file the results are written to.
+     *
+     * @var resource
+     */
+    protected $tempFile;
+
+    /**
+     * @var DataMigration
+     */
+    protected $definition;
+
+    /**
      * {@inheritdoc}
      */
     public function configure(DataMigration $definition)
     {
+        $this->definition = $definition;
+
         $destination = $definition->destination;
         $this->destIds = $definition->destinationIds;
 
@@ -66,17 +81,20 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
             mkdir(dirname($uri['path']), 0755, true);
         }
 
-        $this->writer = CsvWriter::createFromPath($uri['path'], 'w+');
-        $this->writer->addValidator(new ColumnConsistency(), 'column_consistency');
+        $this->reader = CsvReader::createFromPath($uri['path'], 'c+');
 
-        $this->reader = CsvReader::createFromPath($uri['path']);
-
-        $this->headerWritten = false;
         // The file is new if it is entirely empty or only includes a header.
         $this->newFile = $this->reader->count() <= 1;
         if (!$this->newFile) {
             $this->reader->setHeaderOffset(0);
         }
+
+        $this->tempFile = tmpfile();
+        $this->writer = CsvWriter::createFromStream($this->tempFile);
+        $this->writer->addValidator(new ColumnConsistency(), 'column_consistency');
+
+        $this->headerWritten = false;
+
     }
 
     /**
@@ -114,8 +132,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     public function getCurrentEntity(array $destIds)
     {
         if (!$this->newFile) {
-            $constraint = new Statement();
-            $constraint->where(
+            $constraint = (new Statement())->where(
               function ($record) use ($destIds) {
                   $found = true;
                   foreach ($destIds as $key => $value) {
@@ -135,5 +152,20 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         }
 
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     * @throws MigrationException
+     *   Thrown when the destination file could not be written.
+     */
+    public function flush()
+    {
+        $destination = $this->definition->destination;
+        $uri = $this->uriParser->parse($destination);
+        $tempFile = stream_get_meta_data($this->tempFile)['uri'];
+        if (!rename($tempFile, $uri['path'])) {
+            throw new MigrationException(sprintf('Could not write to file at "%s"', $destination));
+        }
     }
 }

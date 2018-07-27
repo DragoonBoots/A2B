@@ -7,7 +7,7 @@ cache:
 before_script:
 # Install dependencies
 - apk update
-- apk add git php7-dev gcc g++ make abuild binutils
+- apk add git php7-dev gcc g++ make abuild binutils icu
 - docker-php-ext-install intl
 # Install & enable Xdebug for code coverage reports
 - pecl install xdebug

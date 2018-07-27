@@ -141,6 +141,7 @@ class DriverManager implements DriverManagerInterface
      *
      * @throws NoDriverForSchemeException
      * @throws UnclearDriverException
+     *   Thrown when more than one driver matches the given scheme.
      */
     protected function getDriverForScheme(string $scheme, Collection $drivers, Collection $driverDefinitions)
     {

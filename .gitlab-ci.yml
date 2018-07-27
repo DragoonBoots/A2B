@@ -5,6 +5,9 @@ cache:
   - vendor/
 
 before_script:
+# Install dependencies
+- apk update
+- apk add git build-base
 # Install & enable Xdebug for code coverage reports
 - pecl install xdebug
 - docker-php-ext-enable xdebug

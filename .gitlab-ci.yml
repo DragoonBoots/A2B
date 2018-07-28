@@ -25,6 +25,9 @@ test:
 # Trigger a rebuild of the packagist repo
 deploy:
   stage: deploy
+  only:
+    variables:
+      - $packagist_token
   image: alpine:3.7
   before_script:
     - apk update

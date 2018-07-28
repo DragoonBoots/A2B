@@ -16,8 +16,18 @@ before_script:
 - curl -sS https://getcomposer.org/installer | php
 - php composer.phar install
 
-# Run our tests
-# If Xdebug was installed you can generate a coverage report and see code coverage metrics.
+# Run tests
 test:
+  stage: test
   script:
-  - vendor/bin/simple-phpunit --configuration phpunit.xml.dist --coverage-text --colors=never
+    - vendor/bin/simple-phpunit --configuration phpunit.xml.dist --coverage-text --colors=never
+
+# Trigger a rebuild of the packagist repo
+deploy:
+  stage: deploy
+  image: alpine:3.7
+  before_script:
+    - apk update
+    - apk add git curl
+  script:
+    - "curl -X POST -F token=${packagist_token} -F ref=master https://gitlab.com/api/v4/projects/7511938/trigger/pipeline"

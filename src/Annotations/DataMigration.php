@@ -27,7 +27,7 @@ class DataMigration
      *
      * Defaults to a group called "default".
      *
-     * @var string
+     * @var string|null
      */
     public $group = 'default';
 
@@ -53,7 +53,7 @@ class DataMigration
      * You may want to specify a driver manually if more than one driver
      * implements a scheme.
      *
-     * @var string
+     * @var string|null
      */
     public $sourceDriver;
 
@@ -68,7 +68,7 @@ class DataMigration
     /**
      * The FQCN for the desired destination driver.
      *
-     * @var string
+     * @var string|null
      */
     public $destinationDriver;
 
@@ -87,4 +87,164 @@ class DataMigration
      * @Annotation\Required
      */
     public $destinationIds;
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return self
+     */
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getGroup(): ?string
+    {
+        return $this->group;
+    }
+
+    /**
+     * @param null|string $group
+     *
+     * @return self
+     */
+    public function setGroup(?string $group): self
+    {
+        $this->group = $group;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSource(): string
+    {
+        return $this->source;
+    }
+
+    /**
+     * @param string $source
+     *
+     * @return self
+     */
+    public function setSource(string $source): self
+    {
+        $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getSourceDriver(): ?string
+    {
+        return $this->sourceDriver;
+    }
+
+    /**
+     * @param null|string $sourceDriver
+     *
+     * @return self
+     */
+    public function setSourceDriver(?string $sourceDriver): self
+    {
+        $this->sourceDriver = $sourceDriver;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDestination(): string
+    {
+        return $this->destination;
+    }
+
+    /**
+     * @param string $destination
+     *
+     * @return self
+     */
+    public function setDestination(string $destination): self
+    {
+        $this->destination = $destination;
+
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getDestinationDriver(): ?string
+    {
+        return $this->destinationDriver;
+    }
+
+    /**
+     * @param null|string $destinationDriver
+     *
+     * @return self
+     */
+    public function setDestinationDriver(?string $destinationDriver): self
+    {
+        $this->destinationDriver = $destinationDriver;
+
+        return $this;
+    }
+
+    /**
+     * @return IdField[]
+     */
+    public function getSourceIds(): array
+    {
+        return $this->sourceIds;
+    }
+
+    /**
+     * @param IdField[] $sourceIds
+     *
+     * @return self
+     */
+    public function setSourceIds(array $sourceIds): self
+    {
+        $this->sourceIds = $sourceIds;
+
+        return $this;
+    }
+
+    /**
+     * @return IdField[]
+     */
+    public function getDestinationIds(): array
+    {
+        return $this->destinationIds;
+    }
+
+    /**
+     * @param IdField[] $destinationIds
+     *
+     * @return self
+     */
+    public function setDestinationIds(array $destinationIds): self
+    {
+        $this->destinationIds = $destinationIds;
+
+        return $this;
+    }
 }

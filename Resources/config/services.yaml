@@ -50,6 +50,9 @@ services:
         public: true
         tags:
             - a2b.driver.destination
+        arguments:
+            $dumper: '@a2b.symfony.dumper.cli'
+            $cloner: '@a2b.symfony.dumper.cloner'
 
     a2b.destination.csv:
         parent: a2b.destination.abstract_destination_driver
@@ -63,14 +66,14 @@ services:
         abstract: true
         public: false
         arguments:
-            $uriParser: '@league.uri.parser'
+            $uriParser: '@a2b.league.uri.parser'
 
     a2b.destination.abstract_destination_driver:
         class: DragoonBoots\A2B\Drivers\AbstractDestinationDriver
         abstract: true
         public: false
         arguments:
-            - '@league.uri.parser'
+            - '@a2b.league.uri.parser'
 
     a2b.command.migrate:
         class: DragoonBoots\A2B\Command\MigrateCommand
@@ -78,13 +81,17 @@ services:
             - '@a2b.data_migration_manager'
             - '@a2b.driver_manager'
             - '@a2b.executor'
-            - '@league.uri.parser'
+            - '@a2b.league.uri.parser'
             - '@parameter_bag'
         tags:
             - console.command
 
     # Vendors
-    doctrine.inflector:
+    a2b.doctrine.inflector:
         class: Doctrine\Common\Inflector\Inflector
-    league.uri.parser:
+    a2b.league.uri.parser:
         class: League\Uri\Parser
+    a2b.symfony.dumper.cli:
+        class: Symfony\Component\VarDumper\Dumper\CliDumper
+    a2b.symfony.dumper.cloner:
+        class: Symfony\Component\VarDumper\Cloner\VarCloner

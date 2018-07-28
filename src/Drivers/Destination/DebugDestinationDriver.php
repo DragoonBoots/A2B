@@ -9,7 +9,9 @@ use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
-use DragoonBoots\A2B\Exception\NoDestinationException;
+use League\Uri\Parser;
+use Symfony\Component\VarDumper\Cloner\ClonerInterface;
+use Symfony\Component\VarDumper\Dumper\AbstractDumper;
 
 /**
  * Destination driver to print result to a stream.
@@ -20,11 +22,22 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
 {
 
     /**
-     * Output stream
-     *
-     * @var resource
+     * @var AbstractDumper
      */
-    protected $stream;
+    protected $dumper;
+
+    /**
+     * @var ClonerInterface
+     */
+    protected $cloner;
+
+    public function __construct(Parser $uriParser, AbstractDumper $dumper, ClonerInterface $cloner)
+    {
+        parent::__construct($uriParser);
+
+        $this->dumper = $dumper;
+        $this->cloner = $cloner;
+    }
 
     /**
      * {@inheritdoc}
@@ -36,11 +49,11 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
         $uri = $this->uriParser->parse($destination);
         switch ($uri['path']) {
             case 'stdout':
-                $this->stream = STDOUT;
+                $this->dumper->setOutput(STDOUT);
 
                 return;
             case 'stderr':
-                $this->stream = STDERR;
+                $this->dumper->setOutput(STDERR);
 
                 return;
         }
@@ -53,11 +66,7 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
      */
     public function write($data)
     {
-        if (!isset($this->stream)) {
-            throw new NoDestinationException();
-        }
-        $printable = var_export($data, true)."\n\n";
-        fwrite($this->stream, $printable);
+        $this->dumper->dump($this->cloner->cloneVar($data));
 
         return null;
     }

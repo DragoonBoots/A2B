@@ -82,6 +82,8 @@ class DebugDestinationDriverTest extends TestCase
      */
     public function testConfigure(string $destination, string $path, $stream)
     {
+        /** @var DestinationDriverInterface $driver */
+        /** @var DataMigration $definition */
         $this->setupDriver($destination, $path, $stream, $driver, $definition);
 
         $driver->configure($definition);
@@ -112,9 +114,24 @@ class DebugDestinationDriverTest extends TestCase
 
     public function testConfigureBad()
     {
+        /** @var DestinationDriverInterface $driver */
+        /** @var DataMigration $definition */
         $this->setupDriver('debug:badstream', 'badstream', null, $driver, $definition);
 
         $this->expectException(BadUriException::class);
         $driver->configure($definition);
+    }
+
+    public function testFlush()
+    {
+        $uriParser = $this->createMock(Parser::class);
+        $dumper = $this->createMock(AbstractDumper::class);
+        $cloner = $this->createMock(ClonerInterface::class);
+        $preFlushDriver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
+
+        // Smoke test the flush operation; it should do nothing in this driver.
+        $postFlushDriver = clone $preFlushDriver;
+        $postFlushDriver->flush();
+        $this->assertEquals($preFlushDriver, $postFlushDriver);
     }
 }

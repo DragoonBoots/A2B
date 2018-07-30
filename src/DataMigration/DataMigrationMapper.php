@@ -15,7 +15,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DataMigrationMapper implements DataMigrationMapperInterface
 {
@@ -54,16 +53,14 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      *
      * @param string                        $dbConfig
      * @param ConnectionFactory             $connectionFactory
-     * @param ParameterBagInterface         $parameterBag
      * @param Inflector                     $inflector
      * @param DataMigrationManagerInterface $dataMigrationManager
      */
     public function __construct(
-      string $dbConfig,
-      ConnectionFactory $connectionFactory,
-      ParameterBagInterface $parameterBag,
-      Inflector $inflector,
-      DataMigrationManagerInterface $dataMigrationManager
+        string $dbConfig,
+        ConnectionFactory $connectionFactory,
+        Inflector $inflector,
+        DataMigrationManagerInterface $dataMigrationManager
     ) {
         $this->connection = $connectionFactory->createConnection(['url' => $dbConfig]);
 

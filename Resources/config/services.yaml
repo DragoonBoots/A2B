@@ -30,8 +30,7 @@ services:
         arguments:
             $dbConfig: []
             $connectionFactory: '@doctrine.dbal.connection_factory'
-            $parameterBag: '@parameter_bag'
-            $inflector: '@doctrine.inflector'
+            $inflector: '@a2b.doctrine.inflector'
             $dataMigrationManager: '@a2b.data_migration_manager'
     DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
 

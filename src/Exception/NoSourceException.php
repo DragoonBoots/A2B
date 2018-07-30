@@ -21,7 +21,7 @@ final class NoSourceException extends \Exception
     public function __construct(string $message = "", int $code = 0, Throwable $previous = null)
     {
         if (empty($message)) {
-            $message = 'No source was set for the driver.  Call setSource() with the migration source uri.';
+            $message = 'No source was set for the driver.  Call configure() with the migration definition.';
         }
         parent::__construct($message, $code, $previous);
     }

@@ -64,6 +64,8 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      */
     protected $definition;
 
+    protected $destUri;
+
     /**
      * {@inheritdoc}
      */
@@ -74,14 +76,14 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         $destination = $definition->destination;
         $this->destIds = $definition->destinationIds;
 
-        $uri = $this->uriParser->parse($destination);
+        $this->destUri = $this->uriParser->parse($destination);
 
         // Ensure the destination exists.
-        if (!is_dir(dirname($uri['path']))) {
-            mkdir(dirname($uri['path']), 0755, true);
+        if (!is_dir(dirname($this->destUri['path']))) {
+            mkdir(dirname($this->destUri['path']), 0755, true);
         }
 
-        $this->reader = CsvReader::createFromPath($uri['path'], 'c+');
+        $this->reader = CsvReader::createFromPath($this->destUri['path'], 'c+');
 
         // The file is new if it is entirely empty or only includes a header.
         $this->newFile = $this->reader->count() <= 1;
@@ -131,6 +133,10 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      */
     public function getCurrentEntity(array $destIds)
     {
+        if (!isset($this->writer)) {
+            throw new NoDestinationException();
+        }
+
         if (!$this->newFile) {
             $constraint = (new Statement())->where(
               function ($record) use ($destIds) {
@@ -161,11 +167,10 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      */
     public function flush()
     {
-        $destination = $this->definition->destination;
-        $uri = $this->uriParser->parse($destination);
         $tempFile = stream_get_meta_data($this->tempFile)['uri'];
-        if (!rename($tempFile, $uri['path'])) {
-            throw new MigrationException(sprintf('Could not write to file at "%s"', $destination));
+        if (!copy($tempFile, $this->destUri['path'])) {
+            throw new MigrationException(sprintf('Could not write to file at "%s"', $this->destUri['path']));
         }
+        unlink($tempFile);
     }
 }

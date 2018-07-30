@@ -14,7 +14,8 @@
         "symfony/var-dumper": "^4.1"
     },
     "require-dev": {
-        "symfony/phpunit-bridge": "^4.1"
+        "symfony/phpunit-bridge": "^4.1",
+        "mikey179/vfsStream": "^1.6"
     },
     "license": "LGPL-3.0-only",
     "authors": [
@@ -30,7 +31,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DragoonBoots\\A2B\\Tests\\": "tests/"
+            "DragoonBoots\\A2B\\Tests\\": "tests/src"
         }
     }
 }

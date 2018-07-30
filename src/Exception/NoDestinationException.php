@@ -21,7 +21,7 @@ final class NoDestinationException extends \Exception
     public function __construct(string $message = "", int $code = 0, Throwable $previous = null)
     {
         if (empty($message)) {
-            $message = 'No destination was set for the driver.  Call setDestination() with the migration destination uri.';
+            $message = 'No destination was set for the driver.  Call configure() with the migration definition.';
         }
         parent::__construct($message, $code, $previous);
     }

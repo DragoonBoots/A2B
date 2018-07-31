@@ -182,15 +182,6 @@ class CsvDestinationDriverTest extends TestCase
             [$headerRow, $newRow]
         );
 
-        // Existing file with appended row
-        $existingRow = ['1', 'CsvDestinationDriver', 'Test', 'Case'];
-        $ret['existing file, appended record'] = $ret['existing file'];
-        array_push(
-            $ret['existing file, appended record'],
-            $newRecord,
-            [$headerRow, $existingRow, $newRow]
-        );
-
         // Existing file with modified row
         $modifiedRecord = $newRecord;
         $modifiedRecord['id'] = 1;

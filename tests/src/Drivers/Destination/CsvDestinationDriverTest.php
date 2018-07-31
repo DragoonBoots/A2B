@@ -6,7 +6,7 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
-use DragoonBoots\A2B\Exception\NoDestinationException;
+use DragoonBoots\A2B\Exception\NoIdSetException;
 use League\Uri\Parser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
@@ -57,11 +57,33 @@ class CsvDestinationDriverTest extends TestCase
 
     public function testReadBad()
     {
-        $uriParser = $this->createMock(Parser::class);
-        $driver = new CsvDestinationDriver($uriParser);
+        $path = vfsStream::url('data/existing_dir/malformed_file.csv');
+        $destination = 'csv://'.$path;
+        /** @var DestinationDriverInterface $driver */
+        /** @var DataMigration $definition */
+        $this->setupDriver($path, $destination, $driver, $definition);
+        $driver->configure($definition);
 
-        $this->expectException(NoDestinationException::class);
+        $this->expectException(\RangeException::class);
         $driver->read(['id' => 1]);
+    }
+
+    /**
+     * @param string $destination
+     * @param string $path
+     * @param array  $destIdSet
+     * @param        $entities
+     *
+     * @dataProvider csvMultipleDataProvider
+     */
+    public function testReadMultiple(string $destination, string $path, array $destIdSet, $entities)
+    {
+        /** @var DestinationDriverInterface $driver */
+        /** @var DataMigration $definition */
+        $this->setupDriver($path, $destination, $driver, $definition);
+        $driver->configure($definition);
+
+        $this->assertEquals($entities, $driver->readMultiple($destIdSet));
     }
 
     /**
@@ -72,37 +94,48 @@ class CsvDestinationDriverTest extends TestCase
      */
     public function testConfigure(string $destination, string $path)
     {
+        /** @var DestinationDriverInterface $driver */
+        /** @var DataMigration $definition */
         $this->setupDriver($path, $destination, $driver, $definition);
 
         $driver->configure($definition);
     }
 
-    public function csvdataProvider()
+    /**
+     * @param string $destination
+     * @param string $path
+     * @param array  $existingIds
+     *
+     * @dataProvider csvIdsDataProvider
+     */
+    public function testGetCurrentIds(string $destination, string $path, array $existingIds)
     {
+        /** @var DestinationDriverInterface $driver */
+        /** @var DataMigration $definition */
+        $this->setupDriver($path, $destination, $driver, $definition);
+        $driver->configure($definition);
+
+        $this->assertEquals($existingIds, $driver->getExistingIds());
+    }
+
+    public function csvIdsDataProvider()
+    {
+        // destination and path
         $ret = $this->csvSourceDataProvider();
 
         $ret['new file'] = array_merge(
             $ret['new file'], [
-                ['id' => 1],
-                null,
-            ]
-        );
-
-        $ret['existing file, new entity'] = array_merge(
-            $ret['existing file'], [
-                ['id' => 2],
-                null,
+                // existingIds
+                [],
             ]
         );
 
         $ret['existing file'] = array_merge(
             $ret['existing file'], [
-                ['id' => 1],
+                // existingIds
                 [
-                    'id' => '1',
-                    'field0' => 'CsvDestinationDriver',
-                    'field1' => 'Test',
-                    'field2' => 'Case',
+                    ['id' => 1],
+                    ['id' => 2],
                 ],
             ]
         );
@@ -116,15 +149,108 @@ class CsvDestinationDriverTest extends TestCase
 
         $newFilePath = vfsStream::url('data/new_dir/newfile.csv');
         $ret['new file'] = [
+            // destination
             'csv://'.$newFilePath,
+            // path
             $newFilePath,
         ];
 
         $existingFilePath = vfsStream::url('data/existing_dir/existing_file.csv');
         $ret['existing file'] = [
+            // destination
             'csv://'.$existingFilePath,
+            // path
             $existingFilePath,
         ];
+
+        return $ret;
+    }
+
+    public function csvDataProvider()
+    {
+        // destination and path
+        $ret = $this->csvSourceDataProvider();
+
+        $ret['new file'] = array_merge(
+            $ret['new file'], [
+                // destIds
+                ['id' => 1],
+                // currentEntity
+                null,
+            ]
+        );
+
+        $ret['existing file, new entity'] = array_merge(
+            $ret['existing file'], [
+                // destIds
+                ['id' => 3],
+                // currentEntity
+                null,
+            ]
+        );
+
+        $ret['existing file'] = array_merge(
+            $ret['existing file'], [
+                // destIds
+                ['id' => 1],
+                // currentEntity
+                [
+                    'id' => '1',
+                    'field0' => 'CsvDestinationDriver',
+                    'field1' => 'Test',
+                    'field2' => 'Case',
+                ],
+            ]
+        );
+
+        return $ret;
+    }
+
+    public function csvMultipleDataProvider()
+    {
+
+        // destination and path
+        $ret = $this->csvSourceDataProvider();
+
+        $ret['new file'] = array_merge(
+            $ret['new file'], [
+                // destIdSet
+                [['id' => 1], ['id' => 2]],
+                // entities
+                [],
+            ]
+        );
+
+        $ret['existing file, new entity'] = array_merge(
+            $ret['existing file'], [
+                // destIdSet
+                [['id' => 3]],
+                // entities
+                [],
+            ]
+        );
+
+        $ret['existing file'] = array_merge(
+            $ret['existing file'], [
+                // destIdSet
+                [['id' => 1], ['id' => 2]],
+                // entities
+                [
+                    [
+                        'id' => '1',
+                        'field0' => 'CsvDestinationDriver',
+                        'field1' => 'Test',
+                        'field2' => 'Case',
+                    ],
+                    [
+                        'id' => '2',
+                        'field0' => 'Yet',
+                        'field1' => 'Another',
+                        'field2' => 'Row',
+                    ],
+                ],
+            ]
+        );
 
         return $ret;
     }
@@ -162,8 +288,33 @@ class CsvDestinationDriverTest extends TestCase
         $this->assertEquals($finalData, $writtenData);
     }
 
+    /**
+     * @param string $destination
+     * @param string $path
+     *
+     * @dataProvider csvSourceDataProvider
+     */
+    public function testWriteBad(string $destination, string $path)
+    {
+        /** @var DestinationDriverInterface $driver */
+        /** @var DataMigration $definition */
+        $this->setupDriver($path, $destination, $driver, $definition);
+
+        $driver->configure($definition);
+
+        $newRecord = [
+            // Missing id field
+            'field0' => 'This is',
+            'field1' => 'a new',
+            'field2' => 'record',
+        ];
+        $this->expectException(NoIdSetException::class);
+        $driver->write($newRecord);
+    }
+
     public function csvWriteDataProvider()
     {
+        // destination and path
         $ret = $this->csvSourceDataProvider();
 
         $headerRow = ['id', 'field0', 'field1', 'field2'];
@@ -178,7 +329,9 @@ class CsvDestinationDriverTest extends TestCase
         // New file with all new rows
         array_push(
             $ret['new file'],
+            // newRecord
             $newRecord,
+            // final data
             [$headerRow, $newRow]
         );
 
@@ -189,7 +342,9 @@ class CsvDestinationDriverTest extends TestCase
         $ret['existing file, modified record'] = $ret['existing file'];
         array_push(
             $ret['existing file, modified record'],
+            // newRecord
             $modifiedRecord,
+            // final data
             [$headerRow, $modifiedRow]
         );
 

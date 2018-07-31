@@ -30,6 +30,24 @@ class DebugDestinationDriverTest extends TestCase
         $this->assertNull($driver->read(['id' => 1]));
     }
 
+    public function testReadMultiple()
+    {
+        $uriParser = $this->createMock(Parser::class);
+        $dumper = $this->createMock(AbstractDumper::class);
+        $cloner = $this->createMock(ClonerInterface::class);
+        $driver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
+
+        $this->assertEquals(
+            [],
+            $driver->readMultiple(
+                [
+                    ['id' => 1],
+                    ['id' => 2],
+                ]
+            )
+        );
+    }
+
     /**
      * @param string $destination
      * @param string $path
@@ -88,6 +106,17 @@ class DebugDestinationDriverTest extends TestCase
 
         $driver->configure($definition);
     }
+
+    public function testGetExistingIds()
+    {
+        $parser = $this->createMock(Parser::class);
+        $dumper = $this->createMock(AbstractDumper::class);
+        $cloner = $this->createMock(ClonerInterface::class);
+        $driver = new DebugDestinationDriver($parser, $dumper, $cloner);
+
+        $this->assertEquals([], $driver->getExistingIds());
+    }
+
 
     /**
      * @param string                          $destination

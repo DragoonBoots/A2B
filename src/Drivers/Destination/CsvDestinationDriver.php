@@ -10,7 +10,6 @@ use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\MigrationException;
-use DragoonBoots\A2B\Exception\NoDestinationException;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 use League\Csv\ColumnConsistency;
 use League\Csv\Reader as CsvReader;
@@ -98,6 +97,9 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         $this->headerWritten = false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getExistingIds(): array
     {
         $ids = [];
@@ -119,10 +121,6 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      */
     public function write($data)
     {
-        if (!isset($this->writer)) {
-            throw new NoDestinationException();
-        }
-
         if (!$this->headerWritten) {
             $this->writer->insertOne(array_keys($data));
             $this->headerWritten = true;
@@ -146,10 +144,6 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      */
     public function read(array $destIds)
     {
-        if (!isset($this->writer)) {
-            throw new NoDestinationException();
-        }
-
         if (!$this->newFile) {
             $results = $this->findEntities([$destIds]);
             $count = $results->count();
@@ -176,14 +170,17 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     {
         $constraint = (new Statement())->where(
             function ($record) use ($destIdSet) {
-                $found = true;
                 foreach ($destIdSet as $destIds) {
+                    $found = true;
                     foreach ($destIds as $key => $value) {
                         $found = $found && ($record[$key] == $value);
                     }
+                    if ($found) {
+                        return true;
+                    }
                 }
 
-                return $found;
+                return false;
             }
         );
         $results = $constraint->process($this->reader);
@@ -217,9 +214,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     public function flush()
     {
         $tempFile = stream_get_meta_data($this->tempFile)['uri'];
-        if (!copy($tempFile, $this->destUri['path'])) {
-            throw new MigrationException(sprintf('Could not write to file at "%s"', $this->destUri['path']));
-        }
+        copy($tempFile, $this->destUri['path']);
         unlink($tempFile);
     }
 }

@@ -34,7 +34,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DragoonBoots\\A2B\\Tests\\": "tests/"
+            "DragoonBoots\\A2B\\Tests\\": "tests/src"
         }
     }
 }

@@ -27,7 +27,7 @@ class DataMigration
      *
      * Defaults to a group called "default".
      *
-     * @var string|null
+     * @var string
      */
     public $group = 'default';
 
@@ -53,7 +53,7 @@ class DataMigration
      * You may want to specify a driver manually if more than one driver
      * implements a scheme.
      *
-     * @var string|null
+     * @var string
      */
     public $sourceDriver;
 
@@ -68,7 +68,7 @@ class DataMigration
     /**
      * The FQCN for the desired destination driver.
      *
-     * @var string|null
+     * @var string
      */
     public $destinationDriver;
 

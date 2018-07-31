@@ -25,6 +25,40 @@ interface DestinationDriverInterface
     public function configure(DataMigration $definition);
 
     /**
+     * Read the ids that presently exist in the destination.
+     *
+     * @return array
+     */
+    public function getExistingIds(): array;
+
+    /**
+     * Get the entity as last migrated from the destination for updating.
+     *
+     * @param array $destIds
+     *   A list of key-value pairs where the key is the destination id field and
+     *   the value is destination id value.
+     *
+     * @return mixed|null
+     *   Returns the selected entity, or null if it does not exist in the
+     *   destination.
+     */
+    public function read(array $destIds);
+
+    /**
+     * Read multiple entities.
+     *
+     * @see read()
+     *
+     * @param array $destIdSet
+     *   A list of key/value pairs.  An empty array will fetch all entities.
+     *
+     * @return array
+     *   Returns the selected entities that exist.  This means if no entities
+     *   were found, an empty array is returned.
+     */
+    public function readMultiple(array $destIdSet);
+
+    /**
      * Write the transformed data.
      *
      * @param $data
@@ -44,17 +78,4 @@ interface DestinationDriverInterface
      * Implementors should also perform any cleanup that needs to be done here.
      */
     public function flush();
-
-    /**
-     * Get the entity as last migrated from the destination for updating.
-     *
-     * @param array $destIds
-     *   A list of key-value pairs where the key is the destination id field and
-     *   the value is destination id value.
-     *
-     * @return mixed|null
-     *   Returns the selected entity, or null if it does not exist in the
-     *   destination.
-     */
-    public function getCurrentEntity(array $destIds);
 }

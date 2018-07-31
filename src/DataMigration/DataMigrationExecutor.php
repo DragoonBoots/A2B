@@ -75,12 +75,11 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      * {@inheritdoc}
      */
     public function execute(
-      DataMigrationInterface $migration,
-      DataMigration $definition,
-      SourceDriverInterface $sourceDriver,
-      DestinationDriverInterface $destinationDriver
-    )
-    {
+        DataMigrationInterface $migration,
+        DataMigration $definition,
+        SourceDriverInterface $sourceDriver,
+        DestinationDriverInterface $destinationDriver
+    ) {
         $this->migration = $migration;
         $this->definition = $definition;
         $this->sourceIds = $definition->sourceIds;
@@ -88,20 +87,31 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $this->destinationIds = $definition->destinationIds;
         $this->destinationDriver = $destinationDriver;
 
+        $existingIds = $this->destinationDriver->getExistingIds();
+        $newIds = [];
         foreach ($sourceDriver->getIterator() as $row) {
-            $this->executeRow($row);
+            $newIds[] = $this->executeRow($row);
+        }
+
+        // Handle orphans
+        $orphanIds = $this->findOrphans($existingIds, $newIds);
+        if (!empty($orphanIds)) {
+            $orphans = $this->destinationDriver->readMultiple($orphanIds);
+        } else {
+            $orphans = [];
         }
 
         // Cleanup
-        $this->destinationDriver->flush();
         unset(
-          $this->migration,
-          $this->definition,
-          $this->sourceIds,
-          $this->sourceDriver,
-          $this->destinationIds,
-          $this->destinationDriver
+            $this->migration,
+            $this->definition,
+            $this->sourceIds,
+            $this->sourceDriver,
+            $this->destinationIds,
+            $this->destinationDriver
         );
+
+        return $orphans;
     }
 
     /**
@@ -112,8 +122,9 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\NoDestinationException
      * @throws \Doctrine\DBAL\Schema\SchemaException
+     * @throws \Doctrine\DBAL\DBALException
      */
-    protected function executeRow(array $sourceRow)
+    protected function executeRow(array $sourceRow): array
     {
         $sourceIds = $this->getSourceIds($sourceRow);
 
@@ -122,7 +133,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
 
         try {
             $destIds = $this->mapper->getDestIdsFromSourceIds(get_class($this->migration), $sourceIds);
-            $entity = $this->destinationDriver->getCurrentEntity($destIds);
+            $entity = $this->destinationDriver->read($destIds);
             if (is_null($entity)) {
                 $entity = $this->migration->defaultResult();
             }
@@ -137,6 +148,8 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $this->mapper->addMapping(get_class($this->migration), $this->definition, $sourceIds, $destIds);
         $postWriteDestinationRow = new PostWriteDestinationRow($this->migration, $this->definition, $entity);
         $this->eventDispatcher->dispatch(DataMigrationEvents::EVENT_POST_WRITE_DESTINATION_ROW, $postWriteDestinationRow);
+
+        return $destIds;
     }
 
     /**
@@ -165,5 +178,22 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         }
 
         return $sourceIds;
+    }
+
+    protected function findOrphans(array $oldIds, array $newIds): array
+    {
+        $orphans = array_udiff(
+            $oldIds, $newIds,
+            function ($a, $b) {
+                $diff = 0;
+                foreach ($a as $key => $aValue) {
+                    $diff += strcmp($aValue, $b[$key]);
+                }
+
+                return $diff;
+            }
+        );
+
+        return $orphans;
     }
 }

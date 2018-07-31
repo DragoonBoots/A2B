@@ -64,6 +64,14 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     /**
      * {@inheritdoc}
      */
+    public function getExistingIds(): array
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function write($data)
     {
         $this->dumper->dump($this->cloner->cloneVar($data));
@@ -74,8 +82,13 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     /**
      * {@inheritdoc}
      */
-    public function getCurrentEntity(array $destIds)
+    public function read(array $destIds)
     {
         return null;
+    }
+
+    public function readMultiple(array $destIdSet)
+    {
+        return [];
     }
 }

@@ -19,7 +19,7 @@ class DebugDestinationDriverTest extends TestCase
 
     use VarDumperTestTrait;
 
-    public function testGetCurrentEntity()
+    public function testRead()
     {
         $uriParser = $this->createMock(Parser::class);
         $dumper = $this->createMock(AbstractDumper::class);
@@ -27,7 +27,7 @@ class DebugDestinationDriverTest extends TestCase
         $driver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
 
         // The debug destination never has a current entity.
-        $this->assertNull($driver->getCurrentEntity(['id' => 1]));
+        $this->assertNull($driver->read(['id' => 1]));
     }
 
     /**

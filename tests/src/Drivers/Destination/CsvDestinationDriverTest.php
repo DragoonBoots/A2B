@@ -25,14 +25,14 @@ class CsvDestinationDriverTest extends TestCase
      *
      * @dataProvider csvDataProvider
      */
-    public function testGetCurrentEntity(string $destination, string $path, array $destIds, $currentEntity)
+    public function testRead(string $destination, string $path, array $destIds, $currentEntity)
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
         $this->setupDriver($path, $destination, $driver, $definition);
         $driver->configure($definition);
 
-        $this->assertEquals($currentEntity, $driver->getCurrentEntity($destIds));
+        $this->assertEquals($currentEntity, $driver->read($destIds));
     }
 
     /**
@@ -55,13 +55,13 @@ class CsvDestinationDriverTest extends TestCase
         $driver = new CsvDestinationDriver($uriParser);
     }
 
-    public function testGetCurrentEntityBad()
+    public function testReadBad()
     {
         $uriParser = $this->createMock(Parser::class);
         $driver = new CsvDestinationDriver($uriParser);
 
         $this->expectException(NoDestinationException::class);
-        $driver->getCurrentEntity(['id' => 1]);
+        $driver->read(['id' => 1]);
     }
 
     /**

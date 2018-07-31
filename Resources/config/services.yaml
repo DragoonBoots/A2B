@@ -80,8 +80,11 @@ services:
             - '@a2b.data_migration_manager'
             - '@a2b.driver_manager'
             - '@a2b.executor'
+            - '@a2b.mapper'
             - '@a2b.league.uri.parser'
             - '@parameter_bag'
+            - '@a2b.symfony.dumper.cli'
+            - '@a2b.symfony.dumper.cloner'
         tags:
             - console.command
 

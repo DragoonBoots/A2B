@@ -96,7 +96,20 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         $this->writer->addValidator(new ColumnConsistency(), 'column_consistency');
 
         $this->headerWritten = false;
+    }
 
+    public function getExistingIds(): array
+    {
+        $ids = [];
+        foreach ($this->reader->getIterator() as $row) {
+            $id = [];
+            foreach ($this->destIds as $destId) {
+                $id[$destId->getName()] = $row[$destId->getName()];
+            }
+            $ids[] = $id;
+        }
+
+        return $ids;
     }
 
     /**
@@ -131,24 +144,14 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      * {@inheritdoc}
      * @throws \League\Csv\Exception
      */
-    public function getCurrentEntity(array $destIds)
+    public function read(array $destIds)
     {
         if (!isset($this->writer)) {
             throw new NoDestinationException();
         }
 
         if (!$this->newFile) {
-            $constraint = (new Statement())->where(
-              function ($record) use ($destIds) {
-                  $found = true;
-                  foreach ($destIds as $key => $value) {
-                      $found = $found && ($record[$key] == $value);
-                  }
-
-                  return $found;
-              }
-            );
-            $results = $constraint->process($this->reader);
+            $results = $this->findEntities([$destIds]);
             $count = $results->count();
             if ($count > 1) {
                 throw new \RangeException(sprintf("More than one row matched the ids:\n%s\n", var_export($destIds, true)));
@@ -158,6 +161,52 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         }
 
         return null;
+    }
+
+    /**
+     * Query the destination results
+     *
+     * @param array $destIdSet
+     *   An array of of dest id arrays.  Each dest id array is a set of
+     *   key/value pairs.
+     *
+     * @return \League\Csv\ResultSet
+     */
+    protected function findEntities(array $destIdSet)
+    {
+        $constraint = (new Statement())->where(
+            function ($record) use ($destIdSet) {
+                $found = true;
+                foreach ($destIdSet as $destIds) {
+                    foreach ($destIds as $key => $value) {
+                        $found = $found && ($record[$key] == $value);
+                    }
+                }
+
+                return $found;
+            }
+        );
+        $results = $constraint->process($this->reader);
+
+        return $results;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function readMultiple(array $destIdSet)
+    {
+        if ($this->newFile) {
+            return [];
+        }
+
+        $results = $this->findEntities($destIdSet);
+        $entities = [];
+        foreach ($results as $result) {
+            $entities[] = $result;
+        }
+
+        return $entities;
     }
 
     /**

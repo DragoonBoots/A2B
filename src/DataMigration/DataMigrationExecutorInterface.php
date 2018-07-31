@@ -6,6 +6,7 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NoIdSetException;
+use DragoonBoots\A2B\Types\MapRow;
 
 interface DataMigrationExecutorInterface
 {
@@ -17,6 +18,10 @@ interface DataMigrationExecutorInterface
      * @param DataMigration              $definition
      * @param SourceDriverInterface      $sourceDriver
      * @param DestinationDriverInterface $destinationDriver
+     *
+     * @return mixed
+     *   A list of entities that existed in the destination but no longer exist
+     *   in the source.
      *
      * @throws NoIdSetException
      */

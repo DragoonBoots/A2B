@@ -82,7 +82,7 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
             $this->connection = $this->connectionFactory->createConnection(['url' => $source]);
         } catch (DBALException $e) {
             // Convert the Doctrine exception into our own.
-            throw new BadUriException($source, 0, $e);
+            throw new BadUriException($source, $e->getCode(), $e);
         }
     }
 

@@ -72,8 +72,6 @@ class DriverManagerTest extends TestCase
                 throw new \Exception('Wrong driver interface used.');
         }
         $driverStub = $this->getMockBuilder($driverInterface)
-            ->disableAutoload()
-            ->disableOriginalConstructor()
             ->setMockClassName($driverId)
             ->getMock();
         $addCallable($driverStub);

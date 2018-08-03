@@ -1,0 +1,78 @@
+{
+    "name": "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+    "line": 15,
+    "short_desc": "Source driver interface",
+    "long_desc": "Source drivers should implement this interface and be annotated with\nDragoonBoots\\A2B\\Annotations\\Driver.",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\Drivers",
+    "file": "src\/Drivers\/SourceDriverInterface.php",
+    "relative_file": null,
+    "hash": "9339fcd2f4b219fcbef51c6c681c52f7940eafea",
+    "parent": null,
+    "modifiers": null,
+    "is_trait": false,
+    "is_interface": true,
+    "aliases": {
+        "DataMigration": "DragoonBoots\\A2B\\Annotations\\DataMigration",
+        "BadUriException": "DragoonBoots\\A2B\\Exception\\BadUriException"
+    },
+    "errors": [],
+    "interfaces": {
+        "IteratorAggregate": "IteratorAggregate"
+    },
+    "traits": [],
+    "properties": [],
+    "methods": {
+        "configure": {
+            "name": "configure",
+            "line": 27,
+            "short_desc": "Set the source of this driver.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\BadUriException",
+                    "Thrown when the given URI is not valid."
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "definition": {
+                    "name": "definition",
+                    "line": 27,
+                    "short_desc": "The migration definition.",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Annotations",
+                            "DataMigration"
+                        ],
+                        "attributes": {
+                            "startLine": 27,
+                            "endLine": 27
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

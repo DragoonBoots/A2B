@@ -1,0 +1,77 @@
+{
+    "name": "DragoonBoots\\A2B\\Types\\MapRow",
+    "line": 9,
+    "short_desc": "",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\Types",
+    "file": "src\/Types\/MapRow.php",
+    "relative_file": null,
+    "hash": "2c69f8da0c02d894cd7af46266f6379d5448e9aa",
+    "parent": null,
+    "modifiers": 0,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "UuidInterface": "Ramsey\\Uuid\\UuidInterface"
+    },
+    "errors": [],
+    "interfaces": [],
+    "traits": [],
+    "properties": {
+        "id": {
+            "name": "id",
+            "line": 15,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "int",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "migration": {
+            "name": "migration",
+            "line": 22,
+            "short_desc": "The migration uuid that last processed this row",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Ramsey\\Uuid\\UuidInterface",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "updated": {
+            "name": "updated",
+            "line": 29,
+            "short_desc": "When this was last updated.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DateTimeImmutable",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        }
+    },
+    "methods": [],
+    "constants": []
+}

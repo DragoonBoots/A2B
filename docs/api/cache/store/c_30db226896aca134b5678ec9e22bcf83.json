@@ -1,0 +1,45 @@
+{
+    "name": "DragoonBoots\\A2B\\DataMigration\\AbstractDataMigration",
+    "line": 10,
+    "short_desc": "Base class for Data Migrations",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\DataMigration",
+    "file": "src\/DataMigration\/AbstractDataMigration.php",
+    "relative_file": null,
+    "hash": "f3a87d8c75bd3c1cbf0d5c5ca3a10ba93dd24c54",
+    "parent": null,
+    "modifiers": 16,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": [],
+    "errors": [],
+    "interfaces": {
+        "DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface": "DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface"
+    },
+    "traits": [],
+    "properties": [],
+    "methods": {
+        "defaultResult": {
+            "name": "defaultResult",
+            "line": 16,
+            "short_desc": "The default result to use when no result with the same id(s) exist.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "mixed",
+                    false
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        }
+    },
+    "constants": []
+}

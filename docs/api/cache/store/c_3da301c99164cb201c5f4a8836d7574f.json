@@ -1,0 +1,543 @@
+{
+    "name": "DragoonBoots\\A2B\\DataMigration\\DataMigrationExecutor",
+    "line": 19,
+    "short_desc": "",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\DataMigration",
+    "file": "src\/DataMigration\/DataMigrationExecutor.php",
+    "relative_file": null,
+    "hash": "2603e03b290d6a66a973467f79b2053ed5837a0a",
+    "parent": null,
+    "modifiers": 0,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "DataMigration": "DragoonBoots\\A2B\\Annotations\\DataMigration",
+        "IdField": "DragoonBoots\\A2B\\Annotations\\IdField",
+        "DestinationDriverInterface": "DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+        "SourceDriverInterface": "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+        "DataMigrationEvents": "DragoonBoots\\A2B\\Event\\DataMigrationEvents",
+        "PostFetchSourceRow": "DragoonBoots\\A2B\\Event\\PostFetchSourceRow",
+        "PostTransformRow": "DragoonBoots\\A2B\\Event\\PostTransformRow",
+        "PostWriteDestinationRow": "DragoonBoots\\A2B\\Event\\PostWriteDestinationRow",
+        "NoIdSetException": "DragoonBoots\\A2B\\Exception\\NoIdSetException",
+        "NoMappingForIdsException": "DragoonBoots\\A2B\\Exception\\NoMappingForIdsException",
+        "EventDispatcherInterface": "Symfony\\Component\\EventDispatcher\\EventDispatcherInterface"
+    },
+    "errors": [],
+    "interfaces": {
+        "DragoonBoots\\A2B\\DataMigration\\DataMigrationExecutorInterface": "DragoonBoots\\A2B\\DataMigration\\DataMigrationExecutorInterface"
+    },
+    "traits": [],
+    "properties": {
+        "eventDispatcher": {
+            "name": "eventDispatcher",
+            "line": 25,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Symfony\\Component\\EventDispatcher\\EventDispatcherInterface",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "mapper": {
+            "name": "mapper",
+            "line": 30,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationMapperInterface",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "migration": {
+            "name": "migration",
+            "line": 35,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "definition": {
+            "name": "definition",
+            "line": 40,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "sourceDriver": {
+            "name": "sourceDriver",
+            "line": 45,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "destinationDriver": {
+            "name": "destinationDriver",
+            "line": 50,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "sourceIds": {
+            "name": "sourceIds",
+            "line": 55,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\IdField",
+                    true
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "destinationIds": {
+            "name": "destinationIds",
+            "line": 60,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\IdField",
+                    true
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        }
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "line": 68,
+            "short_desc": "DataMigrationExecutor constructor.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "eventDispatcher": {
+                    "name": "eventDispatcher",
+                    "line": 68,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\Symfony\\Component\\EventDispatcher\\EventDispatcherInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "Symfony",
+                            "Component",
+                            "EventDispatcher",
+                            "EventDispatcherInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 68,
+                            "endLine": 68
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "mapper": {
+                    "name": "mapper",
+                    "line": 68,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationMapperInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "DataMigration",
+                            "DataMigrationMapperInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 68,
+                            "endLine": 68
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "execute": {
+            "name": "execute",
+            "line": 77,
+            "short_desc": "Run the given migration",
+            "long_desc": "",
+            "hint": [
+                [
+                    "mixed",
+                    false
+                ]
+            ],
+            "hint_desc": "A list of entities that existed in the destination but no longer exist\n  in the source.",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoIdSetException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migration": {
+                    "name": "migration",
+                    "line": 78,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "DataMigration",
+                            "DataMigrationInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 78,
+                            "endLine": 78
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "definition": {
+                    "name": "definition",
+                    "line": 79,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Annotations",
+                            "DataMigration"
+                        ],
+                        "attributes": {
+                            "startLine": 79,
+                            "endLine": 79
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "sourceDriver": {
+                    "name": "sourceDriver",
+                    "line": 80,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Drivers",
+                            "SourceDriverInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 80,
+                            "endLine": 80
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "destinationDriver": {
+                    "name": "destinationDriver",
+                    "line": 81,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Drivers",
+                            "DestinationDriverInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 81,
+                            "endLine": 81
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "executeRow": {
+            "name": "executeRow",
+            "line": 127,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 2,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoIdSetException",
+                    "Thrown when there is no value set for an id in this row."
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NonexistentMigrationException",
+                    ""
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoDestinationException",
+                    ""
+                ],
+                [
+                    "\\Doctrine\\DBAL\\Schema\\SchemaException",
+                    ""
+                ],
+                [
+                    "\\Doctrine\\DBAL\\DBALException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "sourceRow": {
+                    "name": "sourceRow",
+                    "line": 127,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getSourceIds": {
+            "name": "getSourceIds",
+            "line": 165,
+            "short_desc": "Get the source id values for this row.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoIdSetException",
+                    "Thrown when there is no value set for the given id."
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "sourceRow": {
+                    "name": "sourceRow",
+                    "line": 165,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "findOrphans": {
+            "name": "findOrphans",
+            "line": 183,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 2,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "oldIds": {
+                    "name": "oldIds",
+                    "line": 183,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "newIds": {
+                    "name": "newIds",
+                    "line": 183,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

@@ -1,0 +1,183 @@
+{
+    "name": "DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+    "line": 16,
+    "short_desc": "DataMigration interface",
+    "long_desc": "Data migrations must implement this interface and be annotated with\nDragoonBoots\\A2B\\Annotations\\DataMigration.  They will most likely also\nwant to extend AbstractDataMigration.",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\DataMigration",
+    "file": "src\/DataMigration\/DataMigrationInterface.php",
+    "relative_file": null,
+    "hash": "c96770b338e7ad516357b13ae3f698b173400850",
+    "parent": null,
+    "modifiers": null,
+    "is_trait": false,
+    "is_interface": true,
+    "aliases": {
+        "DestinationDriverInterface": "DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+        "SourceDriverInterface": "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface"
+    },
+    "errors": [],
+    "interfaces": [],
+    "traits": [],
+    "properties": [],
+    "methods": {
+        "configureSource": {
+            "name": "configureSource",
+            "line": 24,
+            "short_desc": "Configure the source driver to fetch data.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "sourceDriver": {
+                    "name": "sourceDriver",
+                    "line": 24,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Drivers",
+                            "SourceDriverInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 24,
+                            "endLine": 24
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "transform": {
+            "name": "transform",
+            "line": 36,
+            "short_desc": "Transform the source to the destination.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "sourceData": {
+                    "name": "sourceData",
+                    "line": 36,
+                    "short_desc": "The source data returned from the source driver",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "destinationData": {
+                    "name": "destinationData",
+                    "line": 36,
+                    "short_desc": "The destination data, passed by reference.  This is either an existing\n  entity known to have been created from the given source keys, or the\n  result returned by defaultResult().",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "mixed",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": null,
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": true
+                }
+            }
+        },
+        "configureDestination": {
+            "name": "configureDestination",
+            "line": 43,
+            "short_desc": "Configure the destination driver to put data.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "destinationDriver": {
+                    "name": "destinationDriver",
+                    "line": 43,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Drivers",
+                            "DestinationDriverInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 43,
+                            "endLine": 43
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "defaultResult": {
+            "name": "defaultResult",
+            "line": 50,
+            "short_desc": "The default result to use when no result with the same id(s) exist.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "mixed",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        }
+    },
+    "constants": []
+}

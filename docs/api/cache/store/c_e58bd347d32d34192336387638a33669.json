@@ -1,0 +1,358 @@
+{
+    "name": "DragoonBoots\\A2B\\Drivers\\Source\\DbalSourceDriver",
+    "line": 39,
+    "short_desc": "Doctrine DBAL source driver.",
+    "long_desc": "",
+    "hint": null,
+    "tags": {
+        "Driver": [
+            [
+                "({\n",
+                "",
+                "",
+                "",
+                "\"db2\",\n",
+                "",
+                "",
+                "",
+                "\"ibm_db2\",\n",
+                "",
+                "",
+                "",
+                "\"mssql\",\n",
+                "",
+                "",
+                "",
+                "\"pdo_sqlsrv\",\n",
+                "",
+                "",
+                "",
+                "\"mysql\",\n",
+                "",
+                "",
+                "",
+                "\"mysql2\",\n",
+                "",
+                "",
+                "",
+                "\"pdo_mysql\",\n",
+                "",
+                "",
+                "",
+                "\"pgsql\",\n",
+                "",
+                "",
+                "",
+                "\"postgres\",\n",
+                "",
+                "",
+                "",
+                "\"postgresql\",\n",
+                "",
+                "",
+                "",
+                "\"pdo_pgsql\",\n",
+                "",
+                "",
+                "",
+                "\"sqlite\",\n",
+                "",
+                "",
+                "",
+                "\"sqlite3\",\n",
+                "",
+                "",
+                "",
+                "\"pdo_sqlite\"\n})"
+            ]
+        ]
+    },
+    "namespace": "DragoonBoots\\A2B\\Drivers\\Source",
+    "file": "src\/Drivers\/Source\/DbalSourceDriver.php",
+    "relative_file": null,
+    "hash": "b9de6ee8f3e51d2998802736000e245a3e0d3124",
+    "parent": "DragoonBoots\\A2B\\Drivers\\AbstractSourceDriver",
+    "modifiers": 0,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "ConnectionFactory": "Doctrine\\Bundle\\DoctrineBundle\\ConnectionFactory",
+        "DBALException": "Doctrine\\DBAL\\DBALException",
+        "Connection": "Doctrine\\DBAL\\Driver\\Connection",
+        "ResultStatement": "Doctrine\\DBAL\\Driver\\ResultStatement",
+        "Statement": "Doctrine\\DBAL\\Driver\\Statement",
+        "DataMigration": "DragoonBoots\\A2B\\Annotations\\DataMigration",
+        "Driver": "DragoonBoots\\A2B\\Annotations\\Driver",
+        "AbstractSourceDriver": "DragoonBoots\\A2B\\Drivers\\AbstractSourceDriver",
+        "SourceDriverInterface": "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+        "BadUriException": "DragoonBoots\\A2B\\Exception\\BadUriException",
+        "Parser": "League\\Uri\\Parser"
+    },
+    "errors": [],
+    "interfaces": {
+        "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface": "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface"
+    },
+    "traits": [],
+    "properties": {
+        "connectionFactory": {
+            "name": "connectionFactory",
+            "line": 45,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Bundle\\DoctrineBundle\\ConnectionFactory",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "connection": {
+            "name": "connection",
+            "line": 50,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\DBAL\\Driver\\Connection",
+                    false
+                ],
+                [
+                    "null",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "resultIterator": {
+            "name": "resultIterator",
+            "line": 59,
+            "short_desc": "The main result statement",
+            "long_desc": "This provides the rows passed to the migration.",
+            "hint": [
+                [
+                    "\\Doctrine\\DBAL\\Driver\\ResultStatement",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        }
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "line": 67,
+            "short_desc": "DbalSourceDriver constructor.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "uriParser": {
+                    "name": "uriParser",
+                    "line": 67,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\League\\Uri\\Parser",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "League",
+                            "Uri",
+                            "Parser"
+                        ],
+                        "attributes": {
+                            "startLine": 67,
+                            "endLine": 67
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "connectionFactory": {
+                    "name": "connectionFactory",
+                    "line": 67,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\Doctrine\\Bundle\\DoctrineBundle\\ConnectionFactory",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "Doctrine",
+                            "Bundle",
+                            "DoctrineBundle",
+                            "ConnectionFactory"
+                        ],
+                        "attributes": {
+                            "startLine": 67,
+                            "endLine": 67
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "configure": {
+            "name": "configure",
+            "line": 77,
+            "short_desc": "Set the source of this driver.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\BadUriException",
+                    "Thrown when the given URI is not valid."
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "definition": {
+                    "name": "definition",
+                    "line": 77,
+                    "short_desc": "The migration definition.",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Annotations",
+                            "DataMigration"
+                        ],
+                        "attributes": {
+                            "startLine": 77,
+                            "endLine": 77
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getConnection": {
+            "name": "getConnection",
+            "line": 92,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "DragoonBoots\\A2B\\Drivers\\Source\\Doctrine\\DBAL\\Driver\\Connection",
+                    false
+                ],
+                [
+                    "null",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        },
+        "setStatement": {
+            "name": "setStatement",
+            "line": 102,
+            "short_desc": "Set the statement used for the main result set.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "statement": {
+                    "name": "statement",
+                    "line": 102,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\Doctrine\\DBAL\\Driver\\Statement",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "Doctrine",
+                            "DBAL",
+                            "Driver",
+                            "Statement"
+                        ],
+                        "attributes": {
+                            "startLine": 102,
+                            "endLine": 102
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getIterator": {
+            "name": "getIterator",
+            "line": 111,
+            "short_desc": "{@inheritdoc}",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        }
+    },
+    "constants": []
+}

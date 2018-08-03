@@ -1,0 +1,41 @@
+{
+    "name": "DragoonBoots\\A2B\\A2BBundle",
+    "line": 10,
+    "short_desc": "",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B",
+    "file": "src\/A2BBundle.php",
+    "relative_file": null,
+    "hash": "040f218780d9ff01b7974c241f162a995101a6b5",
+    "parent": "Symfony\\Component\\HttpKernel\\Bundle\\Bundle",
+    "modifiers": 0,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "A2BExtension": "DragoonBoots\\A2B\\DependencyInjection\\A2BExtension",
+        "Bundle": "Symfony\\Component\\HttpKernel\\Bundle\\Bundle"
+    },
+    "errors": [],
+    "interfaces": [],
+    "traits": [],
+    "properties": [],
+    "methods": {
+        "getContainerExtension": {
+            "name": "getContainerExtension",
+            "line": 16,
+            "short_desc": "{@inheritdoc}",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        }
+    },
+    "constants": []
+}

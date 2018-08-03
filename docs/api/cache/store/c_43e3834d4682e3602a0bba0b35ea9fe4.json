@@ -1,0 +1,89 @@
+{
+    "name": "DragoonBoots\\A2B\\Drivers\\AbstractSourceDriver",
+    "line": 11,
+    "short_desc": "Base class for source drivers.",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\Drivers",
+    "file": "src\/Drivers\/AbstractSourceDriver.php",
+    "relative_file": null,
+    "hash": "2cd3ec1a3f40611c8299c7a05ffd6730bc5e70a5",
+    "parent": null,
+    "modifiers": 16,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "Parser": "League\\Uri\\Parser"
+    },
+    "errors": [],
+    "interfaces": {
+        "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface": "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface"
+    },
+    "traits": [],
+    "properties": {
+        "uriParser": {
+            "name": "uriParser",
+            "line": 17,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\League\\Uri\\Parser",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        }
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "line": 24,
+            "short_desc": "AbstractSourceDriver constructor.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "uriParser": {
+                    "name": "uriParser",
+                    "line": 24,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\League\\Uri\\Parser",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "League",
+                            "Uri",
+                            "Parser"
+                        ],
+                        "attributes": {
+                            "startLine": 24,
+                            "endLine": 24
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

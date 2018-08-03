@@ -1,0 +1,171 @@
+{
+    "name": "DragoonBoots\\A2B\\DataMigration\\DataMigrationExecutorInterface",
+    "line": 11,
+    "short_desc": "",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\DataMigration",
+    "file": "src\/DataMigration\/DataMigrationExecutorInterface.php",
+    "relative_file": null,
+    "hash": "3f4f7a4e3a67ec9524a4e20f29e5ee8c9f579913",
+    "parent": null,
+    "modifiers": null,
+    "is_trait": false,
+    "is_interface": true,
+    "aliases": {
+        "DataMigration": "DragoonBoots\\A2B\\Annotations\\DataMigration",
+        "DestinationDriverInterface": "DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+        "SourceDriverInterface": "DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+        "NoIdSetException": "DragoonBoots\\A2B\\Exception\\NoIdSetException",
+        "MapRow": "DragoonBoots\\A2B\\Types\\MapRow"
+    },
+    "errors": [],
+    "interfaces": [],
+    "traits": [],
+    "properties": [],
+    "methods": {
+        "execute": {
+            "name": "execute",
+            "line": 28,
+            "short_desc": "Run the given migration",
+            "long_desc": "",
+            "hint": [
+                [
+                    "mixed",
+                    false
+                ]
+            ],
+            "hint_desc": "A list of entities that existed in the destination but no longer exist\n  in the source.",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoIdSetException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migration": {
+                    "name": "migration",
+                    "line": 28,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "DataMigration",
+                            "DataMigrationInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 28,
+                            "endLine": 28
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "definition": {
+                    "name": "definition",
+                    "line": 28,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Annotations",
+                            "DataMigration"
+                        ],
+                        "attributes": {
+                            "startLine": 28,
+                            "endLine": 28
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "sourceDriver": {
+                    "name": "sourceDriver",
+                    "line": 28,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Drivers\\SourceDriverInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Drivers",
+                            "SourceDriverInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 28,
+                            "endLine": 28
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "destinationDriver": {
+                    "name": "destinationDriver",
+                    "line": 28,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Drivers",
+                            "DestinationDriverInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 28,
+                            "endLine": 28
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

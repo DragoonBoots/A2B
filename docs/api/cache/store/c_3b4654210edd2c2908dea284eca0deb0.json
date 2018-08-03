@@ -1,0 +1,259 @@
+{
+    "name": "DragoonBoots\\A2B\\DataMigration\\DataMigrationMapperInterface",
+    "line": 14,
+    "short_desc": "Map source ids and destination ids.",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\DataMigration",
+    "file": "src\/DataMigration\/DataMigrationMapperInterface.php",
+    "relative_file": null,
+    "hash": "812c6491f3387a4f261d86f16df5cf620634da4c",
+    "parent": null,
+    "modifiers": null,
+    "is_trait": false,
+    "is_interface": true,
+    "aliases": {
+        "SchemaException": "Doctrine\\DBAL\\Schema\\SchemaException",
+        "DataMigration": "DragoonBoots\\A2B\\Annotations\\DataMigration",
+        "NoMappingForIdsException": "DragoonBoots\\A2B\\Exception\\NoMappingForIdsException",
+        "NonexistentMigrationException": "DragoonBoots\\A2B\\Exception\\NonexistentMigrationException"
+    },
+    "errors": [],
+    "interfaces": [],
+    "traits": [],
+    "properties": [],
+    "methods": {
+        "addMapping": {
+            "name": "addMapping",
+            "line": 27,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\Doctrine\\DBAL\\Schema\\SchemaException",
+                    ""
+                ],
+                [
+                    "\\Doctrine\\DBAL\\DBALException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migrationId": {
+                    "name": "migrationId",
+                    "line": 27,
+                    "short_desc": "The class name of the migration being run.",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": null,
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "migrationDefinition": {
+                    "name": "migrationDefinition",
+                    "line": 27,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Annotations",
+                            "DataMigration"
+                        ],
+                        "attributes": {
+                            "startLine": 27,
+                            "endLine": 27
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "sourceIds": {
+                    "name": "sourceIds",
+                    "line": 27,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "destIds": {
+                    "name": "destIds",
+                    "line": 27,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getDestIdsFromSourceIds": {
+            "name": "getDestIdsFromSourceIds",
+            "line": 38,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NonexistentMigrationException",
+                    ""
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoMappingForIdsException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migrationId": {
+                    "name": "migrationId",
+                    "line": 38,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "sourceIds": {
+                    "name": "sourceIds",
+                    "line": 38,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getSourceIdsFromDestIds": {
+            "name": "getSourceIdsFromDestIds",
+            "line": 49,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NonexistentMigrationException",
+                    ""
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoMappingForIdsException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migrationId": {
+                    "name": "migrationId",
+                    "line": 49,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "destIds": {
+                    "name": "destIds",
+                    "line": 49,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

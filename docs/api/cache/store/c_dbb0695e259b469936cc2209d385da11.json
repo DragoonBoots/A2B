@@ -1,0 +1,474 @@
+{
+    "name": "DragoonBoots\\A2B\\Drivers\\Destination\\CsvDestinationDriver",
+    "line": 24,
+    "short_desc": "CSV Destination driver",
+    "long_desc": "",
+    "hint": null,
+    "tags": {
+        "Driver": [
+            [
+                "(\"csv\")"
+            ]
+        ]
+    },
+    "namespace": "DragoonBoots\\A2B\\Drivers\\Destination",
+    "file": "src\/Drivers\/Destination\/CsvDestinationDriver.php",
+    "relative_file": null,
+    "hash": "d98ae230c450a034f043f81e5ebc4eacb0e24d0a",
+    "parent": "DragoonBoots\\A2B\\Drivers\\AbstractDestinationDriver",
+    "modifiers": 0,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "DataMigration": "DragoonBoots\\A2B\\Annotations\\DataMigration",
+        "Driver": "DragoonBoots\\A2B\\Annotations\\Driver",
+        "IdField": "DragoonBoots\\A2B\\Annotations\\IdField",
+        "AbstractDestinationDriver": "DragoonBoots\\A2B\\Drivers\\AbstractDestinationDriver",
+        "DestinationDriverInterface": "DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface",
+        "MigrationException": "DragoonBoots\\A2B\\Exception\\MigrationException",
+        "NoIdSetException": "DragoonBoots\\A2B\\Exception\\NoIdSetException",
+        "ColumnConsistency": "League\\Csv\\ColumnConsistency",
+        "CsvReader": "League\\Csv\\Reader",
+        "Statement": "League\\Csv\\Statement",
+        "CsvWriter": "League\\Csv\\Writer"
+    },
+    "errors": [],
+    "interfaces": {
+        "DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface": "DragoonBoots\\A2B\\Drivers\\DestinationDriverInterface"
+    },
+    "traits": [],
+    "properties": {
+        "writer": {
+            "name": "writer",
+            "line": 30,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\League\\Csv\\Writer",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "reader": {
+            "name": "reader",
+            "line": 35,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\League\\Csv\\Reader",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "destIds": {
+            "name": "destIds",
+            "line": 40,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\IdField",
+                    true
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "headerWritten": {
+            "name": "headerWritten",
+            "line": 45,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "bool",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": {
+                "nodeType": "Expr_ConstFetch",
+                "name": {
+                    "nodeType": "Name",
+                    "parts": [
+                        "false"
+                    ],
+                    "attributes": {
+                        "startLine": 45,
+                        "endLine": 45,
+                        "namespacedName": {
+                            "nodeType": "Name_FullyQualified",
+                            "parts": [
+                                "DragoonBoots",
+                                "A2B",
+                                "Drivers",
+                                "Destination",
+                                "false"
+                            ],
+                            "attributes": {
+                                "startLine": 45,
+                                "endLine": 45
+                            }
+                        }
+                    }
+                },
+                "attributes": {
+                    "startLine": 45,
+                    "endLine": 45
+                }
+            },
+            "errors": []
+        },
+        "newFile": {
+            "name": "newFile",
+            "line": 52,
+            "short_desc": "Is the file being worked on a newly created file?",
+            "long_desc": "",
+            "hint": [
+                [
+                    "bool",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": {
+                "nodeType": "Expr_ConstFetch",
+                "name": {
+                    "nodeType": "Name",
+                    "parts": [
+                        "false"
+                    ],
+                    "attributes": {
+                        "startLine": 52,
+                        "endLine": 52,
+                        "namespacedName": {
+                            "nodeType": "Name_FullyQualified",
+                            "parts": [
+                                "DragoonBoots",
+                                "A2B",
+                                "Drivers",
+                                "Destination",
+                                "false"
+                            ],
+                            "attributes": {
+                                "startLine": 52,
+                                "endLine": 52
+                            }
+                        }
+                    }
+                },
+                "attributes": {
+                    "startLine": 52,
+                    "endLine": 52
+                }
+            },
+            "errors": []
+        },
+        "tempFile": {
+            "name": "tempFile",
+            "line": 59,
+            "short_desc": "The temporary file the results are written to.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "resource",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "definition": {
+            "name": "definition",
+            "line": 64,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "destUri": {
+            "name": "destUri",
+            "line": 66,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        }
+    },
+    "methods": {
+        "configure": {
+            "name": "configure",
+            "line": 71,
+            "short_desc": "Set the destination of this driver.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\BadUriException",
+                    "Thrown when the given URI is not valid."
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "definition": {
+                    "name": "definition",
+                    "line": 71,
+                    "short_desc": "The migration definition.",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "Annotations",
+                            "DataMigration"
+                        ],
+                        "attributes": {
+                            "startLine": 71,
+                            "endLine": 71
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getExistingIds": {
+            "name": "getExistingIds",
+            "line": 103,
+            "short_desc": "Read the ids that presently exist in the destination.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        },
+        "write": {
+            "name": "write",
+            "line": 122,
+            "short_desc": "Write the transformed data.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ],
+                [
+                    "null",
+                    false
+                ]
+            ],
+            "hint_desc": "An associative array with the destination keys.  If no keys can\n  logically exist (e.g. output only), return null.",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NoDestinationException",
+                    "Thrown when the destination is not configured."
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "data": {
+                    "name": "data",
+                    "line": 122,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": null,
+                    "tags": [],
+                    "modifiers": null,
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "read": {
+            "name": "read",
+            "line": 145,
+            "short_desc": "Get the entity as last migrated from the destination for updating.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "mixed",
+                    false
+                ],
+                [
+                    "null",
+                    false
+                ]
+            ],
+            "hint_desc": "Returns the selected entity, or null if it does not exist in the\n  destination.",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "destIds": {
+                    "name": "destIds",
+                    "line": 145,
+                    "short_desc": "A list of key-value pairs where the key is the destination id field and\n  the value is destination id value.",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "findEntities": {
+            "name": "findEntities",
+            "line": 169,
+            "short_desc": "Query the destination results",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\League\\Csv\\ResultSet",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "destIdSet": {
+                    "name": "destIdSet",
+                    "line": 169,
+                    "short_desc": "An array of of dest id arrays.  Each dest id array is a set of\n  key\/value pairs.",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "readMultiple": {
+            "name": "readMultiple",
+            "line": 194,
+            "short_desc": "Read multiple entities.",
+            "long_desc": "",
+            "hint": [
+                [
+                    "array",
+                    false
+                ]
+            ],
+            "hint_desc": "Returns the selected entities that exist.  This means if no entities\n  were found, an empty array is returned.",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "destIdSet": {
+                    "name": "destIdSet",
+                    "line": 194,
+                    "short_desc": "A list of key\/value pairs.  An empty array will fetch all entities.",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "array",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "array",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "flush": {
+            "name": "flush",
+            "line": 214,
+            "short_desc": "Flush remaining data that has not been written.",
+            "long_desc": "Implementors should also perform any cleanup that needs to be done here.",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        }
+    },
+    "constants": []
+}

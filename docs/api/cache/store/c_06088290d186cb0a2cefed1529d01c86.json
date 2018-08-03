@@ -1,0 +1,202 @@
+{
+    "name": "DragoonBoots\\A2B\\Annotations\\IdField",
+    "line": 14,
+    "short_desc": "Id field annotation",
+    "long_desc": "",
+    "hint": null,
+    "tags": {
+        "Annotation": [
+            [
+                ""
+            ]
+        ],
+        "Annotation\\Target": [
+            [
+                "(\"ANNOTATION\")"
+            ]
+        ]
+    },
+    "namespace": "DragoonBoots\\A2B\\Annotations",
+    "file": "src\/Annotations\/IdField.php",
+    "relative_file": null,
+    "hash": "905a46cc20631154094ddebb206323cc5715f6b0",
+    "parent": null,
+    "modifiers": 0,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "Annotation": "Doctrine\\Common\\Annotations\\Annotation"
+    },
+    "errors": [],
+    "interfaces": [],
+    "traits": [],
+    "properties": {
+        "name": {
+            "name": "name",
+            "line": 23,
+            "short_desc": "The name of the id field",
+            "long_desc": "",
+            "hint": [
+                [
+                    "string",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": {
+                "Annotation\\Required": [
+                    [
+                        ""
+                    ]
+                ]
+            },
+            "modifiers": 1,
+            "default": null,
+            "errors": []
+        },
+        "type": {
+            "name": "type",
+            "line": 36,
+            "short_desc": "The type of the id field.",
+            "long_desc": "Valid types are:\n- int\n- string",
+            "hint": [
+                [
+                    "string",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": {
+                "Annotation\\Required": [
+                    [
+                        ""
+                    ]
+                ],
+                "Annotation\\Enum": [
+                    [
+                        "({\"int\",",
+                        "\"string\"})"
+                    ]
+                ]
+            },
+            "modifiers": 1,
+            "default": null,
+            "errors": []
+        }
+    },
+    "methods": {
+        "getName": {
+            "name": "getName",
+            "line": 41,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "string",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        },
+        "setName": {
+            "name": "setName",
+            "line": 51,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "DragoonBoots\\A2B\\Annotations\\IdField",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "name": {
+                    "name": "name",
+                    "line": 51,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getType": {
+            "name": "getType",
+            "line": 61,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "string",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        },
+        "setType": {
+            "name": "setType",
+            "line": 71,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "DragoonBoots\\A2B\\Annotations\\IdField",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "type": {
+                    "name": "type",
+                    "line": 71,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

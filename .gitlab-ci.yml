@@ -5,22 +5,40 @@ cache:
   - vendor/
 
 before_script:
-# Install dependencies
-- apk update
-- apk add git php7-dev gcc g++ make abuild binutils gmp-dev icu-dev zlib-dev
-- docker-php-ext-install gmp intl zip
-# Install & enable Xdebug for code coverage reports
-- pecl install xdebug
-- docker-php-ext-enable xdebug
-# Install and run Composer
-- curl -sS https://getcomposer.org/installer | php
-- php composer.phar install
+  # Install dependencies
+  - apk update
+  - apk add git php7-dev gcc g++ make abuild binutils gmp-dev icu-dev zlib-dev
+  - docker-php-ext-install gmp intl zip
+  # Install & enable Xdebug for code coverage reports
+  - pecl install xdebug
+  - docker-php-ext-enable xdebug
+  # Install and run Composer
+  - curl -sS https://getcomposer.org/installer | php
+  - php composer.phar install
 
 # Run tests
 test:
   stage: test
   script:
     - vendor/bin/simple-phpunit --configuration phpunit.xml.dist --coverage-text --colors=never
+
+pages:
+  stage: deploy
+  cache:
+    paths:
+      - docs/api/cache
+  before_script:
+    - apk update
+    - apk add git curl
+    - curl -O http://get.sensiolabs.org/sami.phar
+  script:
+    - "php sami.phar update config.sami.php"
+    - "cp -R docs/api/build public"
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
 
 # Trigger a rebuild of the packagist repo
 deploy:

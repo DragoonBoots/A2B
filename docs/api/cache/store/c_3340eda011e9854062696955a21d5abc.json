@@ -1,0 +1,427 @@
+{
+    "name": "DragoonBoots\\A2B\\DataMigration\\DataMigrationManager",
+    "line": 15,
+    "short_desc": "",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\DataMigration",
+    "file": "src\/DataMigration\/DataMigrationManager.php",
+    "relative_file": null,
+    "hash": "10ad0ef17578e3e40565a229df0068ea36610ffe",
+    "parent": null,
+    "modifiers": 0,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "Reader": "Doctrine\\Common\\Annotations\\Reader",
+        "ArrayCollection": "Doctrine\\Common\\Collections\\ArrayCollection",
+        "Collection": "Doctrine\\Common\\Collections\\Collection",
+        "Criteria": "Doctrine\\Common\\Collections\\Criteria",
+        "Comparison": "Doctrine\\Common\\Collections\\Expr\\Comparison",
+        "DataMigration": "DragoonBoots\\A2B\\Annotations\\DataMigration",
+        "NonexistentMigrationException": "DragoonBoots\\A2B\\Exception\\NonexistentMigrationException"
+    },
+    "errors": [],
+    "interfaces": {
+        "DragoonBoots\\A2B\\DataMigration\\DataMigrationManagerInterface": "DragoonBoots\\A2B\\DataMigration\\DataMigrationManagerInterface"
+    },
+    "traits": [],
+    "properties": {
+        "annotationReader": {
+            "name": "annotationReader",
+            "line": 21,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Common\\Annotations\\Reader",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": null,
+            "errors": []
+        },
+        "migrations": {
+            "name": "migrations",
+            "line": 26,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Common\\Collections\\Collection",
+                    false
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+                    true
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": {
+                "nodeType": "Expr_Array",
+                "items": [],
+                "attributes": {
+                    "startLine": 26,
+                    "endLine": 26,
+                    "kind": 2
+                }
+            },
+            "errors": []
+        },
+        "migrationDefinitions": {
+            "name": "migrationDefinitions",
+            "line": 31,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Common\\Collections\\Collection",
+                    false
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                    true
+                ]
+            ],
+            "hint_desc": "",
+            "tags": [],
+            "modifiers": 2,
+            "default": {
+                "nodeType": "Expr_Array",
+                "items": [],
+                "attributes": {
+                    "startLine": 31,
+                    "endLine": 31,
+                    "kind": 2
+                }
+            },
+            "errors": []
+        }
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "line": 38,
+            "short_desc": "DataMigrationManager constructor.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "annotationReader": {
+                    "name": "annotationReader",
+                    "line": 38,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\Doctrine\\Common\\Annotations\\Reader",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "Doctrine",
+                            "Common",
+                            "Annotations",
+                            "Reader"
+                        ],
+                        "attributes": {
+                            "startLine": 38,
+                            "endLine": 38
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "addMigration": {
+            "name": "addMigration",
+            "line": 55,
+            "short_desc": "Add a new migration",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": {
+                "internal": [
+                    [
+                        ""
+                    ]
+                ]
+            },
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\ReflectionException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migration": {
+                    "name": "migration",
+                    "line": 55,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "DragoonBoots",
+                            "A2B",
+                            "DataMigration",
+                            "DataMigrationInterface"
+                        ],
+                        "attributes": {
+                            "startLine": 55,
+                            "endLine": 55
+                        }
+                    },
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getMigrations": {
+            "name": "getMigrations",
+            "line": 63,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Common\\Collections\\Collection",
+                    false
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        },
+        "getMigrationDefinitions": {
+            "name": "getMigrationDefinitions",
+            "line": 68,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Common\\Collections\\Collection",
+                    false
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": []
+        },
+        "getMigration": {
+            "name": "getMigration",
+            "line": 73,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+                    false
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NonexistentMigrationException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migrationName": {
+                    "name": "migrationName",
+                    "line": 73,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getMigrationsInGroup": {
+            "name": "getMigrationsInGroup",
+            "line": 82,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Common\\Collections\\Collection",
+                    false
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\DataMigration\\DataMigrationInterface",
+                    true
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "groupName": {
+                    "name": "groupName",
+                    "line": 82,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getMigrationDefinition": {
+            "name": "getMigrationDefinition",
+            "line": 101,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                    false
+                ]
+            ],
+            "hint_desc": "",
+            "tags": {
+                "todo": [
+                    [
+                        "Remove",
+                        "this",
+                        "and",
+                        "inject",
+                        "the",
+                        "definition",
+                        "into",
+                        "each",
+                        "migration."
+                    ]
+                ]
+            },
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [
+                [
+                    "\\DragoonBoots\\A2B\\Exception\\NonexistentMigrationException",
+                    ""
+                ]
+            ],
+            "errors": [],
+            "parameters": {
+                "migrationName": {
+                    "name": "migrationName",
+                    "line": 101,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        },
+        "getMigrationDefinitionsInGroup": {
+            "name": "getMigrationDefinitionsInGroup",
+            "line": 110,
+            "short_desc": "",
+            "long_desc": "",
+            "hint": [
+                [
+                    "\\Doctrine\\Common\\Collections\\Collection",
+                    false
+                ],
+                [
+                    "\\DragoonBoots\\A2B\\Annotations\\DataMigration",
+                    true
+                ]
+            ],
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "groupName": {
+                    "name": "groupName",
+                    "line": 110,
+                    "short_desc": null,
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

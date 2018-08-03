@@ -1,0 +1,101 @@
+{
+    "name": "DragoonBoots\\A2B\\Exception\\NoDriverForSchemeException",
+    "line": 11,
+    "short_desc": "Thrown when a requested driver does not exist for the given scheme.",
+    "long_desc": "",
+    "hint": null,
+    "tags": [],
+    "namespace": "DragoonBoots\\A2B\\Exception",
+    "file": "src\/Exception\/NoDriverForSchemeException.php",
+    "relative_file": null,
+    "hash": "4e9f26bfbebc4bae2b1db82b998469930ebb4247",
+    "parent": "Exception",
+    "modifiers": 32,
+    "is_trait": false,
+    "is_interface": false,
+    "aliases": {
+        "Throwable": "Throwable"
+    },
+    "errors": [],
+    "interfaces": [],
+    "traits": [],
+    "properties": [],
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "line": 21,
+            "short_desc": "NoDriverForSchemeException constructor.",
+            "long_desc": "",
+            "hint": null,
+            "hint_desc": null,
+            "tags": [],
+            "modifiers": 1,
+            "is_by_ref": "",
+            "exceptions": [],
+            "errors": [],
+            "parameters": {
+                "scheme": {
+                    "name": "scheme",
+                    "line": 21,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "string",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "string",
+                    "default": null,
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "code": {
+                    "name": "code",
+                    "line": 21,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "int",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": "int",
+                    "default": "0",
+                    "variadic": false,
+                    "is_by_ref": false
+                },
+                "previous": {
+                    "name": "previous",
+                    "line": 21,
+                    "short_desc": "",
+                    "long_desc": null,
+                    "hint": [
+                        [
+                            "\\Throwable",
+                            false
+                        ]
+                    ],
+                    "tags": [],
+                    "modifiers": {
+                        "nodeType": "Name_FullyQualified",
+                        "parts": [
+                            "Throwable"
+                        ],
+                        "attributes": {
+                            "startLine": 21,
+                            "endLine": 21
+                        }
+                    },
+                    "default": "null",
+                    "variadic": false,
+                    "is_by_ref": false
+                }
+            }
+        }
+    },
+    "constants": []
+}

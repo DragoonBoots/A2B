@@ -90,6 +90,14 @@ class DataMigrationManager implements DataMigrationManagerInterface
         return $migrations;
     }
 
+    /**
+     * @todo Remove this and inject the definition into each migration.
+     *
+     * @param string $migrationName
+     *
+     * @return DataMigration|mixed
+     * @throws NonexistentMigrationException
+     */
     public function getMigrationDefinition(string $migrationName)
     {
         if (!$this->migrationDefinitions->containsKey($migrationName)) {

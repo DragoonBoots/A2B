@@ -39,3 +39,7 @@ Add the following to your composer.json
 ```
 
 Then run `composer require dragoonboots/a2b:dev-master`.
+
+Documentation
+-------------
+See the API documentation [here](https://dragoonboots.gitlab.io/a2b/index.html).

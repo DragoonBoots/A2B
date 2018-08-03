@@ -1,6 +1,10 @@
+parameters:
+    a2b.mapper.db:
+        url: 'sqlite:///%kernel.project_dir%/resources/data/data_migration_map.sqlite'
 services:
     _defaults:
         public: false
+        lazy: true
 
     a2b.data_migration_manager:
         class: DragoonBoots\A2B\DataMigration\DataMigrationManager
@@ -13,17 +17,20 @@ services:
         class: DragoonBoots\A2B\Drivers\DriverManager
         public: true
         arguments:
-            - '@annotation_reader'
+        - '@annotation_reader'
     DragoonBoots\A2B\Drivers\DriverManagerInterface: '@a2b.driver_manager'
 
     a2b.executor:
         class: DragoonBoots\A2B\DataMigration\DataMigrationExecutor
         public: true
         arguments:
-            - '@event_dispatcher'
-            - '@a2b.mapper'
+        - '@event_dispatcher'
+        - '@a2b.mapper'
     DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
 
+    a2b.mapper.connection:
+        factory: '@doctrine.dbal.connection_factory:createConnection'
+        arguments: '%a2b.mapper.db'
     a2b.mapper:
         class: DragoonBoots\A2B\DataMigration\DataMigrationMapper
         public: true
@@ -39,7 +46,7 @@ services:
         class: DragoonBoots\A2B\Drivers\Source\DbalSourceDriver
         public: true
         tags:
-            - a2b.driver.source
+        - a2b.driver.source
         arguments:
             $connectionFactory: '@doctrine.dbal.connection_factory'
 
@@ -48,7 +55,7 @@ services:
         class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver
         public: true
         tags:
-            - a2b.driver.destination
+        - a2b.driver.destination
         arguments:
             $dumper: '@a2b.symfony.dumper.cli'
             $cloner: '@a2b.symfony.dumper.cloner'
@@ -58,7 +65,7 @@ services:
         class: DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver
         public: true
         tags:
-            - a2b.driver.destination
+        - a2b.driver.destination
 
     a2b.source.abstract_source_driver:
         class: DragoonBoots\A2B\Drivers\AbstractSourceDriver
@@ -72,21 +79,21 @@ services:
         abstract: true
         public: false
         arguments:
-            - '@a2b.league.uri.parser'
+        - '@a2b.league.uri.parser'
 
     a2b.command.migrate:
         class: DragoonBoots\A2B\Command\MigrateCommand
         arguments:
-            - '@a2b.data_migration_manager'
-            - '@a2b.driver_manager'
-            - '@a2b.executor'
-            - '@a2b.mapper'
-            - '@a2b.league.uri.parser'
-            - '@parameter_bag'
-            - '@a2b.symfony.dumper.cli'
-            - '@a2b.symfony.dumper.cloner'
+        - '@a2b.data_migration_manager'
+        - '@a2b.driver_manager'
+        - '@a2b.executor'
+        - '@a2b.mapper'
+        - '@a2b.league.uri.parser'
+        - '@parameter_bag'
+        - '@a2b.symfony.dumper.cli'
+        - '@a2b.symfony.dumper.cloner'
         tags:
-            - console.command
+        - console.command
 
     # Vendors
     a2b.doctrine.inflector:

@@ -14,7 +14,7 @@
         "symfony/yaml": "^4.1",
         "symfony/framework-bundle": "^4.1",
         "symfony/var-dumper": "^4.1",
-        "ramsey/uuid": "^3.8"
+        "symfony/proxy-manager-bridge": "^4.1"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^4.1",

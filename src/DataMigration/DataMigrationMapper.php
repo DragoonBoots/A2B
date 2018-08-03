@@ -3,9 +3,8 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
-use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use Doctrine\Common\Inflector\Inflector;
-use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -16,9 +15,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
-use DragoonBoots\A2B\Types\MapRow;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 
 class DataMigrationMapper implements DataMigrationMapperInterface
 {
@@ -53,60 +49,20 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     protected $mappingConformed = [];
 
     /**
-     * The UUID for this migration process.
-     *
-     * This is used to determine which records were checked/updated by this
-     * process.
-     *
-     * @var UuidInterface
-     */
-    protected $migrationUuid;
-
-    /**
      * DataMigrationMapper constructor.
      *
-     * @param string                        $dbConfig
-     * @param ConnectionFactory             $connectionFactory
+     * @param Connection                    $connection
      * @param Inflector                     $inflector
      * @param DataMigrationManagerInterface $dataMigrationManager
      */
     public function __construct(
-        string $dbConfig,
-        ConnectionFactory $connectionFactory,
+        Connection $connection,
         Inflector $inflector,
         DataMigrationManagerInterface $dataMigrationManager
     ) {
-        $this->connection = $connectionFactory->createConnection(['url' => $dbConfig]);
-
+        $this->connection = $connection;
         $this->inflector = $inflector;
         $this->dataMigrationManager = $dataMigrationManager;
-    }
-
-    /**
-     * @param UuidInterface $migrationUuid
-     *
-     * @return self
-     */
-    public function setMigrationUuid(UuidInterface $migrationUuid): self
-    {
-        $this->migrationUuid = $migrationUuid;
-
-        return $this;
-    }
-
-    /**
-     * Generates a uuid if one has not been defined already.
-     *
-     * @return UuidInterface
-     * @throws \Exception
-     */
-    protected function getMigrationUuid(): UuidInterface
-    {
-        if (is_null($this->migrationUuid)) {
-            $this->migrationUuid = Uuid::uuid4();
-        }
-
-        return $this->migrationUuid;
     }
 
     /**
@@ -148,12 +104,6 @@ class DataMigrationMapper implements DataMigrationMapperInterface
             }
             $setFunction = 'set';
         }
-        $q->$setFunction(
-            'migration', $q->createNamedParameter(
-            $this->getMigrationUuid()
-                ->getBytes()
-        )
-        );
         $q->$setFunction('updated', $q->createNamedParameter(date('c')));
         $q->execute();
     }
@@ -197,10 +147,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
                 $table = $toSchema->createTable($tableName);
                 $table->addOption('comment', sprintf('Data migration map for "%s"', $migrationId));
                 $table->addColumn('id', Type::INTEGER);
-                $table->addColumn('migration', Type::BLOB);
                 $table->addColumn('updated', Type::DATETIMETZ_IMMUTABLE);
                 $table->setPrimaryKey(['id']);
-                $table->addIndex(['migration'], 'ix_migration');
                 $table->addIndex(['updated'], 'ix_updated');
             } else {
                 throw $e;
@@ -262,6 +210,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      *   One of 'source' or 'dest'.
      *
      * @throws SchemaException
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function conformMappingColumn(Table &$table, IdField $idField, string $type)
     {
@@ -352,27 +301,6 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     }
 
     /**
-     * @param $migrationId
-     *
-     * @return bool
-     */
-    protected function isUpdateMigration($migrationId): bool
-    {
-        $tableName = $this->getMappingTableName($migrationId);
-
-        static $updateMigrations = [];
-        if (!isset($updateMigrations[$migrationId])) {
-            $q = $this->connection->createQueryBuilder();
-            $q->select('COUNT(*)')
-                ->from($tableName);
-            $count = (int)($q->execute()->fetch(FetchMode::COLUMN));
-            $updateMigrations[$migrationId] = (bool)($count > 0);
-        }
-
-        return $updateMigrations[$migrationId];
-    }
-
-    /**
      * @param string $migrationId
      * @param array  $sourceIds
      * @param array  $destIds
@@ -435,7 +363,9 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * @param           $migrationId
      * @param array     $sourceIds
+     *   The querying ids, as a list of key/value items.
      * @param IdField[] $destIdFields
+     *   The resulting id fields.
      * @param string    $type
      *   One of MAPPING_SOURCE or MAPPING_DEST.
      *
@@ -454,11 +384,11 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $q->from($tableName);
 
         foreach ($destIdFields as $destIdField) {
-            $q->addSelect($this->getMappingColumnName($destIdField, self::MAPPING_DEST));
+            $q->addSelect($this->getMappingColumnName($destIdField, $type));
         }
 
         foreach ($sourceIds as $sourceId => $value) {
-            $columnName = $this->getMappingColumnName($sourceId, self::MAPPING_SOURCE);
+            $columnName = $this->getMappingColumnName($sourceId, $this->flipMappingType($type));
             $q->andWhere(
               sprintf(
                 '"%s" = %s',
@@ -471,7 +401,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         try {
             $result = $q->execute()->fetch();
         } catch (TableNotFoundException $e) {
-            throw new NoMappingForIdsException($sourceIds, 0, $e);
+            throw new NoMappingForIdsException($sourceIds, $e->getCode(), $e);
         }
         if (!$result) {
             throw new NoMappingForIdsException($sourceIds);
@@ -488,6 +418,22 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     }
 
     /**
+     * @param $direction
+     *
+     * @return string
+     */
+    protected function flipMappingType($direction)
+    {
+        if ($direction == self::MAPPING_SOURCE) {
+            return self::MAPPING_DEST;
+        } elseif ($direction == self::MAPPING_DEST) {
+            return self::MAPPING_SOURCE;
+        } else {
+            throw new \UnexpectedValueException(sprintf('"%s" is not a valid mapping direction.', $direction));
+        }
+    }
+
+    /**
      * @param string $migrationId
      * @param array  $destIds
      *
@@ -501,25 +447,5 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $definition = $this->dataMigrationManager->getMigrationDefinition($migrationId);
 
         return $this->getMatchingIds($migrationId, $destIds, $definition->sourceIds, self::MAPPING_SOURCE);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getOrphans(string $migrationId): array
-    {
-        $q = $this->connection->createQueryBuilder();
-        $q->select('*')
-            ->from($this->getMappingTableName($migrationId))
-            ->where(
-                sprintf(
-                    'migration <> "%s"',
-                    $this->getMigrationUuid()->getBytes()
-                )
-            );
-        $results = $q->execute()
-            ->fetchAll(FetchMode::CUSTOM_OBJECT, MapRow::class);
-
-        return $results;
     }
 }

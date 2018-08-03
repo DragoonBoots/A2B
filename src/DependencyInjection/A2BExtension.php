@@ -37,13 +37,6 @@ class A2BExtension extends Extension implements CompilerPassInterface
         $container->registerForAutoconfiguration(DestinationDriverInterface::class)
           ->addTag('a2b.driver.destination')
           ->setParent('a2b.destination.abstract_destination_driver');
-
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
-
-        // Configure the migration mapper
-        $migrationMapperDefinition = $container->getDefinition('a2b.mapper');
-        $migrationMapperDefinition->replaceArgument('$dbConfig', $config['mapper']['db']);
     }
 
     /**

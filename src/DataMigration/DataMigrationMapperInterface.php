@@ -47,17 +47,4 @@ interface DataMigrationMapperInterface
      * @throws NoMappingForIdsException
      */
     public function getSourceIdsFromDestIds(string $migrationId, array $destIds);
-
-    /**
-     * Find rows that were not checked/modified during this process.
-     *
-     * An orphaned row doesn't exist in the source data but does exist in the
-     * destination.
-     *
-     * @param string $migrationId
-     *
-     * @return array
-     *   A list of orphaned rows.
-     */
-    public function getOrphans(string $migrationId): array;
 }

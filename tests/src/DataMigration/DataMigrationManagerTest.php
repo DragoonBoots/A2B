@@ -81,6 +81,8 @@ class DataMigrationManagerTest extends TestCase
         }
 
         $expected = new ArrayCollection(['Group1Migration' => $migrations['Group1']]);
-        $this->assertArraySubset($expected, $dataMigrationManager->getMigrationsInGroup('Group1'));
+        $this->assertEquals(
+            $expected, $dataMigrationManager->getMigrationsInGroup('Group1')
+        );
     }
 }

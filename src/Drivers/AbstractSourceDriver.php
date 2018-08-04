@@ -3,6 +3,7 @@
 
 namespace DragoonBoots\A2B\Drivers;
 
+use DragoonBoots\A2B\Annotations\Driver;
 use League\Uri\Parser;
 
 /**
@@ -10,6 +11,11 @@ use League\Uri\Parser;
  */
 abstract class AbstractSourceDriver implements SourceDriverInterface
 {
+
+    /**
+     * @var Driver|null
+     */
+    protected $definition;
 
     /**
      * @var Parser
@@ -26,4 +32,21 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
         $this->uriParser = $uriParser;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefinition(): ?Driver
+    {
+        return $this->definition;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDefinition(Driver $definition): self
+    {
+        $this->definition = $definition;
+
+        return $this;
+    }
 }

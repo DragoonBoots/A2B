@@ -100,7 +100,7 @@ class DataMigration
         $this->source = $values['source'] ?? null;
         $this->sourceDriver = $values['sourceDriver'] ?? null;
         $this->destination = $values['destination'] ?? null;
-        $this->destinationDriver = $values['destination'] ?? null;
+        $this->destinationDriver = $values['destinationDriver'] ?? null;
         $this->sourceIds = $values['sourceIds'] ?? null;
         $this->destinationIds = $values['destinationIds'] ?? null;
     }

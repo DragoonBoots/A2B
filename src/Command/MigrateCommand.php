@@ -210,7 +210,7 @@ class MigrateCommand extends Command
             }
 
             // Run migration
-            $orphans = $this->executor->execute($migration, $definition, $sourceDriver, $destinationDriver);
+            $orphans = $this->executor->execute($migration, $sourceDriver, $destinationDriver);
 
             if (!empty($orphans) && !$input->getOption('prune')) {
                 if ($input->getOption('preserve')) {

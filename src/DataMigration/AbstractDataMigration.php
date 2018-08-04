@@ -13,7 +13,7 @@ abstract class AbstractDataMigration implements DataMigrationInterface
 {
 
     /**
-     * @var DataMigration
+     * @var DataMigration|null
      */
     protected $definition;
 

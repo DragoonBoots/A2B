@@ -20,11 +20,6 @@ class PostTransformRow extends Event
     protected $migration;
 
     /**
-     * @var DataMigration
-     */
-    protected $definition;
-
-    /**
      * @var mixed
      */
     protected $destinationEntity;
@@ -33,13 +28,11 @@ class PostTransformRow extends Event
      * PreFetchSourceRow constructor.
      *
      * @param DataMigrationInterface $migration
-     * @param DataMigration          $definition
      * @param                        $destinationEntity
      */
-    public function __construct(DataMigrationInterface $migration, DataMigration $definition, $destinationEntity)
+    public function __construct(DataMigrationInterface $migration, $destinationEntity)
     {
         $this->migration = $migration;
-        $this->definition = $definition;
         $this->destinationEntity = $destinationEntity;
     }
 
@@ -49,14 +42,6 @@ class PostTransformRow extends Event
     public function getMigration(): DataMigrationInterface
     {
         return $this->migration;
-    }
-
-    /**
-     * @return DataMigration
-     */
-    public function getDefinition(): DataMigration
-    {
-        return $this->definition;
     }
 
     /**

@@ -4,7 +4,6 @@
 namespace DragoonBoots\A2B\DataMigration;
 
 
-use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
@@ -33,11 +32,6 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      * @var DataMigrationInterface
      */
     protected $migration;
-
-    /**
-     * @var DataMigration
-     */
-    protected $definition;
 
     /**
      * @var SourceDriverInterface
@@ -76,12 +70,11 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      */
     public function execute(
         DataMigrationInterface $migration,
-        DataMigration $definition,
         SourceDriverInterface $sourceDriver,
         DestinationDriverInterface $destinationDriver
     ) {
+        $definition = $migration->getDefinition();
         $this->migration = $migration;
-        $this->definition = $definition;
         $this->sourceIds = $definition->getSourceIds();
         $this->sourceDriver = $sourceDriver;
         $this->destinationIds = $definition->getDestinationIds();
@@ -104,7 +97,6 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         // Cleanup
         unset(
             $this->migration,
-            $this->definition,
             $this->sourceIds,
             $this->sourceDriver,
             $this->destinationIds,
@@ -131,7 +123,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     {
         $sourceIds = $this->getSourceIds($sourceRow);
 
-        $postFetchSourceRowEvent = new PostFetchSourceRow($this->migration, $this->definition, $sourceRow);
+        $postFetchSourceRowEvent = new PostFetchSourceRow($this->migration, $sourceRow);
         $this->eventDispatcher->dispatch(DataMigrationEvents::EVENT_POST_FETCH_SOURCE_ROW, $postFetchSourceRowEvent);
 
         try {
@@ -144,12 +136,12 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             $entity = $this->migration->defaultResult();
         }
         $this->migration->transform($sourceRow, $entity);
-        $postTransformRowEvent = new PostTransformRow($this->migration, $this->definition, $entity);
+        $postTransformRowEvent = new PostTransformRow($this->migration, $entity);
         $this->eventDispatcher->dispatch(DataMigrationEvents::EVENT_POST_TRANSFORM_ROW, $postTransformRowEvent);
 
         $destIds = $this->destinationDriver->write($entity);
-        $this->mapper->addMapping(get_class($this->migration), $this->definition, $sourceIds, $destIds);
-        $postWriteDestinationRow = new PostWriteDestinationRow($this->migration, $this->definition, $entity);
+        $this->mapper->addMapping(get_class($this->migration), $this->migration->getDefinition(), $sourceIds, $destIds);
+        $postWriteDestinationRow = new PostWriteDestinationRow($this->migration, $entity);
         $this->eventDispatcher->dispatch(DataMigrationEvents::EVENT_POST_WRITE_DESTINATION_ROW, $postWriteDestinationRow);
 
         return $destIds;

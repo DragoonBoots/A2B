@@ -155,6 +155,55 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function askAboutOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver)
+    {
+        define('ORPHANS_REMOVE', 'n');
+        define('ORPHANS_KEEP', 'y');
+        define('ORPHANS_CHECK', 'c');
+
+        $choices = [
+            ORPHANS_KEEP => 'Keep all orphans',
+            ORPHANS_REMOVE => 'Remove all orphans',
+            ORPHANS_CHECK => 'Make a decision for each orphan',
+        ];
+        $q = sprintf('%d entities existed in the destination but do not exist in the source.  Keep them?', count($orphans));
+        $decision = $this->outputFormatter->ask($q, $choices, ORPHANS_KEEP);
+
+        if ($decision == ORPHANS_KEEP) {
+            $this->writeOrphans($orphans, $migration, $destinationDriver);
+        } elseif ($decision == ORPHANS_CHECK) {
+            $entityChoices = [
+                ORPHANS_KEEP => 'Keep',
+                ORPHANS_REMOVE => 'Remove',
+            ];
+            foreach ($orphans as $orphan) {
+                $printableEntity = var_export($orphan, true)."\n";
+                $entityQ = sprintf("Keep this entity?\n%s", $printableEntity);
+                $entityDecision = $this->outputFormatter->ask($entityQ, $entityChoices, ORPHANS_KEEP);
+                if ($entityDecision == ORPHANS_KEEP) {
+                    $this->writeOrphans([$orphan], $migration, $destinationDriver);
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function writeOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver): void
+    {
+        foreach ($orphans as $orphan) {
+            $destIds = $destinationDriver->write($orphan);
+
+            // Make a fake set of source ids for the mapper.
+            $sourceIds = array_fill_keys(array_keys($destIds), null);
+            $this->mapper->addMapping(get_class($migration), $migration->getDefinition(), $sourceIds, $destIds);
+        }
+    }
+
+    /**
      * Get the source id values for this row.
      *
      * @param array $sourceRow

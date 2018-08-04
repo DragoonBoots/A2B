@@ -173,6 +173,7 @@ TXT;
     public function finish()
     {
         $this->migrationProgressBar->finish();
+        $this->migrationSection->clear();
         $this->summaryProgressBar->advance();
     }
 
@@ -201,6 +202,12 @@ TXT;
             $q = new ChoiceQuestion($message, $options, $default);
         }
 
-        return $this->migrationIo->askQuestion($q);
+        $this->migrationProgressBar->clear();
+        $this->migrationSection->clear();
+        $result = $this->migrationIo->askQuestion($q);
+        $this->migrationSection->clear();
+        $this->migrationProgressBar->display();
+
+        return $result;
     }
 }

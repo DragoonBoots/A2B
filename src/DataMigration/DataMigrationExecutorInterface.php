@@ -31,4 +31,26 @@ interface DataMigrationExecutorInterface
      * @throws NoIdSetException
      */
     public function execute(DataMigrationInterface $migration, SourceDriverInterface $sourceDriver, DestinationDriverInterface $destinationDriver);
+
+    /**
+     * Handle orphans from the migration.
+     *
+     * @param array                      $orphans
+     * @param DataMigrationInterface     $migration
+     * @param DestinationDriverInterface $destinationDriver
+     */
+    public function askAboutOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver);
+
+    /**
+     * Write orphans to the destination and mapping table.
+     *
+     * @param array                      $orphans
+     * @param DataMigrationInterface     $migration
+     * @param DestinationDriverInterface $destinationDriver
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
+     */
+    public function writeOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver): void;
 }

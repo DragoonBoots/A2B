@@ -9,7 +9,6 @@ use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
 use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
-use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use League\Uri\Parser;
 use Symfony\Component\Console\Command\Command;
@@ -17,7 +16,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\VarDumper\Cloner\ClonerInterface;
@@ -222,9 +220,9 @@ class MigrateCommand extends Command
 
             if (!empty($orphans) && !$input->getOption('prune')) {
                 if ($input->getOption('preserve')) {
-                    $this->writeOrphans($orphans, $migration, $definition, $destinationDriver);
+                    $this->executor->writeOrphans($orphans, $migration, $destinationDriver);
                 } else {
-                    $this->askAboutOrphans($orphans, $migration, $definition, $destinationDriver);
+                    $this->executor->askAboutOrphans($orphans, $migration, $destinationDriver);
                 }
             }
             $destinationDriver->flush();
@@ -258,96 +256,5 @@ class MigrateCommand extends Command
         }
 
         return $migrations;
-    }
-
-    /**
-     * Ask the user how to handle each orphan.
-     *
-     * @param array                      $orphans
-     * @param DataMigrationInterface     $migration
-     * @param DataMigration              $definition
-     * @param DestinationDriverInterface $destinationDriver
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Schema\SchemaException
-     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
-     */
-    protected function askAboutOrphans(array $orphans, DataMigrationInterface $migration, DataMigration $definition, DestinationDriverInterface $destinationDriver)
-    {
-        define('ORPHANS_REMOVE', 'n');
-        define('ORPHANS_KEEP', 'y');
-        define('ORPHANS_CHECK', 'c');
-
-        $choices = [
-            ORPHANS_KEEP => 'Keep all orphans',
-            ORPHANS_REMOVE => 'Remove all orphans',
-            ORPHANS_CHECK => 'Make a decision for each orphan',
-        ];
-        $q = new ChoiceQuestion(
-            sprintf('%d entities existed in the destination but do not exist in the source.  Keep them?', count($orphans)),
-            $choices,
-            ORPHANS_KEEP
-        );
-        $decision = $this->io->askQuestion($q);
-        if ($decision == ORPHANS_KEEP) {
-            $this->writeOrphans($orphans, $migration, $definition, $destinationDriver);
-        } elseif ($decision == ORPHANS_CHECK) {
-            $entityChoices = [
-                ORPHANS_KEEP => 'Keep',
-                ORPHANS_REMOVE => 'Remove',
-            ];
-            foreach ($orphans as $orphan) {
-                $printableEntity = $this->varDumper->dump($this->varCloner->cloneVar($orphan), true);
-                $entityQ = new ChoiceQuestion(
-                    sprintf("Keep this entity?\n%s", $printableEntity),
-                    $entityChoices,
-                    ORPHANS_KEEP
-                );
-                $entityDecision = $this->io->askQuestion($entityQ);
-                if ($entityDecision == ORPHANS_KEEP) {
-                    $this->writeOrphan($orphan, $migration, $definition, $destinationDriver);
-                }
-            }
-        }
-    }
-
-    /**
-     * Write an orphan to the destination and mapping table.
-     *
-     * @param                            $orphan
-     * @param DataMigrationInterface     $migration
-     * @param DataMigration              $definition
-     * @param DestinationDriverInterface $destinationDriver
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Schema\SchemaException
-     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
-     */
-    protected function writeOrphan($orphan, DataMigrationInterface $migration, DataMigration $definition, DestinationDriverInterface $destinationDriver): void
-    {
-        $destIds = $destinationDriver->write($orphan);
-
-        // Make a fake set of source ids for the mapper.
-        $sourceIds = array_fill_keys(array_keys($destIds), null);
-        $this->mapper->addMapping(get_class($migration), $definition, $sourceIds, $destIds);
-    }
-
-    /**
-     * Write multiple orphans to the destination and mapping table.
-     *
-     * @param array                      $orphans
-     * @param DataMigrationInterface     $migration
-     * @param DataMigration              $definition
-     * @param DestinationDriverInterface $destinationDriver
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Schema\SchemaException
-     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
-     */
-    protected function writeOrphans(array $orphans, DataMigrationInterface $migration, DataMigration $definition, DestinationDriverInterface $destinationDriver): void
-    {
-        foreach ($orphans as $orphan) {
-            $this->writeOrphan($orphan, $migration, $definition, $destinationDriver);
-        }
     }
 }

@@ -35,7 +35,7 @@ services:
         factory: 'doctrine.dbal.connection_factory:createConnection'
         lazy: true
         arguments:
-        - '%a2b.mapper.db'
+        - '%a2b.mapper.db%'
     a2b.mapper:
         class: DragoonBoots\A2B\DataMigration\DataMigrationMapper
         public: true

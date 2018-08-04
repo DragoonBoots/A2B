@@ -26,7 +26,6 @@ services:
         public: true
         lazy: true
         arguments:
-        - '@event_dispatcher'
         - '@a2b.mapper'
     DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
 

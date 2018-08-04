@@ -2,12 +2,20 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
+use DragoonBoots\A2B\DataMigration\OutputFormatter\OutputFormatterInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 
 interface DataMigrationExecutorInterface
 {
+
+    /**
+     * Set the output formatter to use for all output.
+     *
+     * @param OutputFormatterInterface $outputFormatter
+     */
+    public function setOutputFormatter(OutputFormatterInterface $outputFormatter);
 
     /**
      * Run the given migration

@@ -59,6 +59,13 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     protected $resultIterator;
 
     /**
+     * The number of rows in the source.
+     *
+     * @var int|null
+     */
+    protected $count = null;
+
+    /**
      * DbalSourceDriver constructor.
      *
      * @param Parser            $uriParser
@@ -77,6 +84,7 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     public function configure(DataMigration $definition)
     {
         $source = $definition->getSource();
+        $this->count = null;
 
         try {
             $this->connection = $this->connectionFactory->createConnection(['url' => $source]);
@@ -84,6 +92,14 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
             // Convert the Doctrine exception into our own.
             throw new BadUriException($source, $e->getCode(), $e);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count(): int
+    {
+        return $this->count ?? parent::count();
     }
 
     /**
@@ -103,6 +119,20 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     {
         $statement->execute();
         $this->resultIterator = $statement;
+    }
+
+    /**
+     * Set the statement use for counting the number of rows in the source.
+     *
+     * This should select a single field.  The first field in the result
+     * will be used as the count.
+     *
+     * @param Statement $statement
+     */
+    public function setCountStatement(Statement $statement)
+    {
+        $statement->execute();
+        $this->count = (int)$statement->fetchColumn();
     }
 
     /**

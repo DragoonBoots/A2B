@@ -35,6 +35,19 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
     /**
      * {@inheritdoc}
      */
+    public function count(): int
+    {
+        $count = 0;
+        foreach ($this->getIterator() as $item) {
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getDefinition(): ?Driver
     {
         return $this->definition;

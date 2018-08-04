@@ -5,28 +5,24 @@ namespace DragoonBoots\A2B\DataMigration;
 
 
 use DragoonBoots\A2B\Annotations\IdField;
+use DragoonBoots\A2B\DataMigration\OutputFormatter\OutputFormatterInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
-use DragoonBoots\A2B\Event\DataMigrationEvents;
-use DragoonBoots\A2B\Event\PostFetchSourceRow;
-use DragoonBoots\A2B\Event\PostTransformRow;
-use DragoonBoots\A2B\Event\PostWriteDestinationRow;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class DataMigrationExecutor implements DataMigrationExecutorInterface
 {
 
     /**
-     * @var EventDispatcherInterface
-     */
-    protected $eventDispatcher;
-
-    /**
      * @var DataMigrationMapperInterface
      */
     protected $mapper;
+
+    /**
+     * @var OutputFormatterInterface
+     */
+    protected $outputFormatter;
 
     /**
      * @var DataMigrationInterface
@@ -54,15 +50,28 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     protected $destinationIds;
 
     /**
+     * The number of rows migrated
+     *
+     * @var int
+     */
+    protected $rowCounter = 0;
+
+    /**
      * DataMigrationExecutor constructor.
      *
-     * @param EventDispatcherInterface     $eventDispatcher
      * @param DataMigrationMapperInterface $mapper
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, DataMigrationMapperInterface $mapper)
+    public function __construct(DataMigrationMapperInterface $mapper)
     {
-        $this->eventDispatcher = $eventDispatcher;
         $this->mapper = $mapper;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setOutputFormatter(OutputFormatterInterface $outputFormatter)
+    {
+        $this->outputFormatter = $outputFormatter;
     }
 
     /**
@@ -80,11 +89,14 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $this->destinationIds = $definition->getDestinationIds();
         $this->destinationDriver = $destinationDriver;
 
+        $this->outputFormatter->start($migration, $sourceDriver->count());
+        $this->rowCounter = 0;
         $existingIds = $this->destinationDriver->getExistingIds();
         $newIds = [];
         foreach ($sourceDriver->getIterator() as $row) {
             $newIds[] = $this->executeRow($row);
         }
+        $this->outputFormatter->finish();
 
         // Handle orphans
         $orphanIds = $this->findOrphans($existingIds, $newIds);
@@ -123,9 +135,6 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     {
         $sourceIds = $this->getSourceIds($sourceRow);
 
-        $postFetchSourceRowEvent = new PostFetchSourceRow($this->migration, $sourceRow);
-        $this->eventDispatcher->dispatch(DataMigrationEvents::EVENT_POST_FETCH_SOURCE_ROW, $postFetchSourceRowEvent);
-
         try {
             $destIds = $this->mapper->getDestIdsFromSourceIds(get_class($this->migration), $sourceIds);
             $entity = $this->destinationDriver->read($destIds);
@@ -136,13 +145,11 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             $entity = $this->migration->defaultResult();
         }
         $this->migration->transform($sourceRow, $entity);
-        $postTransformRowEvent = new PostTransformRow($this->migration, $entity);
-        $this->eventDispatcher->dispatch(DataMigrationEvents::EVENT_POST_TRANSFORM_ROW, $postTransformRowEvent);
 
         $destIds = $this->destinationDriver->write($entity);
         $this->mapper->addMapping(get_class($this->migration), $this->migration->getDefinition(), $sourceIds, $destIds);
-        $postWriteDestinationRow = new PostWriteDestinationRow($this->migration, $entity);
-        $this->eventDispatcher->dispatch(DataMigrationEvents::EVENT_POST_WRITE_DESTINATION_ROW, $postWriteDestinationRow);
+        $this->rowCounter++;
+        $this->outputFormatter->writeProgress($this->rowCounter, $sourceIds, $destIds);
 
         return $destIds;
     }
@@ -175,6 +182,16 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         return $sourceIds;
     }
 
+    /**
+     * Find rows that existed in the destination that don't exist in the source
+     *
+     * @param array $oldIds
+     *   The ids present in the destination at the start of the migration
+     * @param array $newIds
+     *   The ids migrated from the source
+     *
+     * @return array
+     */
     protected function findOrphans(array $oldIds, array $newIds): array
     {
         $orphans = array_udiff(

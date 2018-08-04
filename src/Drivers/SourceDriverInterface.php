@@ -28,6 +28,13 @@ interface SourceDriverInterface extends \IteratorAggregate
     public function configure(DataMigration $definition);
 
     /**
+     * Get the total number of rows in the source.
+     *
+     * @return int
+     */
+    public function count(): int;
+
+    /**
      * Get the settings defined for this driver.
      *
      * This will only be set for drivers retrieved from the DriverManager.

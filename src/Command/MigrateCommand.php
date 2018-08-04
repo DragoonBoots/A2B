@@ -7,6 +7,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
+use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
 use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
@@ -158,12 +159,15 @@ class MigrateCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     * @throws \DragoonBoots\A2B\Exception\BadUriException
+     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
      * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
+     * @throws \DragoonBoots\A2B\Exception\NoIdSetException
      * @throws \DragoonBoots\A2B\Exception\NonexistentDriverException
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
-     * @throws \DragoonBoots\A2B\Exception\NoIdSetException
-     * @throws \DragoonBoots\A2B\Exception\BadUriException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -175,6 +179,10 @@ class MigrateCommand extends Command
         }
 
         $migrations = $this->getMigrations($input->getOption('group'), $input->getArgument('migrations'));
+
+        $outputFormatter = new ConsoleOutputFormatter($input, $output);
+        $outputFormatter->configure(['total' => count($migrations)]);
+        $this->executor->setOutputFormatter($outputFormatter);
 
         foreach ($migrations as $migration) {
             $definition = $migration->getDefinition();

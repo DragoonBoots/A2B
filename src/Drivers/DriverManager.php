@@ -120,7 +120,7 @@ class DriverManager implements DriverManagerInterface
         if ($useDrivers->isEmpty()) {
             throw new NoDriverForSchemeException($scheme);
         }
-        if ($useDrivers->count() > 1) {
+        if (count($useDrivers) > 1) {
             $driverNames = [];
             foreach ($useDrivers as $driver) {
                 $driverNames[] = get_class($driver);

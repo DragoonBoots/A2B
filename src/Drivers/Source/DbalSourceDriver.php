@@ -99,7 +99,7 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
      */
     public function count(): int
     {
-        return $this->count ?? parent::count();
+        return $this->count;
     }
 
     /**

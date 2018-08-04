@@ -89,7 +89,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $this->destinationIds = $definition->getDestinationIds();
         $this->destinationDriver = $destinationDriver;
 
-        $this->outputFormatter->start($migration, $sourceDriver->count());
+        $this->outputFormatter->start($migration, count($sourceDriver));
         $this->rowCounter = 0;
         $existingIds = $this->destinationDriver->getExistingIds();
         $newIds = [];

@@ -98,6 +98,26 @@ class DbalSourceDriverTest extends TestCase
         $this->assertSame($statement, $driver->getIterator());
     }
 
+    public function testSetCountStatement()
+    {
+        /** @var DataMigration $definition */
+        /** @var Connection $connection */
+        /** @var DbalSourceDriver $driver */
+        $this->setupDriver($definition, $connection, $driver);
+        $driver->configure($definition);
+
+        $count = 5;
+        $statement = $this->createMock(Statement::class);
+        $statement->expects($this->once())
+            ->method('execute');
+        $statement->expects($this->once())
+            ->method('fetchColumn')
+            ->willReturn((string)$count);
+        $driver->setCountStatement($statement);
+
+        $this->assertEquals($count, $driver->count());
+    }
+
     public function testGetConnection()
     {
         /** @var DataMigration $definition */

@@ -117,6 +117,9 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     /**
      * @param array $sourceRow
      *
+     * @return array
+     *   The set of ids that identify this row in the destination.
+     *
      * @throws NoIdSetException
      *   Thrown when there is no value set for an id in this row.
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException

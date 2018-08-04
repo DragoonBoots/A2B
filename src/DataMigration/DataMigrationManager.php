@@ -7,8 +7,6 @@ namespace DragoonBoots\A2B\DataMigration;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Collections\Expr\Comparison;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 
@@ -26,11 +24,6 @@ class DataMigrationManager implements DataMigrationManagerInterface
     protected $migrations = [];
 
     /**
-     * @var Collection|DataMigration[]
-     */
-    protected $migrationDefinitions = [];
-
-    /**
      * DataMigrationManager constructor.
      *
      * @param Reader $annotationReader
@@ -40,7 +33,6 @@ class DataMigrationManager implements DataMigrationManagerInterface
         $this->annotationReader = $annotationReader;
 
         $this->migrations = new ArrayCollection();
-        $this->migrationDefinitions = new ArrayCollection();
     }
 
     /**
@@ -54,20 +46,15 @@ class DataMigrationManager implements DataMigrationManagerInterface
      */
     public function addMigration(DataMigrationInterface $migration)
     {
-        $this->migrations[get_class($migration)] = $migration;
         $reflClass = new \ReflectionClass($migration);
-        $this->migrationDefinitions[get_class($migration)] = $this->annotationReader->getClassAnnotation($reflClass, DataMigration::class);
-
+        $definition = $this->annotationReader->getClassAnnotation($reflClass, DataMigration::class);
+        $migration->setDefinition($definition);
+        $this->migrations[get_class($migration)] = $migration;
     }
 
     public function getMigrations(): Collection
     {
         return $this->migrations;
-    }
-
-    public function getMigrationDefinitions(): Collection
-    {
-        return $this->migrationDefinitions;
     }
 
     public function getMigration(string $migrationName)
@@ -82,36 +69,14 @@ class DataMigrationManager implements DataMigrationManagerInterface
     public function getMigrationsInGroup(string $groupName)
     {
         $migrations = $this->migrations->filter(
-          function (DataMigrationInterface $migration) use ($groupName) {
-              return $this->getMigrationDefinition(get_class($migration))->group === $groupName;
-          }
+            function (DataMigrationInterface $migration) use ($groupName) {
+                $definition = $this->getMigration(get_class($migration))
+                    ->getDefinition();
+
+                return $definition->getGroup() == $groupName;
+            }
         );
 
         return $migrations;
-    }
-
-    /**
-     * @todo Remove this and inject the definition into each migration.
-     *
-     * @param string $migrationName
-     *
-     * @return DataMigration|mixed
-     * @throws NonexistentMigrationException
-     */
-    public function getMigrationDefinition(string $migrationName)
-    {
-        if (!$this->migrationDefinitions->containsKey($migrationName)) {
-            throw new NonexistentMigrationException($migrationName);
-        }
-
-        return $this->migrationDefinitions[$migrationName];
-    }
-
-    public function getMigrationDefinitionsInGroup(string $groupName)
-    {
-        $criteria = new Criteria(new Comparison('group', '=', $groupName));
-        $definitions = $this->migrationDefinitions->matching($criteria);
-
-        return $definitions;
     }
 }

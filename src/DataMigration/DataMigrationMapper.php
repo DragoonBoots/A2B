@@ -355,7 +355,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      */
     public function getDestIdsFromSourceIds(string $migrationId, array $sourceIds)
     {
-        $definition = $this->dataMigrationManager->getMigrationDefinition($migrationId);
+        $definition = $this->dataMigrationManager->getMigration($migrationId)
+            ->getDefinition();
 
         return $this->getMatchingIds($migrationId, $sourceIds, $definition->destinationIds, self::MAPPING_DEST);
     }
@@ -444,7 +445,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      */
     public function getSourceIdsFromDestIds(string $migrationId, array $destIds)
     {
-        $definition = $this->dataMigrationManager->getMigrationDefinition($migrationId);
+        $definition = $this->dataMigrationManager->getMigration($migrationId)
+            ->getDefinition();
 
         return $this->getMatchingIds($migrationId, $destIds, $definition->sourceIds, self::MAPPING_SOURCE);
     }

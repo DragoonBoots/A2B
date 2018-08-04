@@ -174,12 +174,10 @@ class MigrateCommand extends Command
             return;
         }
 
-        /** @var DataMigrationInterface[] $migrations */
-        /** @var DataMigration[] $definitions */
-        list($migrations, $definitions) = $this->getMigrations($input->getOption('group'), $input->getArgument('migrations'));
+        $migrations = $this->getMigrations($input->getOption('group'), $input->getArgument('migrations'));
 
-        foreach ($migrations as $migrationId => $migration) {
-            $definition = $definitions[$migrationId];
+        foreach ($migrations as $migration) {
+            $definition = $migration->getDefinition();
 
             // Resolve container parameters source/destination urls
             $definition->source = $this->parameterBag->resolveValue($definition->source);
@@ -230,34 +228,29 @@ class MigrateCommand extends Command
      * @param array $groups
      * @param array $migrationIds
      *
-     * @return array
-     *   An array containing migrations and definitions
+     * @return DataMigrationInterface[]
      *
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      */
     protected function getMigrations(array $groups, array $migrationIds)
     {
         $migrations = [];
-        $definitions = [];
         if (empty($migrationIds)) {
             foreach ($groups as $group) {
                 $migrations = array_merge(
-                    $migrations, $this->dataMigrationManager->getMigrationsInGroup($group)
-                    ->toArray()
-                );
-                $definitions = array_merge(
-                    $definitions, $this->dataMigrationManager->getMigrationDefinitionsInGroup($group)
-                    ->toArray()
+                    $migrations,
+                    $this->dataMigrationManager
+                        ->getMigrationsInGroup($group)
+                        ->toArray()
                 );
             }
         } else {
             foreach ($migrationIds as $migrationId) {
                 $migrations[$migrationId] = $this->dataMigrationManager->getMigration($migrationId);
-                $definitions[$migrationId] = $this->dataMigrationManager->getMigrationDefinition($migrationId);
             }
         }
 
-        return [$migrations, $definitions];
+        return $migrations;
     }
 
     /**

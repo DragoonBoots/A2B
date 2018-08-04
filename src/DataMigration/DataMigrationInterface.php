@@ -3,6 +3,7 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
+use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 
@@ -48,4 +49,25 @@ interface DataMigrationInterface
      * @return mixed
      */
     public function defaultResult();
+
+    /**
+     * Get the settings defined for this migration.
+     *
+     * This will only be set for migrations retrieved from the
+     * DataMigrationManager.
+     *
+     * @return DataMigration|null
+     */
+    public function getDefinition(): ?DataMigration;
+
+    /**
+     * Used by the manager to inject the definition
+     *
+     * @internal
+     *
+     * @param DataMigration $definition
+     *
+     * @return self
+     */
+    public function setDefinition(DataMigration $definition);
 }

@@ -6,7 +6,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NoIdSetException;
-use DragoonBoots\A2B\Types\MapRow;
 
 interface DataMigrationExecutorInterface
 {

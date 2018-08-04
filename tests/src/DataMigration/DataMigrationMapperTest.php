@@ -12,6 +12,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManager;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapper;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class DataMigrationMapperTest extends TestCase
@@ -74,6 +75,7 @@ class DataMigrationMapperTest extends TestCase
      */
     protected function setupMapper(?array &$migrations, ?array &$definitions, ?DataMigrationMapper &$mapper)
     {
+        /** @var DataMigrationInterface[]|MockObject[] $migrations */
         $migrations = [
             'TestMigration1' => $this->getMockBuilder(DataMigrationInterface::class)
                 ->disableOriginalConstructor()
@@ -84,6 +86,7 @@ class DataMigrationMapperTest extends TestCase
                 ->setMockClassName('TestMigration2')
                 ->getMock(),
         ];
+        /** @var DataMigration[] $definitions */
         $definitions = [
             'TestMigration1' => (new DataMigration())
                 ->setSourceIds(
@@ -112,6 +115,10 @@ class DataMigrationMapperTest extends TestCase
                     ]
                 ),
         ];
+        foreach ($migrations as $migrationId => $migration) {
+            $migration->method('getDefinition')
+                ->willReturn($definitions[$migrationId]);
+        }
 
         // Test with a real inflector and migration manager as their output can
         // cause very real problems in the mapping database.

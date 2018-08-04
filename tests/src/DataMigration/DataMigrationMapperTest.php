@@ -88,32 +88,32 @@ class DataMigrationMapperTest extends TestCase
         ];
         /** @var DataMigration[] $definitions */
         $definitions = [
-            'TestMigration1' => (new DataMigration())
-                ->setSourceIds(
-                    [
-                        (new IdField())->setName('identifier')
-                            ->setType('string'),
-                    ]
-                )
-                ->setDestinationIds(
-                    [
-                        (new IdField())->setName('id')
-                            ->setType('int'),
-                    ]
-                ),
-            'TestMigration2' => (new DataMigration())
-                ->setSourceIds(
-                    [
-                        (new IdField())->setName('identifier')
-                            ->setType('string'),
-                    ]
-                )
-                ->setDestinationIds(
-                    [
-                        (new IdField())->setName('id')
-                            ->setType('int'),
-                    ]
-                ),
+            'TestMigration1' => new DataMigration(
+                [
+                    'sourceIds' => [
+                        new IdField(
+                            [
+                                'name' => 'identifier',
+                                'type' => 'string',
+                            ]
+                        ),
+                    ],
+                    'destinationIds' => [new IdField(['name' => 'id'])],
+                ]
+            ),
+            'TestMigration2' => new DataMigration(
+                [
+                    'sourceIds' => [
+                        new IdField(
+                            [
+                                'name' => 'identifier',
+                                'type' => 'string',
+                            ]
+                        ),
+                    ],
+                    'destinationIds' => [new IdField(['name' => 'id'])],
+                ]
+            ),
         ];
         foreach ($migrations as $migrationId => $migration) {
             $migration->method('getDefinition')

@@ -180,14 +180,14 @@ class MigrateCommand extends Command
             $definition = $migration->getDefinition();
 
             // Resolve container parameters source/destination urls
-            $definition->source = $this->parameterBag->resolveValue($definition->source);
-            $definition->destination = $this->parameterBag->resolveValue($definition->destination);
+            $definition->setSource($this->parameterBag->resolveValue($definition->getSource()));
+            $definition->setDestination($this->parameterBag->resolveValue($definition->getDestination()));
 
             // Get source driver
-            if (isset($definition->sourceDriver)) {
-                $sourceDriver = $this->driverManager->getSourceDriver($definition->sourceDriver);
+            if (!is_null($definition->getSourceDriver())) {
+                $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
             } else {
-                $sourceUri = $this->uriParser->parse($definition->source);
+                $sourceUri = $this->uriParser->parse($definition->getSource());
                 $sourceDriver = $this->driverManager->getSourceDriverForScheme($sourceUri['scheme']);
             }
             $sourceDriver->configure($definition);
@@ -196,14 +196,13 @@ class MigrateCommand extends Command
             // Get destination driver
             if ($input->getOption('simulate') === true) {
                 $destinationDriver = $this->driverManager->getDestinationDriver(DebugDestinationDriver::class);
-                $fakeDefinition = new DataMigration();
-                $fakeDefinition->destination = 'debug:stderr';
+                $fakeDefinition = new DataMigration(['destination' => 'debug:stderr']);
                 $destinationDriver->configure($fakeDefinition);
             } else {
-                if (isset($definition->destinationDriver)) {
-                    $destinationDriver = $this->driverManager->getDestinationDriver($definition->destinationDriver);
+                if (!is_null($definition->getDestinationDriver())) {
+                    $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
                 } else {
-                    $destinationUri = $this->uriParser->parse($definition->destination);
+                    $destinationUri = $this->uriParser->parse($definition->getDestination());
                     $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
                 }
                 $destinationDriver->configure($definition);

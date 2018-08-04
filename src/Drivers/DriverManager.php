@@ -133,9 +133,9 @@ class DriverManager implements DriverManagerInterface
     /**
      * Get the driver from the given list that implements the given scheme.
      *
-     * @param string     $scheme
-     * @param Collection $drivers
-     * @param Collection $driverDefinitions
+     * @param string                                                          $scheme
+     * @param SourceDriverInterface[]|DestinationDriverInterface[]|Collection $drivers
+     * @param Driver[]|Collection                                             $driverDefinitions
      *
      * @return SourceDriverInterface|DestinationDriverInterface
      *
@@ -148,7 +148,7 @@ class DriverManager implements DriverManagerInterface
         $useDrivers = $drivers->filter(
           function ($driver) use ($scheme, $driverDefinitions) {
               /** @var SourceDriverInterface|DestinationDriverInterface $driver */
-              return in_array($scheme, $driverDefinitions[get_class($driver)]->value);
+              return in_array($scheme, $driverDefinitions[get_class($driver)]->getValue());
           }
         );
 

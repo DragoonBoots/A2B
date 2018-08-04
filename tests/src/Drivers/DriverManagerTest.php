@@ -21,6 +21,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDriver()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager, $driverStub, $driverId);
 
         $this->assertEquals(
@@ -106,6 +107,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDriverBad()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager);
 
         $this->expectException(NonexistentDriverException::class);
@@ -114,6 +116,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDriverForScheme()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager, $driverStub);
 
         $this->assertEquals(
@@ -124,6 +127,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDriverForSchemeBad()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager);
 
         $this->expectException(NoDriverForSchemeException::class);
@@ -157,6 +161,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetDestinationDriverForScheme()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager, $driverStub);
 
         $this->assertEquals(
@@ -208,6 +213,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDriverDefinition()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager, $driverStub, $driverId, $annotation);
 
         $this->assertEquals(
@@ -218,6 +224,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDriverDefinitionBad()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager);
 
         $this->expectException(NonexistentDriverException::class);
@@ -226,6 +233,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDrivers()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager, $driverStub);
 
         $this->assertContains(
@@ -236,6 +244,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetDestinationDriverDefinitions()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager, $driverStub, $driverId, $annotation);
 
         $this->assertContains(
@@ -246,6 +255,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetSourceDriverDefinitions()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager, $driverStub, $driverId, $annotation);
 
         $this->assertContains(
@@ -256,6 +266,7 @@ class DriverManagerTest extends TestCase
 
     public function testAddDestinationDriver()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager, $driverStub);
 
         $this->assertContains(
@@ -267,6 +278,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetDestinationDriver()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager, $driverStub, $driverId);
 
         $this->assertEquals(
@@ -277,6 +289,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetDestinationDriverBad()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager);
 
         $this->expectException(NonexistentDriverException::class);
@@ -285,6 +298,7 @@ class DriverManagerTest extends TestCase
 
     public function testAddSourceDriver()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupSourceDriver($driverManager, $driverStub);
 
         $this->assertContains(
@@ -296,6 +310,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetDestinationDrivers()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager, $driverStub);
 
         $this->assertContains(
@@ -306,6 +321,7 @@ class DriverManagerTest extends TestCase
 
     public function testGetDestinationDriverDefinition()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager, $driverStub, $driverId, $annotation);
 
         $this->assertEquals(
@@ -316,8 +332,8 @@ class DriverManagerTest extends TestCase
 
     public function testGetDestinationDriverDefinitionBad()
     {
+        /** @var DriverManagerInterface $driverManager */
         $this->setupDestinationDriver($driverManager);
-
 
         $this->expectException(NonexistentDriverException::class);
         $driverManager->getDestinationDriverDefinition('NonexistentDriver');

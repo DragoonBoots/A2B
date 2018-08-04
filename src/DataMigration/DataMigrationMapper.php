@@ -156,8 +156,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         }
 
         // Ensure mapping columns are present.
-        $sourceIdFields = $migrationDefinition->sourceIds;
-        $destIdFields = $migrationDefinition->destinationIds;
+        $sourceIdFields = $migrationDefinition->getSourceIds();
+        $destIdFields = $migrationDefinition->getDestinationIds();
         foreach ($sourceIdFields as $sourceIdField) {
             $this->conformMappingColumn($table, $sourceIdField, self::MAPPING_SOURCE);
         }
@@ -217,10 +217,10 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $comment = sprintf(
           '%s field "%s"',
           ucfirst($type),
-          $idField->name
+            $idField->getName()
         );
         $columnName = $this->getMappingColumnName($idField, $type);
-        if ($idField->type == 'int') {
+        if ($idField->getType() == 'int') {
             $colType = Type::INTEGER;
         } else {
             $colType = Type::STRING;
@@ -254,7 +254,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     protected function getMappingColumnName($idField, string $type): string
     {
         if ($idField instanceof IdField) {
-            $idField = $idField->name;
+            $idField = $idField->getName();
         }
         $type = strtolower($type);
 
@@ -358,7 +358,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $definition = $this->dataMigrationManager->getMigration($migrationId)
             ->getDefinition();
 
-        return $this->getMatchingIds($migrationId, $sourceIds, $definition->destinationIds, self::MAPPING_DEST);
+        return $this->getMatchingIds($migrationId, $sourceIds, $definition->getDestinationIds(), self::MAPPING_DEST);
     }
 
     /**
@@ -448,6 +448,6 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $definition = $this->dataMigrationManager->getMigration($migrationId)
             ->getDefinition();
 
-        return $this->getMatchingIds($migrationId, $destIds, $definition->sourceIds, self::MAPPING_SOURCE);
+        return $this->getMatchingIds($migrationId, $destIds, $definition->getSourceIds(), self::MAPPING_SOURCE);
     }
 }

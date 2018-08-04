@@ -20,7 +20,7 @@ class DataMigration
      * @var string
      * @Annotation\Required
      */
-    public $name;
+    protected $name;
 
     /**
      * The migration group.
@@ -29,7 +29,7 @@ class DataMigration
      *
      * @var string
      */
-    public $group = 'default';
+    protected $group = 'default';
 
     /**
      * The data source uri
@@ -44,7 +44,7 @@ class DataMigration
      * @var string
      * @Annotation\Required
      */
-    public $source;
+    protected $source;
 
     /**
      * The FQCN for the desired source driver.
@@ -55,7 +55,7 @@ class DataMigration
      *
      * @var string
      */
-    public $sourceDriver;
+    protected $sourceDriver;
 
     /**
      * The destination uri in the same format as the source URI.
@@ -63,14 +63,14 @@ class DataMigration
      * @var string
      * @Annotation\Required
      */
-    public $destination;
+    protected $destination;
 
     /**
      * The FQCN for the desired destination driver.
      *
      * @var string
      */
-    public $destinationDriver;
+    protected $destinationDriver;
 
     /**
      * The source unique ids
@@ -78,7 +78,7 @@ class DataMigration
      * @var \DragoonBoots\A2B\Annotations\IdField[]
      * @Annotation\Required
      */
-    public $sourceIds;
+    protected $sourceIds;
 
     /**
      * The destination unique ids
@@ -86,7 +86,24 @@ class DataMigration
      * @var \DragoonBoots\A2B\Annotations\IdField[]
      * @Annotation\Required
      */
-    public $destinationIds;
+    protected $destinationIds;
+
+    /**
+     * DataMigration constructor.
+     *
+     * @param array $values
+     */
+    public function __construct(array $values = [])
+    {
+        $this->name = $values['name'] ?? null;
+        $this->group = $values['group'] ?? null;
+        $this->source = $values['source'] ?? null;
+        $this->sourceDriver = $values['sourceDriver'] ?? null;
+        $this->destination = $values['destination'] ?? null;
+        $this->destinationDriver = $values['destination'] ?? null;
+        $this->sourceIds = $values['sourceIds'] ?? null;
+        $this->destinationIds = $values['destinationIds'] ?? null;
+    }
 
     /**
      * @return string
@@ -94,18 +111,6 @@ class DataMigration
     public function getName(): string
     {
         return $this->name;
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return self
-     */
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     /**
@@ -117,18 +122,6 @@ class DataMigration
     }
 
     /**
-     * @param null|string $group
-     *
-     * @return self
-     */
-    public function setGroup(?string $group): self
-    {
-        $this->group = $group;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getSource(): string
@@ -137,6 +130,8 @@ class DataMigration
     }
 
     /**
+     * @internal
+     *
      * @param string $source
      *
      * @return self
@@ -157,18 +152,6 @@ class DataMigration
     }
 
     /**
-     * @param null|string $sourceDriver
-     *
-     * @return self
-     */
-    public function setSourceDriver(?string $sourceDriver): self
-    {
-        $this->sourceDriver = $sourceDriver;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getDestination(): string
@@ -177,6 +160,8 @@ class DataMigration
     }
 
     /**
+     * @internal
+     *
      * @param string $destination
      *
      * @return self
@@ -197,18 +182,6 @@ class DataMigration
     }
 
     /**
-     * @param null|string $destinationDriver
-     *
-     * @return self
-     */
-    public function setDestinationDriver(?string $destinationDriver): self
-    {
-        $this->destinationDriver = $destinationDriver;
-
-        return $this;
-    }
-
-    /**
      * @return IdField[]
      */
     public function getSourceIds(): array
@@ -217,34 +190,10 @@ class DataMigration
     }
 
     /**
-     * @param IdField[] $sourceIds
-     *
-     * @return self
-     */
-    public function setSourceIds(array $sourceIds): self
-    {
-        $this->sourceIds = $sourceIds;
-
-        return $this;
-    }
-
-    /**
      * @return IdField[]
      */
     public function getDestinationIds(): array
     {
         return $this->destinationIds;
-    }
-
-    /**
-     * @param IdField[] $destinationIds
-     *
-     * @return self
-     */
-    public function setDestinationIds(array $destinationIds): self
-    {
-        $this->destinationIds = $destinationIds;
-
-        return $this;
     }
 }

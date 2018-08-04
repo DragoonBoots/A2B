@@ -76,7 +76,7 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
      */
     public function configure(DataMigration $definition)
     {
-        $source = $definition->source;
+        $source = $definition->getSource();
 
         try {
             $this->connection = $this->connectionFactory->createConnection(['url' => $source]);

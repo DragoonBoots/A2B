@@ -20,16 +20,16 @@ class Driver
      * @var string[]
      * @Annotation\Required
      */
-    public $value;
+    protected $value;
 
     /**
      * Driver constructor.
      *
      * @param array $values
      */
-    public function __construct(array $values)
+    public function __construct(array $values = [])
     {
-        $schemes = $values['value'];
+        $schemes = $values['value'] ?? [];
         if (!is_array($schemes)) {
             $schemes = [$schemes];
         }
@@ -42,17 +42,5 @@ class Driver
     public function getValue(): array
     {
         return $this->value;
-    }
-
-    /**
-     * @param string[] $value
-     *
-     * @return self
-     */
-    public function setValue(array $value): self
-    {
-        $this->value = $value;
-
-        return $this;
     }
 }

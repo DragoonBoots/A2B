@@ -58,10 +58,8 @@ class DataMigrationManagerTest extends TestCase
         ];
         /** @var DataMigration[] $definitions */
         $definitions = [
-            'Group1' => (new DataMigration())
-                ->setGroup('Group1'),
-            'Group2' => (new DataMigration())
-                ->setGroup('Group2'),
+            'Group1' => new DataMigration(['group' => 'Group1']),
+            'Group2' => new DataMigration(['group' => 'Group2']),
         ];
         foreach ($migrations as $group => $migration) {
             $migration->method('getDefinition')

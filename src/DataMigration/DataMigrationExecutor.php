@@ -82,9 +82,9 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     ) {
         $this->migration = $migration;
         $this->definition = $definition;
-        $this->sourceIds = $definition->sourceIds;
+        $this->sourceIds = $definition->getSourceIds();
         $this->sourceDriver = $sourceDriver;
-        $this->destinationIds = $definition->destinationIds;
+        $this->destinationIds = $definition->getDestinationIds();
         $this->destinationDriver = $destinationDriver;
 
         $existingIds = $this->destinationDriver->getExistingIds();
@@ -169,15 +169,15 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     {
         $sourceIds = [];
         foreach ($this->sourceIds as $idField) {
-            if (!isset($sourceRow[$idField->name])) {
+            if (!isset($sourceRow[$idField->getName()])) {
                 throw new NoIdSetException($idField, $sourceRow);
             }
 
-            $value = $sourceRow[$idField->name];
-            if ($idField->type == 'int') {
+            $value = $sourceRow[$idField->getName()];
+            if ($idField->getType() == 'int') {
                 $value = (int)$value;
             }
-            $sourceIds[$idField->name] = $value;
+            $sourceIds[$idField->getName()] = $value;
         }
 
         return $sourceIds;

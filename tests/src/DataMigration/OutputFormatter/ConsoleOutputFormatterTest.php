@@ -184,7 +184,6 @@ class ConsoleOutputFormatterTest extends TestCase
      * @param string $message
      * @param array  $choices
      * @param string $default
-     * @param string $result
      *
      * @throws \ReflectionException
      */
@@ -198,7 +197,7 @@ class ConsoleOutputFormatterTest extends TestCase
         /** @var ConsoleOutputFormatter $formatter */
         $this->setupFormatter($formatter, $migrationSection);
         $formatter->configure(['total' => 1]);
-        
+
         /** @var DataMigrationInterface|MockObject $migration */
         $migration = $this->getMockBuilder(DataMigrationInterface::class)
             ->disableOriginalConstructor()

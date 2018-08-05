@@ -65,6 +65,8 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function flush()
     {
@@ -75,6 +77,8 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function getDefinition(): ?Driver
     {
@@ -83,6 +87,8 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function setDefinition(Driver $definition): self
     {

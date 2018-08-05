@@ -34,6 +34,8 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function getDefinition(): ?Driver
     {
@@ -42,6 +44,8 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function setDefinition(Driver $definition): self
     {

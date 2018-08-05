@@ -11,6 +11,8 @@ abstract class AbstractOutputFormatter implements OutputFormatterInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function configure(array $options)
     {

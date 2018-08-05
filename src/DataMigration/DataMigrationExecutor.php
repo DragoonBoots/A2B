@@ -14,6 +14,12 @@ use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 class DataMigrationExecutor implements DataMigrationExecutorInterface
 {
 
+    protected const ORPHAN_REMOVE = 'n';
+
+    protected const ORPHAN_KEEP = 'y';
+
+    protected const ORPHAN_ASK = 'c';
+
     /**
      * @var DataMigrationMapperInterface
      */
@@ -99,9 +105,9 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $this->outputFormatter->finish();
 
         // Handle orphans
-        $orphanIds = $this->findOrphans($existingIds, $newIds);
+        $orphanIds = array_values($this->findOrphans($existingIds, $newIds));
         if (!empty($orphanIds)) {
-            $orphans = $this->destinationDriver->readMultiple($orphanIds);
+            $orphans = array_values($this->destinationDriver->readMultiple($orphanIds));
         } else {
             $orphans = [];
         }
@@ -144,7 +150,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         } catch (NoMappingForIdsException $e) {
             $entity = $this->migration->defaultResult();
         }
-        $this->migration->transform($sourceRow, $entity);
+        $entity = $this->migration->transform($sourceRow, $entity);
 
         $destIds = $this->destinationDriver->write($entity);
         $this->mapper->addMapping(get_class($this->migration), $this->migration->getDefinition(), $sourceIds, $destIds);
@@ -159,30 +165,26 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      */
     public function askAboutOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver)
     {
-        define('ORPHANS_REMOVE', 'n');
-        define('ORPHANS_KEEP', 'y');
-        define('ORPHANS_CHECK', 'c');
-
         $choices = [
-            ORPHANS_KEEP => 'Keep all orphans',
-            ORPHANS_REMOVE => 'Remove all orphans',
-            ORPHANS_CHECK => 'Make a decision for each orphan',
+            self::ORPHAN_KEEP => 'Keep all orphans',
+            self::ORPHAN_REMOVE => 'Remove all orphans',
+            self::ORPHAN_ASK => 'Make a decision for each orphan',
         ];
         $q = sprintf('%d entities existed in the destination but do not exist in the source.  Keep them?', count($orphans));
-        $decision = $this->outputFormatter->ask($q, $choices, ORPHANS_KEEP);
+        $decision = $this->outputFormatter->ask($q, $choices, self::ORPHAN_KEEP);
 
-        if ($decision == ORPHANS_KEEP) {
+        if ($decision == self::ORPHAN_KEEP) {
             $this->writeOrphans($orphans, $migration, $destinationDriver);
-        } elseif ($decision == ORPHANS_CHECK) {
+        } elseif ($decision == self::ORPHAN_ASK) {
             $entityChoices = [
-                ORPHANS_KEEP => 'Keep',
-                ORPHANS_REMOVE => 'Remove',
+                self::ORPHAN_KEEP => 'Keep',
+                self::ORPHAN_REMOVE => 'Remove',
             ];
             foreach ($orphans as $orphan) {
                 $printableEntity = var_export($orphan, true)."\n";
                 $entityQ = sprintf("Keep this entity?\n%s", $printableEntity);
-                $entityDecision = $this->outputFormatter->ask($entityQ, $entityChoices, ORPHANS_KEEP);
-                if ($entityDecision == ORPHANS_KEEP) {
+                $entityDecision = $this->outputFormatter->ask($entityQ, $entityChoices, self::ORPHAN_KEEP);
+                if ($entityDecision == self::ORPHAN_KEEP) {
                     $this->writeOrphans([$orphan], $migration, $destinationDriver);
                 }
             }

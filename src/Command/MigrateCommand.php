@@ -2,13 +2,11 @@
 
 namespace DragoonBoots\A2B\Command;
 
-use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
-use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use League\Uri\Parser;
 use Symfony\Component\Console\Command\Command;
@@ -86,6 +84,8 @@ class MigrateCommand extends Command
      * @param AbstractDumper                 $varDumper
      * @param ClonerInterface                $varCloner
      */
+    const ERROR_NO_PRUNE_PRESERVE = 'You cannot use both "--prune" and "--preserve" together.';
+
     public function __construct(
         DataMigrationManagerInterface $dataMigrationManager,
         DriverManagerInterface $driverManager,
@@ -166,12 +166,13 @@ class MigrateCommand extends Command
      * @throws \DragoonBoots\A2B\Exception\NonexistentDriverException
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
+     * @throws \ReflectionException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Validate options
         if ($input->getOption('prune') && $input->getOption('preserve')) {
-            $this->io->error('You cannot use both "--prune" and "--preserve" together.');
+            $this->io->error(self::ERROR_NO_PRUNE_PRESERVE);
 
             return;
         }
@@ -186,8 +187,12 @@ class MigrateCommand extends Command
             $definition = $migration->getDefinition();
 
             // Resolve container parameters source/destination urls
-            $definition->setSource($this->parameterBag->resolveValue($definition->getSource()));
-            $definition->setDestination($this->parameterBag->resolveValue($definition->getDestination()));
+            $this->injectProperty($definition, 'source', $this->parameterBag->resolveValue($definition->getSource()));
+            if ($input->getOption('simulate')) {
+                $this->injectProperty($definition, 'destination', 'debug:stderr');
+            } else {
+                $this->injectProperty($definition, 'destination', $this->parameterBag->resolveValue($definition->getDestination()));
+            }
 
             // Get source driver
             if (!is_null($definition->getSourceDriver())) {
@@ -200,20 +205,14 @@ class MigrateCommand extends Command
             $migration->configureSource($sourceDriver);
 
             // Get destination driver
-            if ($input->getOption('simulate') === true) {
-                $destinationDriver = $this->driverManager->getDestinationDriver(DebugDestinationDriver::class);
-                $fakeDefinition = new DataMigration(['destination' => 'debug:stderr']);
-                $destinationDriver->configure($fakeDefinition);
+            if (!is_null($definition->getDestinationDriver())) {
+                $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
             } else {
-                if (!is_null($definition->getDestinationDriver())) {
-                    $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
-                } else {
-                    $destinationUri = $this->uriParser->parse($definition->getDestination());
-                    $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
-                }
-                $destinationDriver->configure($definition);
-                $migration->configureDestination($destinationDriver);
+                $destinationUri = $this->uriParser->parse($definition->getDestination());
+                $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
             }
+            $destinationDriver->configure($definition);
+            $migration->configureDestination($destinationDriver);
 
             // Run migration
             $orphans = $this->executor->execute($migration, $sourceDriver, $destinationDriver);
@@ -227,6 +226,25 @@ class MigrateCommand extends Command
             }
             $destinationDriver->flush();
         }
+    }
+
+    /**
+     * Inject a value into an object property with reflection.
+     *
+     * @param object $object
+     * @param string $propertyName
+     * @param mixed  $value
+     *
+     * @throws \ReflectionException
+     */
+    private function injectProperty(object $object, string $propertyName, $value)
+    {
+        $refl = new \ReflectionClass($object);
+        $property = $refl->getProperty($propertyName);
+        $accessible = $property->isPublic();
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
+        $property->setAccessible($accessible);
     }
 
     /**

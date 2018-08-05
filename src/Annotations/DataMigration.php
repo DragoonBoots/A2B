@@ -96,7 +96,7 @@ class DataMigration
     public function __construct(array $values = [])
     {
         $this->name = $values['name'] ?? null;
-        $this->group = $values['group'] ?? null;
+        $this->group = $values['group'] ?? 'default';
         $this->source = $values['source'] ?? null;
         $this->sourceDriver = $values['sourceDriver'] ?? null;
         $this->destination = $values['destination'] ?? null;

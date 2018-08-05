@@ -53,6 +53,19 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
     /**
      * {@inheritdoc}
      */
+    public function readMultiple(array $destIdSet)
+    {
+        $results = [];
+        foreach ($destIdSet as $destId) {
+            $results[] = $this->read($destId);
+        }
+
+        return $results;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function flush()
     {
         // Do nothing, allowing drivers that don't have a buffer to avoid

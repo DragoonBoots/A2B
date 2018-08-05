@@ -13,7 +13,7 @@ use DragoonBoots\A2B\Exception\BadUriException;
  * Source drivers should implement this interface and be annotated with
  * DragoonBoots\A2B\Annotations\Driver.
  */
-interface SourceDriverInterface extends \IteratorAggregate
+interface SourceDriverInterface extends \IteratorAggregate, \Countable
 {
 
     /**

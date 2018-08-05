@@ -9,7 +9,7 @@ use League\Uri\Parser;
 /**
  * Base class for source drivers.
  */
-abstract class AbstractSourceDriver implements SourceDriverInterface, \Countable
+abstract class AbstractSourceDriver implements SourceDriverInterface
 {
 
     /**

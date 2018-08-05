@@ -30,11 +30,11 @@ interface DataMigrationInterface
      * @param array $sourceData
      *   The source data returned from the source driver
      * @param mixed $destinationData
-     *   The destination data, passed by reference.  This is either an existing
-     *   entity known to have been created from the given source keys, or the
-     *   result returned by defaultResult().
+     *   The destination data to modify.  This is either an existing entity
+     *   known to have been created from the given source keys, or the result
+     *   returned by defaultResult().
      */
-    public function transform(array $sourceData, &$destinationData);
+    public function transform(array $sourceData, $destinationData);
 
     /**
      * Configure the destination driver to put data.

@@ -3,6 +3,7 @@
 
 namespace DragoonBoots\A2B\Drivers;
 
+use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Annotations\IdField;
 use League\Uri\Parser;
 
@@ -11,6 +12,11 @@ use League\Uri\Parser;
  */
 abstract class AbstractDestinationDriver implements DestinationDriverInterface
 {
+
+    /**
+     * @var Driver|null
+     */
+    protected $definition;
 
     /**
      * @var Parser
@@ -37,7 +43,7 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
      */
     protected function resolveDestId(IdField $idField, $value)
     {
-        if ($idField->type == 'int') {
+        if ($idField->getType() == 'int') {
             $value = (int)$value;
         }
 
@@ -52,5 +58,23 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
         // Do nothing, allowing drivers that don't have a buffer to avoid
         // implementing nothing.
         return;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefinition(): ?Driver
+    {
+        return $this->definition;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDefinition(Driver $definition): self
+    {
+        $this->definition = $definition;
+
+        return $this;
     }
 }

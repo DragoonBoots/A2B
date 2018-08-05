@@ -72,8 +72,8 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     {
         $this->definition = $definition;
 
-        $destination = $definition->destination;
-        $this->destIds = $definition->destinationIds;
+        $destination = $definition->getDestination();
+        $this->destIds = $definition->getDestinationIds();
 
         $this->destUri = $this->uriParser->parse($destination);
 
@@ -129,10 +129,10 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
 
         $destIds = [];
         foreach ($this->destIds as $destId) {
-            if (!isset($data[$destId->name])) {
-                throw new NoIdSetException($destId->name, $data);
+            if (!isset($data[$destId->getName()])) {
+                throw new NoIdSetException($destId->getName(), $data);
             }
-            $destIds[$destId->name] = $this->resolveDestId($destId, $data[$destId->name]);
+            $destIds[$destId->getName()] = $this->resolveDestId($destId, $data[$destId->getName()]);
         }
 
         return $destIds;

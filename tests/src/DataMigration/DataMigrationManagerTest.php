@@ -45,6 +45,7 @@ class DataMigrationManagerTest extends TestCase
 
     public function testGetMigrationsInGroup()
     {
+        /** @var DataMigrationInterface[]|MockObject[] $migrations */
         $migrations = [
             'Group1' => $this->getMockBuilder(DataMigrationInterface::class)
                 ->disableOriginalConstructor()
@@ -55,20 +56,23 @@ class DataMigrationManagerTest extends TestCase
                 ->setMockClassName('Group2Migration')
                 ->getMock(),
         ];
-        $annotations = [
-            'Group1' => (new DataMigration())
-                ->setGroup('Group1'),
-            'Group2' => (new DataMigration())
-                ->setGroup('Group2'),
+        /** @var DataMigration[] $definitions */
+        $definitions = [
+            'Group1' => new DataMigration(['group' => 'Group1']),
+            'Group2' => new DataMigration(['group' => 'Group2']),
         ];
+        foreach ($migrations as $group => $migration) {
+            $migration->method('getDefinition')
+                ->willReturn($definitions[$group]);
+        }
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
-                function (\ReflectionClass $reflectionClass, string $annotationName) use ($annotations) {
+                function (\ReflectionClass $reflectionClass, string $annotationName) use ($definitions) {
                     if ($reflectionClass->getName() == 'Group1Migration') {
-                        return $annotations['Group1'];
+                        return $definitions['Group1'];
                     } elseif ($reflectionClass->getName() == 'Group2Migration') {
-                        return $annotations['Group2'];
+                        return $definitions['Group2'];
                     }
 
                     return null;

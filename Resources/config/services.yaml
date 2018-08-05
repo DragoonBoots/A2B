@@ -4,11 +4,11 @@ parameters:
 services:
     _defaults:
         public: false
-        lazy: true
 
     a2b.data_migration_manager:
         class: DragoonBoots\A2B\DataMigration\DataMigrationManager
         public: true
+        lazy: true
         arguments:
         - '@annotation_reader'
     DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface: '@a2b.data_migration_manager'
@@ -16,6 +16,7 @@ services:
     a2b.driver_manager:
         class: DragoonBoots\A2B\Drivers\DriverManager
         public: true
+        lazy: true
         arguments:
         - '@annotation_reader'
     DragoonBoots\A2B\Drivers\DriverManagerInterface: '@a2b.driver_manager'
@@ -23,20 +24,23 @@ services:
     a2b.executor:
         class: DragoonBoots\A2B\DataMigration\DataMigrationExecutor
         public: true
+        lazy: true
         arguments:
-        - '@event_dispatcher'
         - '@a2b.mapper'
     DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
 
     a2b.mapper.connection:
-        factory: '@doctrine.dbal.connection_factory:createConnection'
-        arguments: '%a2b.mapper.db'
+        class: 'Doctrine\DBAL\Connection'
+        factory: 'doctrine.dbal.connection_factory:createConnection'
+        lazy: true
+        arguments:
+        - '%a2b.mapper.db%'
     a2b.mapper:
         class: DragoonBoots\A2B\DataMigration\DataMigrationMapper
         public: true
+        lazy: true
         arguments:
-            $dbConfig: []
-            $connectionFactory: '@doctrine.dbal.connection_factory'
+            $connection: '@a2b.mapper.connection'
             $inflector: '@a2b.doctrine.inflector'
             $dataMigrationManager: '@a2b.data_migration_manager'
     DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
@@ -83,6 +87,7 @@ services:
 
     a2b.command.migrate:
         class: DragoonBoots\A2B\Command\MigrateCommand
+        lazy: true
         arguments:
         - '@a2b.data_migration_manager'
         - '@a2b.driver_manager'
@@ -98,9 +103,13 @@ services:
     # Vendors
     a2b.doctrine.inflector:
         class: Doctrine\Common\Inflector\Inflector
+        lazy: true
     a2b.league.uri.parser:
         class: League\Uri\Parser
+        lazy: true
     a2b.symfony.dumper.cli:
         class: Symfony\Component\VarDumper\Dumper\CliDumper
+        lazy: true
     a2b.symfony.dumper.cloner:
         class: Symfony\Component\VarDumper\Cloner\VarCloner
+        lazy: true

@@ -11,7 +11,6 @@ use Doctrine\DBAL\Driver\Statement;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Source\DbalSourceDriver;
-use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
 use League\Uri\Parser;
 use PHPUnit\Framework\TestCase;
@@ -27,28 +26,25 @@ class DbalSourceDriverTest extends TestCase
     {
         /** @var DataMigration $definition */
         /** @var Connection $connection */
-        /** @var SourceDriverInterface $driver */
+        /** @var DbalSourceDriver $driver */
         $this->setupDriver($definition, $connection, $driver);
         $driver->configure($definition);
     }
 
     /**
-     * @param DataMigration|null         $definition
-     * @param Connection|null            $connection
-     * @param SourceDriverInterface|null $driver
+     * @param DataMigration|null    $definition
+     * @param Connection|null       $connection
+     * @param DbalSourceDriver|null $driver
      */
-    protected function setupDriver(?DataMigration &$definition = null, ?Connection &$connection = null, ?SourceDriverInterface &$driver = null): void
+    protected function setupDriver(?DataMigration &$definition = null, ?Connection &$connection = null, ?DbalSourceDriver &$driver = null): void
     {
         if (!isset($definition)) {
-            $definition = new DataMigration();
-            $definition->setSource(self::SOURCE_URL)
-                ->setSourceIds(
-                    [
-                        (new IdField())
-                            ->setName('id')
-                            ->setType('int'),
-                    ]
-                );
+            $definition = new DataMigration(
+                [
+                    'source' => self::SOURCE_URL,
+                    'sourceIds' => [new IdField(['name' => 'id'])],
+                ]
+            );
         }
         if (!isset($connection)) {
             $connection = $this->createMock(Connection::class);
@@ -73,18 +69,15 @@ class DbalSourceDriverTest extends TestCase
 
     public function testConfigureBad()
     {
-        $definition = new DataMigration();
-        $definition->setSource('sqlite://this/db/is/fake.sqlite')
-            ->setSourceIds(
-                [
-                    (new IdField())
-                        ->setName('id')
-                        ->setType('int'),
-                ]
-            );
+        $definition = new DataMigration(
+            [
+                'source' => 'sqlite://this/db/is/fake.sqlite',
+                'sourceIds' => [new IdField(['name' => 'id'])],
+            ]
+        );
         /** @var DataMigration $definition */
         /** @var Connection $connection */
-        /** @var SourceDriverInterface $driver */
+        /** @var DbalSourceDriver $driver */
         $this->setupDriver($definition, $connection, $driver);
         $this->expectException(BadUriException::class);
         $driver->configure($definition);
@@ -94,7 +87,7 @@ class DbalSourceDriverTest extends TestCase
     {
         /** @var DataMigration $definition */
         /** @var Connection $connection */
-        /** @var SourceDriverInterface $driver */
+        /** @var DbalSourceDriver $driver */
         $this->setupDriver($definition, $connection, $driver);
         $driver->configure($definition);
 
@@ -103,6 +96,26 @@ class DbalSourceDriverTest extends TestCase
         $driver->setStatement($statement);
 
         $this->assertSame($statement, $driver->getIterator());
+    }
+
+    public function testSetCountStatement()
+    {
+        /** @var DataMigration $definition */
+        /** @var Connection $connection */
+        /** @var DbalSourceDriver $driver */
+        $this->setupDriver($definition, $connection, $driver);
+        $driver->configure($definition);
+
+        $count = 5;
+        $statement = $this->createMock(Statement::class);
+        $statement->expects($this->once())
+            ->method('execute');
+        $statement->expects($this->once())
+            ->method('fetchColumn')
+            ->willReturn((string)$count);
+        $driver->setCountStatement($statement);
+
+        $this->assertEquals($count, $driver->count());
     }
 
     public function testGetConnection()

@@ -20,11 +20,6 @@ class PostFetchSourceRow extends Event
     protected $migration;
 
     /**
-     * @var DataMigration
-     */
-    protected $definition;
-
-    /**
      * @var array
      */
     protected $sourceRow;
@@ -33,13 +28,11 @@ class PostFetchSourceRow extends Event
      * PreFetchSourceRow constructor.
      *
      * @param DataMigrationInterface $migration
-     * @param DataMigration          $definition
      * @param array                  $sourceRow
      */
-    public function __construct(DataMigrationInterface $migration, DataMigration $definition, array $sourceRow)
+    public function __construct(DataMigrationInterface $migration, array $sourceRow)
     {
         $this->migration = $migration;
-        $this->definition = $definition;
         $this->sourceRow = $sourceRow;
     }
 
@@ -49,14 +42,6 @@ class PostFetchSourceRow extends Event
     public function getMigration(): DataMigrationInterface
     {
         return $this->migration;
-    }
-
-    /**
-     * @return DataMigration
-     */
-    public function getDefinition(): DataMigration
-    {
-        return $this->definition;
     }
 
     /**

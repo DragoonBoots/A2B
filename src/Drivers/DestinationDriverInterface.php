@@ -4,6 +4,7 @@
 namespace DragoonBoots\A2B\Drivers;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
+use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Exception\NoDestinationException;
 
@@ -78,4 +79,24 @@ interface DestinationDriverInterface
      * Implementors should also perform any cleanup that needs to be done here.
      */
     public function flush();
+
+    /**
+     * Get the settings defined for this driver.
+     *
+     * This will only be set for drivers retrieved from the DriverManager.
+     *
+     * @return Driver|null
+     */
+    public function getDefinition(): ?Driver;
+
+    /**
+     * Used by the manager to inject the definition
+     *
+     * @internal
+     *
+     * @param Driver $definition
+     *
+     * @return self
+     */
+    public function setDefinition(Driver $definition);
 }

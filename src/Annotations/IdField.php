@@ -20,7 +20,7 @@ class IdField
      * @var string
      * @Annotation\Required
      */
-    public $name;
+    protected $name;
 
     /**
      * The type of the id field.
@@ -29,11 +29,23 @@ class IdField
      * - int
      * - string
      *
+     * Defaults to "int".
+     *
      * @var string
-     * @Annotation\Required
      * @Annotation\Enum({"int", "string"})
      */
-    public $type;
+    protected $type;
+
+    /**
+     * IdField constructor.
+     *
+     * @param array $values
+     */
+    public function __construct(array $values = [])
+    {
+        $this->name = $values['name'] ?? null;
+        $this->type = $values['type'] ?? 'int';
+    }
 
     /**
      * @return string
@@ -44,34 +56,10 @@ class IdField
     }
 
     /**
-     * @param string $name
-     *
-     * @return self
-     */
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getType(): string
     {
         return $this->type;
-    }
-
-    /**
-     * @param string $type
-     *
-     * @return self
-     */
-    public function setType(string $type): self
-    {
-        $this->type = $type;
-
-        return $this;
     }
 }

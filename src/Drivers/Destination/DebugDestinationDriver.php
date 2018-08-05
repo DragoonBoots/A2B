@@ -44,7 +44,7 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
      */
     public function configure(DataMigration $definition)
     {
-        $destination = $definition->destination;
+        $destination = $definition->getDestination();
 
         $uri = $this->uriParser->parse($destination);
         switch ($uri['path']) {

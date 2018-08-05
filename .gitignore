@@ -8,3 +8,4 @@ composer.lock
 
 phpunit.xml
 /tests/var/
+/docs/api/

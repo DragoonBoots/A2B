@@ -65,8 +65,9 @@ class DebugDestinationDriverTest extends TestCase
             'field1' => 'Test',
             'field2' => 'Case',
         ];
-        $definition = new DataMigration();
-        $definition->destination = $destination;
+        $definition = new DataMigration(
+            ['destination' => $destination]
+        );
         $driver = new DebugDestinationDriver($uriParser, new CliDumper(), new VarCloner());
         $driver->configure($definition);
 
@@ -136,8 +137,9 @@ class DebugDestinationDriverTest extends TestCase
             ->method('setOutput')
             ->with($stream);
         $cloner = $this->createMock(ClonerInterface::class);
-        $definition = new DataMigration();
-        $definition->destination = $destination;
+        $definition = new DataMigration(
+            ['destination' => $destination]
+        );
         $driver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
     }
 

@@ -47,11 +47,10 @@ class CsvDestinationDriverTest extends TestCase
         $uriParser->expects($this->once())
             ->method('parse')
             ->willReturn(['path' => $path]);
-        $definition = new DataMigration();
-        $definition->destination = $destination;
-        $definition->destinationIds = [
-            (new IdField())->setType('int')->setName('id'),
-        ];
+        $definition = new DataMigration([
+            'destination' => $destination,
+            'destinationIds' => [new IdField(['name' => 'id'])]
+        ]);
         $driver = new CsvDestinationDriver($uriParser);
     }
 

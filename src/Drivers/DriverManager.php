@@ -31,16 +31,6 @@ class DriverManager implements DriverManagerInterface
     protected $destinationDrivers;
 
     /**
-     * @var Collection|Driver[]
-     */
-    protected $sourceDriverDefinitions;
-
-    /**
-     * @var Collection|Driver[]
-     */
-    protected $destinationDriverDefinitions;
-
-    /**
      * DriverManager constructor.
      *
      * @param Reader $annotationReader
@@ -50,9 +40,7 @@ class DriverManager implements DriverManagerInterface
         $this->annotationReader = $annotationReader;
 
         $this->sourceDrivers = new ArrayCollection();
-        $this->sourceDriverDefinitions = new ArrayCollection();
         $this->destinationDrivers = new ArrayCollection();
-        $this->destinationDriverDefinitions = new ArrayCollection();
     }
 
     /**
@@ -66,9 +54,10 @@ class DriverManager implements DriverManagerInterface
      */
     public function addSourceDriver(SourceDriverInterface $sourceDriver)
     {
-        $this->sourceDrivers[get_class($sourceDriver)] = $sourceDriver;
         $reflClass = new \ReflectionClass($sourceDriver);
-        $this->sourceDriverDefinitions[get_class($sourceDriver)] = $this->annotationReader->getClassAnnotation($reflClass, Driver::class);
+        $definition = $this->annotationReader->getClassAnnotation($reflClass, Driver::class);
+        $sourceDriver->setDefinition($definition);
+        $this->sourceDrivers[get_class($sourceDriver)] = $sourceDriver;
     }
 
     /**
@@ -82,9 +71,10 @@ class DriverManager implements DriverManagerInterface
      */
     public function addDestinationDriver(DestinationDriverInterface $destinationDriver)
     {
-        $this->destinationDrivers[get_class($destinationDriver)] = $destinationDriver;
         $reflClass = new \ReflectionClass($destinationDriver);
-        $this->destinationDriverDefinitions[get_class($destinationDriver)] = $this->annotationReader->getClassAnnotation($reflClass, Driver::class);
+        $definition = $this->annotationReader->getClassAnnotation($reflClass, Driver::class);
+        $destinationDriver->setDefinition($definition);
+        $this->destinationDrivers[get_class($destinationDriver)] = $destinationDriver;
     }
 
     public function getSourceDrivers(): Collection
@@ -101,41 +91,16 @@ class DriverManager implements DriverManagerInterface
         return $this->sourceDrivers[$driverName];
     }
 
-    public function getSourceDriverDefinition(string $driverName): Driver
-    {
-        return $this->getDriverDefinition($driverName, $this->sourceDriverDefinitions);
-    }
-
-    /**
-     * Get the driver definition from the given list of definitions.
-     *
-     * @param string     $driverName
-     * @param Collection $driverDefinitions
-     *
-     * @return Driver
-     *
-     * @throws NonexistentDriverException
-     */
-    protected function getDriverDefinition(string $driverName, Collection $driverDefinitions): Driver
-    {
-        if (!$driverDefinitions->containsKey($driverName)) {
-            throw new NonexistentDriverException($driverName);
-        }
-
-        return $driverDefinitions[$driverName];
-    }
-
     public function getSourceDriverForScheme(string $scheme): SourceDriverInterface
     {
-        return $this->getDriverForScheme($scheme, $this->sourceDrivers, $this->sourceDriverDefinitions);
+        return $this->getDriverForScheme($scheme, $this->sourceDrivers);
     }
 
     /**
      * Get the driver from the given list that implements the given scheme.
      *
-     * @param string     $scheme
-     * @param Collection $drivers
-     * @param Collection $driverDefinitions
+     * @param string                                                          $scheme
+     * @param SourceDriverInterface[]|DestinationDriverInterface[]|Collection $drivers
      *
      * @return SourceDriverInterface|DestinationDriverInterface
      *
@@ -143,19 +108,19 @@ class DriverManager implements DriverManagerInterface
      * @throws UnclearDriverException
      *   Thrown when more than one driver matches the given scheme.
      */
-    protected function getDriverForScheme(string $scheme, Collection $drivers, Collection $driverDefinitions)
+    protected function getDriverForScheme(string $scheme, Collection $drivers)
     {
         $useDrivers = $drivers->filter(
-          function ($driver) use ($scheme, $driverDefinitions) {
-              /** @var SourceDriverInterface|DestinationDriverInterface $driver */
-              return in_array($scheme, $driverDefinitions[get_class($driver)]->value);
+            function ($driver) use ($scheme) {
+                /** @var SourceDriverInterface|DestinationDriverInterface $driver */
+                return in_array($scheme, $driver->getDefinition()->getValue());
           }
         );
 
         if ($useDrivers->isEmpty()) {
             throw new NoDriverForSchemeException($scheme);
         }
-        if ($useDrivers->count() > 1) {
+        if (count($useDrivers) > 1) {
             $driverNames = [];
             foreach ($useDrivers as $driver) {
                 $driverNames[] = get_class($driver);
@@ -180,23 +145,8 @@ class DriverManager implements DriverManagerInterface
         return $this->destinationDrivers[$driverName];
     }
 
-    public function getDestinationDriverDefinition(string $driverName): Driver
-    {
-        return $this->getDriverDefinition($driverName, $this->destinationDriverDefinitions);
-    }
-
     public function getDestinationDriverForScheme(string $scheme): DestinationDriverInterface
     {
-        return $this->getDriverForScheme($scheme, $this->destinationDrivers, $this->destinationDriverDefinitions);
-    }
-
-    public function getSourceDriverDefinitions(): Collection
-    {
-        return $this->sourceDriverDefinitions;
-    }
-
-    public function getDestinationDriverDefinitions(): Collection
-    {
-        return $this->destinationDriverDefinitions;
+        return $this->getDriverForScheme($scheme, $this->destinationDrivers);
     }
 }

@@ -87,9 +87,14 @@ TXT;
     public function configure(array $options)
     {
         $total = $options['total'];
-        $this->summarySection = $this->output->section();
+        if (is_callable([$this->output, 'section'])) {
+            $this->summarySection = $this->output->section();
+            $this->migrationSection = $this->output->section();
+        } else {
+            $this->summarySection = $this->output;
+            $this->migrationSection = $this->output;
+        }
         $this->summaryIo = new SymfonyStyle($this->input, $this->summarySection);
-        $this->migrationSection = $this->output->section();
         $this->migrationIo = new SymfonyStyle($this->input, $this->migrationSection);
 
         $this->summaryProgressBar = new ProgressBar($this->summarySection, $total);

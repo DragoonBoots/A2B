@@ -108,11 +108,13 @@ TXT;
                 $migration->getDefinition()->getName()
             )
         );
+        $this->summaryProgressBar->display();
 
         $this->migrationSection->clear();
         $progressBar = new ProgressBar($this->migrationSection, $total);
         $progressBar->setFormat(self::PROGRESS_BAR_FORMAT);
         $progressBar->setMessage('Starting...');
+        $progressBar->display();
         $this->migrationProgressBar = $progressBar;
     }
 

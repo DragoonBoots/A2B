@@ -19,6 +19,8 @@ abstract class AbstractDataMigration implements DataMigrationInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function defaultResult()
     {
@@ -27,6 +29,8 @@ abstract class AbstractDataMigration implements DataMigrationInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function getDefinition(): ?DataMigration
     {
@@ -35,6 +39,8 @@ abstract class AbstractDataMigration implements DataMigrationInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function setDefinition(DataMigration $definition): self
     {

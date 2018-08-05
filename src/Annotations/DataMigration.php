@@ -107,6 +107,8 @@ class DataMigration
 
     /**
      * @return string
+     *
+     * @codeCoverageIgnore
      */
     public function getName(): string
     {
@@ -115,6 +117,8 @@ class DataMigration
 
     /**
      * @return null|string
+     *
+     * @codeCoverageIgnore
      */
     public function getGroup(): ?string
     {
@@ -123,6 +127,8 @@ class DataMigration
 
     /**
      * @return string
+     *
+     * @codeCoverageIgnore
      */
     public function getSource(): string
     {
@@ -135,6 +141,8 @@ class DataMigration
      * @param string $source
      *
      * @return self
+     *
+     * @codeCoverageIgnore
      */
     public function setSource(string $source): self
     {
@@ -145,6 +153,8 @@ class DataMigration
 
     /**
      * @return null|string
+     *
+     * @codeCoverageIgnore
      */
     public function getSourceDriver(): ?string
     {
@@ -153,6 +163,8 @@ class DataMigration
 
     /**
      * @return string
+     *
+     * @codeCoverageIgnore
      */
     public function getDestination(): string
     {
@@ -165,6 +177,8 @@ class DataMigration
      * @param string $destination
      *
      * @return self
+     *
+     * @codeCoverageIgnore
      */
     public function setDestination(string $destination): self
     {
@@ -175,6 +189,8 @@ class DataMigration
 
     /**
      * @return null|string
+     *
+     * @codeCoverageIgnore
      */
     public function getDestinationDriver(): ?string
     {
@@ -183,6 +199,8 @@ class DataMigration
 
     /**
      * @return IdField[]
+     *
+     * @codeCoverageIgnore
      */
     public function getSourceIds(): array
     {
@@ -191,6 +209,8 @@ class DataMigration
 
     /**
      * @return IdField[]
+     *
+     * @codeCoverageIgnore
      */
     public function getDestinationIds(): array
     {

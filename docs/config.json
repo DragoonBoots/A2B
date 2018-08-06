@@ -5,6 +5,7 @@
         "folders": ["api"]
     },
     "html": {
+        "theme": "daux-blue",
         "auto_toc": true,
         "date_modified": false,
         "float": false,

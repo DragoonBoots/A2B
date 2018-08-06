@@ -61,7 +61,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     /**
      * @var DataMigration
      */
-    protected $definition;
+    protected $migrationDefinition;
 
     protected $destUri;
 
@@ -70,7 +70,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      */
     public function configure(DataMigration $definition)
     {
-        $this->definition = $definition;
+        $this->migrationDefinition = $definition;
 
         $destination = $definition->getDestination();
         $this->destIds = $definition->getDestinationIds();

@@ -22,23 +22,33 @@ test:
   script:
     - vendor/bin/simple-phpunit --configuration phpunit.xml.dist --coverage-text --colors=never
 
-pages:
+new_pages:
   stage: deploy
-  cache:
-    paths:
-      - docs/api/cache
-  before_script:
-    - apk update
-    - apk add git curl
-    - curl -O http://get.sensiolabs.org/sami.phar
+  image: daux/daux.io
+  before_script: []
   script:
-    - "php sami.phar update config.sami.php"
-    - "cp -R docs/api/build public"
+    - daux generate --source=docs --destination=public
   artifacts:
     paths:
       - public
-  only:
-    - master
+
+#pages:
+#  stage: deploy
+#  cache:
+#    paths:
+#      - docs/api/cache
+#  before_script:
+#    - apk update
+#    - apk add git curl
+#    - curl -O http://get.sensiolabs.org/sami.phar
+#  script:
+#    - "php sami.phar update config.sami.php"
+#    - "cp -R docs/api/build public"
+#  artifacts:
+#    paths:
+#      - public
+#  only:
+#    - master
 
 # Trigger a rebuild of the packagist repo
 deploy:

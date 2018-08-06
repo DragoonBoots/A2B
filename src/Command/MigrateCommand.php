@@ -7,6 +7,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
+use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use League\Uri\Parser;
 use Symfony\Component\Console\Command\Command;
@@ -200,27 +201,15 @@ class MigrateCommand extends Command
             $this->injectProperty($definition, 'source', $this->parameterBag->resolveValue($definition->getSource()));
             if ($input->getOption('simulate')) {
                 $this->injectProperty($definition, 'destination', 'debug:stderr');
+                $this->injectProperty($definition, 'destinationDriver', DebugDestinationDriver::class);
             } else {
                 $this->injectProperty($definition, 'destination', $this->parameterBag->resolveValue($definition->getDestination()));
             }
 
-            // Get source driver
-            if (!is_null($definition->getSourceDriver())) {
-                $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
-            } else {
-                $sourceUri = $this->uriParser->parse($definition->getSource());
-                $sourceDriver = $this->driverManager->getSourceDriverForScheme($sourceUri['scheme']);
-            }
+            $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
             $sourceDriver->configure($definition);
             $migration->configureSource($sourceDriver);
-
-            // Get destination driver
-            if (!is_null($definition->getDestinationDriver())) {
-                $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
-            } else {
-                $destinationUri = $this->uriParser->parse($definition->getDestination());
-                $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
-            }
+            $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
             $destinationDriver->configure($definition);
             $migration->configureDestination($destinationDriver);
 

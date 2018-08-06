@@ -10,6 +10,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
+use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
@@ -98,12 +99,12 @@ class MigrateCommandTest extends TestCase
     {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getSourceDriverForScheme')
-            ->with('inline')
+            ->method('getSourceDriver')
+            ->with('InlineSourceDriver')
             ->willReturn($this->sourceDriver);
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getDestinationDriverForScheme')
-            ->with('test')
+            ->method('getDestinationDriver')
+            ->with('TestDestinationDriver')
             ->willReturn($this->destinationDriver);
         $this->dataMigrationManager->expects($this->once())
             ->method('resolveDependencies')
@@ -211,6 +212,7 @@ class MigrateCommandTest extends TestCase
             [
                 'name' => 'Test Migration 1',
                 'source' => 'inline://'.urlencode(serialize($data)),
+                'sourceDriver' => 'InlineSourceDriver',
                 'sourceIds' => [
                     new IdField(
                         [
@@ -219,6 +221,7 @@ class MigrateCommandTest extends TestCase
                     ),
                 ],
                 'destination' => 'test:stdout',
+                'destinationDriver' => 'TestDestinationDriver',
                 'destinationIds' => [
                     new IdField(
                         [
@@ -237,6 +240,7 @@ class MigrateCommandTest extends TestCase
                     'name' => 'Test Migration 2',
                     'group' => 'special',
                     'source' => 'inline://'.urlencode(serialize($data)),
+                    'sourceDriver' => 'InlineSourceDriver',
                     'sourceIds' => [
                         new IdField(
                             [
@@ -245,6 +249,7 @@ class MigrateCommandTest extends TestCase
                         ),
                     ],
                     'destination' => 'test:stdout',
+                    'destinationDriver' => 'TestDestinationDriver',
                     'destinationIds' => [
                         new IdField(
                             [
@@ -300,12 +305,12 @@ class MigrateCommandTest extends TestCase
     {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getSourceDriverForScheme')
-            ->with('inline')
+            ->method('getSourceDriver')
+            ->with('InlineSourceDriver')
             ->willReturn($this->sourceDriver);
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getDestinationDriverForScheme')
-            ->with('test')
+            ->method('getDestinationDriver')
+            ->with('TestDestinationDriver')
             ->willReturn($this->destinationDriver);
         $this->dataMigrationManager->expects($this->once())
             ->method('resolveDependencies')
@@ -330,12 +335,12 @@ class MigrateCommandTest extends TestCase
     {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getSourceDriverForScheme')
-            ->with('inline')
+            ->method('getSourceDriver')
+            ->with('InlineSourceDriver')
             ->willReturn($this->sourceDriver);
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getDestinationDriverForScheme')
-            ->with('test')
+            ->method('getDestinationDriver')
+            ->with('TestDestinationDriver')
             ->willReturn($this->destinationDriver);
         $this->dataMigrationManager->expects($this->once())
             ->method('resolveDependencies')
@@ -367,12 +372,12 @@ class MigrateCommandTest extends TestCase
     {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getSourceDriverForScheme')
-            ->with('inline')
+            ->method('getSourceDriver')
+            ->with('InlineSourceDriver')
             ->willReturn($this->sourceDriver);
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getDestinationDriverForScheme')
-            ->with('test')
+            ->method('getDestinationDriver')
+            ->with('TestDestinationDriver')
             ->willReturn($this->destinationDriver);
         $this->dataMigrationManager->expects($this->once())
             ->method('resolveDependencies')
@@ -482,12 +487,12 @@ class MigrateCommandTest extends TestCase
     {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getSourceDriverForScheme')
-            ->with('inline')
+            ->method('getSourceDriver')
+            ->with('InlineSourceDriver')
             ->willReturn($this->sourceDriver);
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getDestinationDriverForScheme')
-            ->with('debug')
+            ->method('getDestinationDriver')
+            ->with(DebugDestinationDriver::class)
             ->willReturn($this->destinationDriver);
         $this->dataMigrationManager->expects($this->once())
             ->method('resolveDependencies')
@@ -542,12 +547,12 @@ class MigrateCommandTest extends TestCase
     {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getSourceDriverForScheme')
-            ->with('inline')
+            ->method('getSourceDriver')
+            ->with('InlineSourceDriver')
             ->willReturn($this->sourceDriver);
         $this->driverManager->expects($this->atLeastOnce())
-            ->method('getDestinationDriverForScheme')
-            ->with('test')
+            ->method('getDestinationDriver')
+            ->with('TestDestinationDriver')
             ->willReturn($this->destinationDriver);
         $this->dataMigrationManager->expects($this->never())
             ->method('resolveDependencies');

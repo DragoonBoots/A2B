@@ -8,7 +8,9 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
+use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+use League\Uri\Parser;
 use MJS\TopSort\Implementations\FixedArraySort;
 
 class DataMigrationManager implements DataMigrationManagerInterface
@@ -20,6 +22,16 @@ class DataMigrationManager implements DataMigrationManagerInterface
     protected $annotationReader;
 
     /**
+     * @var Parser
+     */
+    protected $uriParser;
+
+    /**
+     * @var DriverManagerInterface
+     */
+    protected $driverManager;
+
+    /**
      * @var Collection|DataMigrationInterface[]
      */
     protected $migrations = [];
@@ -27,11 +39,15 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * DataMigrationManager constructor.
      *
-     * @param Reader $annotationReader
+     * @param Reader                 $annotationReader
+     * @param Parser                 $uriParser
+     * @param DriverManagerInterface $driverManager
      */
-    public function __construct(Reader $annotationReader)
+    public function __construct(Reader $annotationReader, Parser $uriParser, DriverManagerInterface $driverManager)
     {
         $this->annotationReader = $annotationReader;
+        $this->uriParser = $uriParser;
+        $this->driverManager = $driverManager;
 
         $this->migrations = new ArrayCollection();
     }
@@ -43,12 +59,28 @@ class DataMigrationManager implements DataMigrationManagerInterface
      *
      * @param DataMigrationInterface $migration
      *
+     * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
+     * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
      * @throws \ReflectionException
      */
     public function addMigration(DataMigrationInterface $migration)
     {
         $reflClass = new \ReflectionClass($migration);
+        /** @var DataMigration $definition */
         $definition = $this->annotationReader->getClassAnnotation($reflClass, DataMigration::class);
+        if (is_null($definition->getSourceDriver())) {
+            $source = $definition->getSource();
+            $sourceUri = $this->uriParser->parse($source);
+            $sourceDriver = $this->driverManager->getSourceDriverForScheme($sourceUri['scheme']);
+            $definition->setSourceDriver(get_class($sourceDriver));
+        }
+        if (is_null($definition->getDestinationDriver())) {
+            $destination = $definition->getDestination();
+            $destinationUri = $this->uriParser->parse($destination);
+            $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
+            $definition->setDestinationDriver(get_class($destinationDriver));
+        }
+
         $migration->setDefinition($definition);
         $this->migrations[get_class($migration)] = $migration;
     }

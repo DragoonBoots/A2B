@@ -174,6 +174,20 @@ class DataMigration
     }
 
     /**
+     * @internal
+     *
+     * @param string $sourceDriver
+     *
+     * @return self
+     */
+    public function setSourceDriver(string $sourceDriver): self
+    {
+        $this->sourceDriver = $sourceDriver;
+
+        return $this;
+    }
+
+    /**
      * @return string
      *
      * @codeCoverageIgnore
@@ -207,6 +221,20 @@ class DataMigration
     public function getDestinationDriver(): ?string
     {
         return $this->destinationDriver;
+    }
+
+    /**
+     * @internal
+     *
+     * @param string $destinationDriver
+     *
+     * @return self
+     */
+    public function setDestinationDriver(string $destinationDriver): self
+    {
+        $this->destinationDriver = $destinationDriver;
+
+        return $this;
     }
 
     /**

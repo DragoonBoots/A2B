@@ -11,6 +11,8 @@ services:
         lazy: true
         arguments:
         - '@annotation_reader'
+        - '@a2b.league.uri.parser'
+        - '@a2b.driver_manager'
     DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface: '@a2b.data_migration_manager'
 
     a2b.driver_manager:

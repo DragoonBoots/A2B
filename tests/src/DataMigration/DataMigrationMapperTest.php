@@ -11,7 +11,11 @@ use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManager;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapper;
+use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
+use DragoonBoots\A2B\Drivers\DriverManagerInterface;
+use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
+use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -90,6 +94,7 @@ class DataMigrationMapperTest extends TestCase
         $definitions = [
             'TestMigration1' => new DataMigration(
                 [
+                    'source' => 'test://test',
                     'sourceIds' => [
                         new IdField(
                             [
@@ -98,11 +103,13 @@ class DataMigrationMapperTest extends TestCase
                             ]
                         ),
                     ],
+                    'destination' => 'test://test',
                     'destinationIds' => [new IdField(['name' => 'id'])],
                 ]
             ),
             'TestMigration2' => new DataMigration(
                 [
+                    'source' => 'test://test',
                     'sourceIds' => [
                         new IdField(
                             [
@@ -111,6 +118,7 @@ class DataMigrationMapperTest extends TestCase
                             ]
                         ),
                     ],
+                    'destination' => 'test://test',
                     'destinationIds' => [new IdField(['name' => 'id'])],
                 ]
             ),
@@ -130,7 +138,15 @@ class DataMigrationMapperTest extends TestCase
                     return $definitions[$reflectionClass->getName()];
                 }
             );
-        $dataMigrationManager = new DataMigrationManager($annotationReader);
+        $uriParser = $this->createMock(Parser::class);
+        $uriParser->method('parse')
+            ->willReturn(['scheme' => 'test']);
+        $driverManager = $this->createMock(DriverManagerInterface::class);
+        $driverManager->method('getSourceDriverForScheme')
+            ->willReturn($this->createMock(SourceDriverInterface::class));
+        $driverManager->method('getDestinationDriverForScheme')
+            ->willReturn($this->createMock(DestinationDriverInterface::class));
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
         foreach ($migrations as $migration) {
             $dataMigrationManager->addMigration($migration);
         }

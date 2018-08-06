@@ -105,6 +105,13 @@ class MigrateCommandTest extends TestCase
             ->method('getDestinationDriverForScheme')
             ->with('test')
             ->willReturn($this->destinationDriver);
+        $this->dataMigrationManager->expects($this->once())
+            ->method('resolveDependencies')
+            ->willReturnCallback(
+                function ($migrations) {
+                    return new ArrayCollection(array_values($migrations));
+                }
+            );
 
         $this->executor->expects($this->exactly(1))
             ->method('execute')
@@ -300,6 +307,13 @@ class MigrateCommandTest extends TestCase
             ->method('getDestinationDriverForScheme')
             ->with('test')
             ->willReturn($this->destinationDriver);
+        $this->dataMigrationManager->expects($this->once())
+            ->method('resolveDependencies')
+            ->willReturnCallback(
+                function ($migrations) {
+                    return new ArrayCollection(array_values($migrations));
+                }
+            );
 
         $this->executor->expects($this->exactly(1))
             ->method('execute')
@@ -323,6 +337,13 @@ class MigrateCommandTest extends TestCase
             ->method('getDestinationDriverForScheme')
             ->with('test')
             ->willReturn($this->destinationDriver);
+        $this->dataMigrationManager->expects($this->once())
+            ->method('resolveDependencies')
+            ->willReturnCallback(
+                function ($migrations) {
+                    return new ArrayCollection(array_values($migrations));
+                }
+            );
 
         $this->executor->expects($this->exactly(1))
             ->method('execute')
@@ -353,6 +374,13 @@ class MigrateCommandTest extends TestCase
             ->method('getDestinationDriverForScheme')
             ->with('test')
             ->willReturn($this->destinationDriver);
+        $this->dataMigrationManager->expects($this->once())
+            ->method('resolveDependencies')
+            ->willReturnCallback(
+                function ($migrations) {
+                    return new ArrayCollection(array_values($migrations));
+                }
+            );
 
         $orphans = [['identifier' => 'orphan']];
         $this->executor->expects($this->exactly(1))
@@ -438,6 +466,13 @@ class MigrateCommandTest extends TestCase
             ->method('getDestinationDriver')
             ->with(get_class($specialDestinationDriver))
             ->willReturn($specialDestinationDriver);
+        $this->dataMigrationManager->expects($this->once())
+            ->method('resolveDependencies')
+            ->willReturnCallback(
+                function ($migrations) {
+                    return new ArrayCollection(array_values($migrations));
+                }
+            );
 
         $tester = new CommandTester($this->command);
         $tester->execute(['migrations' => [get_class($this->migration2)]]);
@@ -454,6 +489,13 @@ class MigrateCommandTest extends TestCase
             ->method('getDestinationDriverForScheme')
             ->with('debug')
             ->willReturn($this->destinationDriver);
+        $this->dataMigrationManager->expects($this->once())
+            ->method('resolveDependencies')
+            ->willReturnCallback(
+                function ($migrations) {
+                    return new ArrayCollection(array_values($migrations));
+                }
+            );
 
         $tester = new CommandTester($this->command);
 
@@ -463,6 +505,8 @@ class MigrateCommandTest extends TestCase
     public function testExecuteConflictingOptions()
     {
         $dataMigrationManager = $this->createMock(DataMigrationManagerInterface::class);
+        $dataMigrationManager->expects($this->never())
+            ->method('resolveDependencies');
         $driverManager = $this->createMock(DriverManagerInterface::class);
         $executor = $this->createMock(DataMigrationExecutorInterface::class);
         $executor->expects($this->never())
@@ -492,6 +536,29 @@ class MigrateCommandTest extends TestCase
         );
 
         $this->assertContains(MigrateCommand::ERROR_NO_PRUNE_PRESERVE, $tester->getDisplay());
+    }
+
+    public function testNoDependencyResolution()
+    {
+        $this->setUpCommand();
+        $this->driverManager->expects($this->atLeastOnce())
+            ->method('getSourceDriverForScheme')
+            ->with('inline')
+            ->willReturn($this->sourceDriver);
+        $this->driverManager->expects($this->atLeastOnce())
+            ->method('getDestinationDriverForScheme')
+            ->with('test')
+            ->willReturn($this->destinationDriver);
+        $this->dataMigrationManager->expects($this->never())
+            ->method('resolveDependencies');
+
+        $tester = new CommandTester($this->command);
+
+        $tester->execute(
+            [
+                '--no-deps' => true,
+            ]
+        );
     }
 
 }

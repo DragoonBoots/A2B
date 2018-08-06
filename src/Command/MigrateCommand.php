@@ -171,6 +171,8 @@ class MigrateCommand extends Command
      * @throws \DragoonBoots\A2B\Exception\NonexistentDriverException
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
+     * @throws \MJS\TopSort\CircularDependencyException
+     * @throws \MJS\TopSort\ElementNotFoundException
      * @throws \ReflectionException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -183,6 +185,9 @@ class MigrateCommand extends Command
         }
 
         $migrations = $this->getMigrations($input->getOption('group'), $input->getArgument('migrations'));
+        if (!$input->getOption('no-deps')) {
+            $migrations = $this->dataMigrationManager->resolveDependencies($migrations);
+        }
 
         $outputFormatter = new ConsoleOutputFormatter($input, $output);
         $outputFormatter->configure(['total' => count($migrations)]);

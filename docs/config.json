@@ -1,0 +1,16 @@
+{
+    "title": "A2B",
+    "tagline": "A2B: Easy data migrations for Symfony",
+    "ignore": {
+        "folders": ["api"]
+    },
+    "html": {
+        "auto_toc": true,
+        "date_modified": false,
+        "float": false,
+        "search": true,
+        "links": {
+            "View this project on GitLab": "https://gitlab.com/DragoonBoots/a2b"
+        }
+    }
+}

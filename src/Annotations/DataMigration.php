@@ -89,6 +89,13 @@ class DataMigration
     protected $destinationIds;
 
     /**
+     * A list of migration FQCNs this depends on
+     *
+     * @var string[]
+     */
+    protected $depends = [];
+
+    /**
      * DataMigration constructor.
      *
      * @param array $values
@@ -101,8 +108,9 @@ class DataMigration
         $this->sourceDriver = $values['sourceDriver'] ?? null;
         $this->destination = $values['destination'] ?? null;
         $this->destinationDriver = $values['destinationDriver'] ?? null;
-        $this->sourceIds = $values['sourceIds'] ?? null;
-        $this->destinationIds = $values['destinationIds'] ?? null;
+        $this->sourceIds = $values['sourceIds'] ?? [];
+        $this->destinationIds = $values['destinationIds'] ?? [];
+        $this->depends = $values['depends'] ?? [];
     }
 
     /**
@@ -215,5 +223,15 @@ class DataMigration
     public function getDestinationIds(): array
     {
         return $this->destinationIds;
+    }
+
+    /**
+     * @return string[]
+     *
+     * @codeCoverageIgnore
+     */
+    public function getDepends(): array
+    {
+        return $this->depends;
     }
 }

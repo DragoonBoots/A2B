@@ -27,7 +27,8 @@ use DragoonBoots\A2B\Drivers\SourceDriverInterface;
  *     destination="csv:///%kernel.project_dir%/resources/data/data.csv",
  *     destinationDriver="DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver",
  *     sourceIds={@IdField(name="id")},
- *     destinationIds={@IdField(name="identifier", type="string")}
+ *     destinationIds={@IdField(name="identifier", type="string")},
+ *     depends={"App\Migrations\DependentMigration"}
  * )
  */
  public class ExampleMigration extends AbstractDataMigration implements DataMigrationInterface
@@ -61,6 +62,8 @@ rows to their destinations and allow for updating.  Each `@IdField` has a
 field to specify the data type.  Valid data types are `int` and `string`; the
 default is `int`.
 
+### depends
+*(optional)* A list of migration FQCNs that must be run before this migration.
 
 Configuration
 -------------

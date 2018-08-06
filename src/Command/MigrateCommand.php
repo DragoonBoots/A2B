@@ -136,6 +136,11 @@ class MigrateCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Keep destination entities that do not exist in the source.'
+            )->addOption(
+                'no-deps',
+                null,
+                InputOption::VALUE_NONE,
+                'Ignore dependencies migrations require.'
             )->addArgument(
                 'migrations', InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
                 'A list of migration classes to run.  Do not specify any migrations to run all migrations.',

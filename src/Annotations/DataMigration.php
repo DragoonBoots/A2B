@@ -110,7 +110,11 @@ class DataMigration
         $this->destinationDriver = $values['destinationDriver'] ?? null;
         $this->sourceIds = $values['sourceIds'] ?? [];
         $this->destinationIds = $values['destinationIds'] ?? [];
-        $this->depends = $values['depends'] ?? [];
+
+        // Normalize dependency list to remove leading backslash
+        foreach ($values['depends'] ?? [] as $dependency) {
+            $this->depends[] = ltrim($dependency, '\\');
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+use MJS\TopSort\Implementations\FixedArraySort;
 
 class DataMigrationManager implements DataMigrationManagerInterface
 {
@@ -78,5 +79,39 @@ class DataMigrationManager implements DataMigrationManagerInterface
         );
 
         return $migrations;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function resolveDependencies(iterable $migrations, array &$extrasAdded = []): Collection
+    {
+        $requestedMigrationList = [];
+        foreach ($migrations as $migration) {
+            $requestedMigrationList[] = get_class($migration);
+        }
+
+        $sorter = new FixedArraySort();
+        foreach ($migrations as $migration) {
+            $definition = $migration->getDefinition();
+            $dependencies = $definition->getDepends();
+            foreach ($dependencies as $dependency) {
+                if (!in_array($dependency, $requestedMigrationList)) {
+                    $extrasAdded[] = $dependency;
+                    $requestedMigrationList[] = $dependency;
+                }
+
+                $sorter->add($dependency);
+            }
+            $sorter->add(get_class($migration), $dependencies);
+        }
+        $runList = $sorter->sort();
+
+        $runMigrations = new ArrayCollection();
+        foreach ($runList as $migrationId) {
+            $runMigrations->add($this->getMigration($migrationId));
+        }
+
+        return $runMigrations;
     }
 }

@@ -4,6 +4,7 @@ namespace DragoonBoots\A2B\Tests\DataMigration;
 
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManager;
@@ -88,5 +89,81 @@ class DataMigrationManagerTest extends TestCase
         $this->assertEquals(
             $expected, $dataMigrationManager->getMigrationsInGroup('Group1')
         );
+    }
+
+    /**
+     * @param DataMigrationInterface[]|MockObject[] $migrations
+     * @param DataMigration[]                       $definitions
+     * @param DataMigration[]                       $requested
+     * @param DataMigration[]|Collection            $expectedRunList
+     * @param string[]                              $expectedExtrasAdded
+     *
+     * @dataProvider dependencyResolutionDataProvider
+     */
+    public function testResolveDependencies($migrations, $definitions, $requested, $expectedRunList, $expectedExtrasAdded)
+    {
+        $annotationReader = $this->createMock(Reader::class);
+        $annotationReader->method('getClassAnnotation')
+            ->willReturnCallback(
+                function (\ReflectionClass $reflectionClass, string $annotationName) use ($definitions) {
+                    return $definitions[$reflectionClass->getName()] ?? null;
+                }
+            );
+
+        $dataMigrationManager = new DataMigrationManager($annotationReader);
+        foreach ($migrations as $migration) {
+            $dataMigrationManager->addMigration($migration);
+        }
+
+        $runList = $dataMigrationManager->resolveDependencies($requested, $extrasAdded);
+        $this->assertEquals($expectedRunList, $runList);
+        $this->assertEquals($expectedExtrasAdded, $extrasAdded);
+    }
+
+    public function dependencyResolutionDataProvider()
+    {
+        /** @var DataMigrationInterface[]|MockObject[] $migrations */
+        $migrations = [
+            'FirstMigration' => $this->getMockBuilder(DataMigrationInterface::class)
+                ->disableOriginalConstructor()
+                ->setMockClassName('FirstMigration')
+                ->getMock(),
+            'DependentMigration' => $this->getMockBuilder(DataMigrationInterface::class)
+                ->disableOriginalConstructor()
+                ->setMockClassName('DependentMigration')
+                ->getMock(),
+        ];
+        /** @var DataMigration[] $definitions */
+        $definitions = [
+            'FirstMigration' => new DataMigration(['depends' => [get_class($migrations['DependentMigration'])]]),
+            'DependentMigration' => new DataMigration([]),
+        ];
+        foreach ($migrations as $group => $migration) {
+            $migration->method('getDefinition')
+                ->willReturn($definitions[$group]);
+        }
+
+        return [
+            'all migrations' => [
+                $migrations,
+                $definitions,
+                // Requested list
+                $migrations,
+                // Run list
+                new ArrayCollection(array_values(array_reverse($migrations))),
+                // Extras added list
+                [],
+            ],
+            'dependency not specified' => [
+                $migrations,
+                $definitions,
+                // Requested list
+                [$migrations['FirstMigration']],
+                // Run list
+                new ArrayCollection(array_values(array_reverse($migrations))),
+                // Extras added list
+                [get_class($migrations['DependentMigration'])],
+            ],
+        ];
     }
 }

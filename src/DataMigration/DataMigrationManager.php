@@ -84,8 +84,12 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function resolveDependencies(iterable $migrations, array &$extrasAdded = []): Collection
+    public function resolveDependencies(iterable $migrations, ?array &$extrasAdded = null): Collection
     {
+        if (!isset($extrasAdded)) {
+            $extrasAdded = [];
+        }
+
         $requestedMigrationList = [];
         foreach ($migrations as $migration) {
             $requestedMigrationList[] = get_class($migration);

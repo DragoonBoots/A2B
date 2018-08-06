@@ -51,5 +51,5 @@ interface DataMigrationManagerInterface
      * @throws \MJS\TopSort\ElementNotFoundException
      * @throws NonexistentMigrationException
      */
-    public function resolveDependencies(iterable $migrations, array &$extrasAdded = []): Collection;
+    public function resolveDependencies(iterable $migrations, ?array &$extrasAdded = null): Collection;
 }

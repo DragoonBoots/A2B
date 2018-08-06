@@ -149,7 +149,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
                 $table->addColumn('id', Type::INTEGER);
                 $table->addColumn('updated', Type::DATETIMETZ_IMMUTABLE);
                 $table->setPrimaryKey(['id']);
-                $table->addIndex(['updated'], 'ix_updated');
+                $table->addIndex(['updated'], sprintf('ix_%s_updated', $tableName));
             } else {
                 throw $e;
             }
@@ -175,7 +175,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         foreach ($destIdFields as $destIdField) {
             $allIdColumnNames[] = $this->getMappingColumnName($destIdField, self::MAPPING_DEST);
         }
-        $allIdIndexName = 'ix_mapping';
+        $allIdIndexName = sprintf('ix_%s_mapping', $tableName);
         try {
             $index = $table->getIndex($allIdIndexName);
             // Ensure index columns match.
@@ -278,7 +278,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      */
     protected function conformMappingIndexes(Table &$table, array $idFields, string $type)
     {
-        $indexName = sprintf('ix_%s', strtolower($type));
+        $indexName = sprintf('ix_%s_%s', $table->getName(), strtolower($type));
         $indexCols = [];
         foreach ($idFields as $idField) {
             $indexCols[] = $this->getMappingColumnName($idField, $type);

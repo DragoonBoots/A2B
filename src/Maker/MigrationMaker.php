@@ -6,6 +6,7 @@ namespace DragoonBoots\A2B\Maker;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Inflector\Inflector;
+use DragoonBoots\A2B\A2BBundle;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
@@ -28,7 +29,9 @@ use Symfony\Component\Console\Question\Question;
 class MigrationMaker extends AbstractMaker
 {
 
-    const TEMPLATE = __DIR__.'/../../Resources/skeleton/migration.tpl.php';
+    protected const TEMPLATE = __DIR__.'/../../Resources/skeleton/migration.tpl.php';
+
+    protected const COMPOSER_PACKAGE = 'dragoonboots/a2b:dev-maker';
 
     /**
      * @var DataMigrationManagerInterface
@@ -104,7 +107,7 @@ class MigrationMaker extends AbstractMaker
      */
     public function configureDependencies(DependencyBuilder $dependencies)
     {
-        // TODO: Implement configureDependencies() method.
+        $dependencies->addClassDependency(A2BBundle::class, self::COMPOSER_PACKAGE);
     }
 
     /**

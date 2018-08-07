@@ -18,6 +18,7 @@ use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DataMigrationMapperTest extends TestCase
 {
@@ -146,7 +147,13 @@ class DataMigrationMapperTest extends TestCase
             ->willReturn($this->createMock(SourceDriverInterface::class));
         $driverManager->method('getDestinationDriverForScheme')
             ->willReturn($this->createMock(DestinationDriverInterface::class));
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
+
+        $parameterBag = $this->createMock(ParameterBagInterface::class);
+        $parameterBag->expects($this->exactly(count($migrations) * 2))
+            ->method('resolveValue')
+            ->willReturnArgument(0);
+
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
         foreach ($migrations as $migration) {
             $dataMigrationManager->addMigration($migration);
         }

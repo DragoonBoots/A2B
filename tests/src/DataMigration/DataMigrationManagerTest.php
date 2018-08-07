@@ -15,6 +15,7 @@ use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DataMigrationManagerTest extends TestCase
 {
@@ -67,7 +68,12 @@ class DataMigrationManagerTest extends TestCase
             ->with('testDestination')
             ->willReturn($destinationDriver);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
+        $parameterBag = $this->createMock(ParameterBagInterface::class);
+        $parameterBag->expects($this->exactly(2))
+            ->method('resolveValue')
+            ->willReturnArgument(0);
+
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
         $dataMigrationManager->addMigration($migration);
         $this->assertEquals(new ArrayCollection(['TestMigration' => $migration]), $dataMigrationManager->getMigrations());
         $this->assertSame($migration, $dataMigrationManager->getMigration(get_class($migration)));
@@ -79,7 +85,11 @@ class DataMigrationManagerTest extends TestCase
         $uriParser = $this->createMock(Parser::class);
         $driverManager = $this->createMock(DriverManagerInterface::class);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
+        $parameterBag = $this->createMock(ParameterBagInterface::class);
+        $parameterBag->method('resolveValue')
+            ->willReturnArgument(0);
+
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
         $this->expectException(NonexistentMigrationException::class);
         $dataMigrationManager->getMigration('NonexistantMigration');
     }
@@ -116,7 +126,11 @@ class DataMigrationManagerTest extends TestCase
         $uriParser = $this->createMock(Parser::class);
         $driverManager = $this->createMock(DriverManagerInterface::class);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
+        $parameterBag = $this->createMock(ParameterBagInterface::class);
+        $parameterBag->method('resolveValue')
+            ->willReturnArgument(0);
+
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
 
         // Inject the migrations
         $refl = new \ReflectionClass($dataMigrationManager);
@@ -151,7 +165,11 @@ class DataMigrationManagerTest extends TestCase
         $uriParser = $this->createMock(Parser::class);
         $driverManager = $this->createMock(DriverManagerInterface::class);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
+        $parameterBag = $this->createMock(ParameterBagInterface::class);
+        $parameterBag->method('resolveValue')
+            ->willReturnArgument(0);
+
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
 
         // Inject the migrations
         $refl = new \ReflectionClass($dataMigrationManager);

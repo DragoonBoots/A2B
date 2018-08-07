@@ -12,6 +12,7 @@ use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 use League\Uri\Parser;
 use MJS\TopSort\Implementations\FixedArraySort;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DataMigrationManager implements DataMigrationManagerInterface
 {
@@ -32,6 +33,11 @@ class DataMigrationManager implements DataMigrationManagerInterface
     protected $driverManager;
 
     /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    /**
      * @var Collection|DataMigrationInterface[]
      */
     protected $migrations = [];
@@ -42,12 +48,19 @@ class DataMigrationManager implements DataMigrationManagerInterface
      * @param Reader                 $annotationReader
      * @param Parser                 $uriParser
      * @param DriverManagerInterface $driverManager
+     * @param ParameterBagInterface  $parameterBag
      */
-    public function __construct(Reader $annotationReader, Parser $uriParser, DriverManagerInterface $driverManager)
+    public function __construct(
+        Reader $annotationReader,
+        Parser $uriParser,
+        DriverManagerInterface $driverManager,
+        ParameterBagInterface $parameterBag
+    )
     {
         $this->annotationReader = $annotationReader;
         $this->uriParser = $uriParser;
         $this->driverManager = $driverManager;
+        $this->parameterBag = $parameterBag;
 
         $this->migrations = new ArrayCollection();
     }
@@ -68,6 +81,9 @@ class DataMigrationManager implements DataMigrationManagerInterface
         $reflClass = new \ReflectionClass($migration);
         /** @var DataMigration $definition */
         $definition = $this->annotationReader->getClassAnnotation($reflClass, DataMigration::class);
+        $this->injectProperty($definition, 'source', $this->parameterBag->resolveValue($definition->getSource()));
+        $this->injectProperty($definition, 'destination', $this->parameterBag->resolveValue($definition->getDestination()));
+
         if (is_null($definition->getSourceDriver())) {
             $source = $definition->getSource();
             $sourceUri = $this->uriParser->parse($source);
@@ -83,6 +99,25 @@ class DataMigrationManager implements DataMigrationManagerInterface
 
         $migration->setDefinition($definition);
         $this->migrations[get_class($migration)] = $migration;
+    }
+
+    /**
+     * Inject a value into an object property with reflection.
+     *
+     * @param object $object
+     * @param string $propertyName
+     * @param mixed  $value
+     *
+     * @throws \ReflectionException
+     */
+    private function injectProperty(object $object, string $propertyName, $value)
+    {
+        $refl = new \ReflectionClass($object);
+        $property = $refl->getProperty($propertyName);
+        $accessible = $property->isPublic();
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
+        $property->setAccessible($accessible);
     }
 
     public function getMigrations(): Collection

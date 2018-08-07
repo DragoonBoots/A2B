@@ -16,7 +16,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\VarDumper\Cloner\ClonerInterface;
 use Symfony\Component\VarDumper\Dumper\AbstractDumper;
 
@@ -54,11 +53,6 @@ class MigrateCommand extends Command
     protected $uriParser;
 
     /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBag;
-
-    /**
      * @var AbstractDumper
      */
     protected $varDumper;
@@ -81,7 +75,6 @@ class MigrateCommand extends Command
      * @param DataMigrationExecutorInterface $executor
      * @param DataMigrationMapperInterface   $mapper
      * @param Parser                         $uriParser
-     * @param ParameterBagInterface          $parameterBag
      * @param AbstractDumper                 $varDumper
      * @param ClonerInterface                $varCloner
      */
@@ -93,7 +86,6 @@ class MigrateCommand extends Command
         DataMigrationExecutorInterface $executor,
         DataMigrationMapperInterface $mapper,
         Parser $uriParser,
-        ParameterBagInterface $parameterBag,
         AbstractDumper $varDumper,
         ClonerInterface $varCloner
     ) {
@@ -104,7 +96,6 @@ class MigrateCommand extends Command
         $this->executor = $executor;
         $this->mapper = $mapper;
         $this->uriParser = $uriParser;
-        $this->parameterBag = $parameterBag;
         $this->varDumper = $varDumper;
         $this->varCloner = $varCloner;
     }
@@ -197,13 +188,9 @@ class MigrateCommand extends Command
         foreach ($migrations as $migration) {
             $definition = $migration->getDefinition();
 
-            // Resolve container parameters source/destination urls
-            $this->injectProperty($definition, 'source', $this->parameterBag->resolveValue($definition->getSource()));
             if ($input->getOption('simulate')) {
                 $this->injectProperty($definition, 'destination', 'debug:stderr');
                 $this->injectProperty($definition, 'destinationDriver', DebugDestinationDriver::class);
-            } else {
-                $this->injectProperty($definition, 'destination', $this->parameterBag->resolveValue($definition->getDestination()));
             }
 
             $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());

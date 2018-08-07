@@ -175,11 +175,6 @@ class MigrateCommandTest extends TestCase
             );
         $this->uriParser = $uriParser;
 
-        $parameterBag = $this->createMock(ParameterBagInterface::class);
-        $parameterBag->expects($this->atLeastOnce())->method('resolveValue')
-            ->willReturnArgument(0);
-        $this->parameterBag = $parameterBag;
-
         $varDumper = $this->createMock(AbstractDumper::class);
         $this->varDumper = $varDumper;
 
@@ -192,7 +187,6 @@ class MigrateCommandTest extends TestCase
             $this->executor,
             $this->mapper,
             $this->uriParser,
-            $this->parameterBag,
             $this->varDumper,
             $this->varCloner
         );
@@ -518,7 +512,6 @@ class MigrateCommandTest extends TestCase
             ->method('execute');
         $mapper = $this->createMock(DataMigrationMapperInterface::class);
         $uriParser = $this->createMock(Parser::class);
-        $parameterBag = $this->createMock(ParameterBagInterface::class);
         $varDumper = $this->createMock(AbstractDumper::class);
         $varCloner = $this->createMock(ClonerInterface::class);
         $command = new MigrateCommand(
@@ -527,7 +520,6 @@ class MigrateCommandTest extends TestCase
             $executor,
             $mapper,
             $uriParser,
-            $parameterBag,
             $varDumper,
             $varCloner
         );

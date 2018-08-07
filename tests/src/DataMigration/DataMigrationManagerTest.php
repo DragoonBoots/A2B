@@ -8,7 +8,11 @@ use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManager;
+use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
+use DragoonBoots\A2B\Drivers\DriverManagerInterface;
+use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -22,14 +26,48 @@ class DataMigrationManagerTest extends TestCase
             ->disableOriginalConstructor()
             ->setMockClassName('TestMigration')
             ->getMock();
-        $annotation = new DataMigration();
+
+        $annotation = new DataMigration(
+            [
+                'source' => 'testSource://test',
+                'destination' => 'testDestination://test',
+            ]
+        );
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->expects($this->once())
             ->method('getClassAnnotation')
             ->with(new \ReflectionClass($migration), DataMigration::class)
             ->willReturn($annotation);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader);
+        $uriParser = $this->createMock(Parser::class);
+        $uriParser->expects($this->exactly(2))
+            ->method('parse')
+            ->willReturnMap(
+                [
+                    [
+                        $annotation->getSource(),
+                        ['scheme' => 'testSource'],
+                    ],
+                    [
+                        $annotation->getDestination(),
+                        ['scheme' => 'testDestination'],
+                    ],
+                ]
+            );
+
+        $sourceDriver = $this->createMock(SourceDriverInterface::class);
+        $destinationDriver = $this->createMock(DestinationDriverInterface::class);
+        $driverManager = $this->createMock(DriverManagerInterface::class);
+        $driverManager->expects($this->once())
+            ->method('getSourceDriverForScheme')
+            ->with('testSource')
+            ->willReturn($sourceDriver);
+        $driverManager->expects($this->once())
+            ->method('getDestinationDriverForScheme')
+            ->with('testDestination')
+            ->willReturn($destinationDriver);
+
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
         $dataMigrationManager->addMigration($migration);
         $this->assertEquals(new ArrayCollection(['TestMigration' => $migration]), $dataMigrationManager->getMigrations());
         $this->assertSame($migration, $dataMigrationManager->getMigration(get_class($migration)));
@@ -38,8 +76,10 @@ class DataMigrationManagerTest extends TestCase
     public function testGetMigrationBad()
     {
         $annotationReader = $this->createMock(Reader::class);
+        $uriParser = $this->createMock(Parser::class);
+        $driverManager = $this->createMock(DriverManagerInterface::class);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader);
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
         $this->expectException(NonexistentMigrationException::class);
         $dataMigrationManager->getMigration('NonexistantMigration');
     }
@@ -48,44 +88,43 @@ class DataMigrationManagerTest extends TestCase
     {
         /** @var DataMigrationInterface[]|MockObject[] $migrations */
         $migrations = [
-            'Group1' => $this->getMockBuilder(DataMigrationInterface::class)
+            'Group1Migration' => $this->getMockBuilder(DataMigrationInterface::class)
                 ->disableOriginalConstructor()
                 ->setMockClassName('Group1Migration')
                 ->getMock(),
-            'Group2' => $this->getMockBuilder(DataMigrationInterface::class)
+            'Group2Migration' => $this->getMockBuilder(DataMigrationInterface::class)
                 ->disableOriginalConstructor()
                 ->setMockClassName('Group2Migration')
                 ->getMock(),
         ];
         /** @var DataMigration[] $definitions */
         $definitions = [
-            'Group1' => new DataMigration(['group' => 'Group1']),
-            'Group2' => new DataMigration(['group' => 'Group2']),
+            'Group1Migration' => new DataMigration(['group' => 'Group1']),
+            'Group2Migration' => new DataMigration(['group' => 'Group2']),
         ];
-        foreach ($migrations as $group => $migration) {
+        foreach ($migrations as $id => $migration) {
             $migration->method('getDefinition')
-                ->willReturn($definitions[$group]);
+                ->willReturn($definitions[$id]);
         }
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
                 function (\ReflectionClass $reflectionClass, string $annotationName) use ($definitions) {
-                    if ($reflectionClass->getName() == 'Group1Migration') {
-                        return $definitions['Group1'];
-                    } elseif ($reflectionClass->getName() == 'Group2Migration') {
-                        return $definitions['Group2'];
-                    }
-
-                    return null;
+                    return $definitions[$reflectionClass->getName()] ?? null;
                 }
             );
+        $uriParser = $this->createMock(Parser::class);
+        $driverManager = $this->createMock(DriverManagerInterface::class);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader);
-        foreach ($migrations as $migration) {
-            $dataMigrationManager->addMigration($migration);
-        }
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
 
-        $expected = new ArrayCollection(['Group1Migration' => $migrations['Group1']]);
+        // Inject the migrations
+        $refl = new \ReflectionClass($dataMigrationManager);
+        $migrationsProperty = $refl->getProperty('migrations');
+        $migrationsProperty->setAccessible(true);
+        $migrationsProperty->setValue($dataMigrationManager, new ArrayCollection($migrations));
+
+        $expected = new ArrayCollection(['Group1Migration' => $migrations['Group1Migration']]);
         $this->assertEquals(
             $expected, $dataMigrationManager->getMigrationsInGroup('Group1')
         );
@@ -109,11 +148,16 @@ class DataMigrationManagerTest extends TestCase
                     return $definitions[$reflectionClass->getName()] ?? null;
                 }
             );
+        $uriParser = $this->createMock(Parser::class);
+        $driverManager = $this->createMock(DriverManagerInterface::class);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader);
-        foreach ($migrations as $migration) {
-            $dataMigrationManager->addMigration($migration);
-        }
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager);
+
+        // Inject the migrations
+        $refl = new \ReflectionClass($dataMigrationManager);
+        $migrationsProperty = $refl->getProperty('migrations');
+        $migrationsProperty->setAccessible(true);
+        $migrationsProperty->setValue($dataMigrationManager, new ArrayCollection($migrations));
 
         $runList = $dataMigrationManager->resolveDependencies($requested, $extrasAdded);
         $this->assertEquals($expectedRunList, $runList);

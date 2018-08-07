@@ -19,7 +19,11 @@
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^4.1",
-        "mikey179/vfsStream": "^1.6"
+        "mikey179/vfsStream": "^1.6",
+        "symfony/maker-bundle": "^1.5"
+    },
+    "suggest": {
+        "symfony/maker-bundle": "Generate migrations from the command line."
     },
     "license": "LGPL-3.0-only",
     "authors": [

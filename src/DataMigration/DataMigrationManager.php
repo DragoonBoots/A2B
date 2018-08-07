@@ -40,7 +40,12 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * @var Collection|DataMigrationInterface[]
      */
-    protected $migrations = [];
+    protected $migrations;
+
+    /**
+     * @var Collection|string[]
+     */
+    protected $groups;
 
     /**
      * DataMigrationManager constructor.
@@ -63,6 +68,7 @@ class DataMigrationManager implements DataMigrationManagerInterface
         $this->parameterBag = $parameterBag;
 
         $this->migrations = new ArrayCollection();
+        $this->groups = new ArrayCollection();
     }
 
     /**
@@ -99,6 +105,7 @@ class DataMigrationManager implements DataMigrationManagerInterface
 
         $migration->setDefinition($definition);
         $this->migrations[get_class($migration)] = $migration;
+        $this->groups[$definition->getGroup()] = $definition->getGroup();
     }
 
     /**
@@ -123,6 +130,11 @@ class DataMigrationManager implements DataMigrationManagerInterface
     public function getMigrations(): Collection
     {
         return $this->migrations;
+    }
+
+    public function getGroups(): Collection
+    {
+        return $this->groups;
     }
 
     public function getMigration(string $migrationName)

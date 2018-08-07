@@ -47,6 +47,14 @@ services:
             $dataMigrationManager: '@a2b.data_migration_manager'
     DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
 
+    a2b.reference_store:
+        class: DragoonBoots\A2B\DataMigration\MigrationReferenceStore
+        arguments:
+        - '@a2b.mapper'
+        - '@a2b.data_migration_manager'
+        - '@a2b.driver_manager'
+    DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface: '@a2b.reference_store'
+
     a2b.source.dbal:
         parent: a2b.source.abstract_source_driver
         class: DragoonBoots\A2B\Drivers\Source\DbalSourceDriver

@@ -13,9 +13,24 @@ abstract class AbstractDataMigration implements DataMigrationInterface
 {
 
     /**
+     * @var MigrationReferenceStoreInterface
+     */
+    protected $referenceStore;
+
+    /**
      * @var DataMigration|null
      */
     protected $definition;
+
+    /**
+     * AbstractDataMigration constructor.
+     *
+     * @param MigrationReferenceStoreInterface $referenceStore
+     */
+    public function __construct(MigrationReferenceStoreInterface $referenceStore)
+    {
+        $this->referenceStore = $referenceStore;
+    }
 
     /**
      * {@inheritdoc}

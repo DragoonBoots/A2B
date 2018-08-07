@@ -49,6 +49,8 @@ services:
 
     a2b.reference_store:
         class: DragoonBoots\A2B\DataMigration\MigrationReferenceStore
+        public: true
+        lazy: true
         arguments:
         - '@a2b.mapper'
         - '@a2b.data_migration_manager'
@@ -94,6 +96,14 @@ services:
         public: false
         arguments:
         - '@a2b.league.uri.parser'
+
+    a2b.migration.abstract_migration:
+        class: DragoonBoots\A2B\DataMigration\AbstractDataMigration
+        abstract: true
+        public: false
+        arguments:
+        - '@a2b.reference_store'
+    DragoonBoots\A2B\DataMigration\AbstractDataMigration: '@a2b.migration.abstract_migration'
 
     a2b.command.migrate:
         class: DragoonBoots\A2B\Command\MigrateCommand

@@ -30,7 +30,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
      *
      * @var array
      */
-    protected $entities;
+    protected $entities = [];
 
     /**
      * MigrationReferenceStore constructor.
@@ -44,8 +44,6 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
         $this->mapper = $mapper;
         $this->migrationManager = $migrationManager;
         $this->driverManager = $driverManager;
-
-        $this->entities = new ArrayCollection();
     }
 
     /**

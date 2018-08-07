@@ -65,5 +65,8 @@ class MigrationReferenceStoreTest extends TestCase
 
         $referenceStore = new MigrationReferenceStore($mapper, $migrationManager, $driverManager);
         $this->assertEquals($expectedReferencedEntity, $referenceStore->get(get_class($migration), $sourceIds));
+
+        // Call a second time to ensure the cache is used instead of fetching again.
+        $this->assertEquals($expectedReferencedEntity, $referenceStore->get(get_class($migration), $sourceIds), 'Not using cached value');
     }
 }

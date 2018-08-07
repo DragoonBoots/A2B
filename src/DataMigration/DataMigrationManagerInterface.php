@@ -2,10 +2,8 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
-use MJS\TopSort\Implementations\FixedArraySort;
 
 
 /**
@@ -15,20 +13,34 @@ interface DataMigrationManagerInterface
 {
 
     /**
+     * Get all migrations
+     *
      * @return Collection|DataMigrationInterface[]
      */
     public function getMigrations(): Collection;
 
     /**
+     * Get all group names
+     *
+     * @return Collection|string[]
+     */
+    public function getGroups(): Collection;
+
+    /**
+     * Get a specific migration
+     *
      * @param string $migrationName
      *
      * @return DataMigrationInterface
      *
      * @throws NonexistentMigrationException
+     *   Thrown when the specified migration doesn't exist
      */
     public function getMigration(string $migrationName);
 
     /**
+     * Get the migrations in a specific group
+     *
      * @param string $groupName
      *
      * @return Collection|DataMigrationInterface[]

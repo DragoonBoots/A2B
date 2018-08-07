@@ -120,6 +120,16 @@ services:
         tags:
         - console.command
 
+    a2b.maker.migration:
+        class: DragoonBoots\A2B\Maker\MigrationMaker
+        lazy: true
+        arguments:
+        - '@a2b.data_migration_manager'
+        - '@a2b.driver_manager'
+        - '@a2b.doctrine.inflector'
+        tags:
+        - 'maker.command'
+
     # Vendors
     a2b.doctrine.inflector:
         class: Doctrine\Common\Inflector\Inflector

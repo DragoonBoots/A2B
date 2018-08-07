@@ -4,7 +4,6 @@
 namespace DragoonBoots\A2B\DataMigration;
 
 
-use Doctrine\Common\Collections\ArrayCollection;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 
 class MigrationReferenceStore implements MigrationReferenceStoreInterface
@@ -56,11 +55,13 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
         if (!isset($this->entities[$key])) {
             $migrationDefinition = $this->migrationManager->getMigration($migrationId)
                 ->getDefinition();
-            $destinationDriver = $this->driverManager->getDestinationDriver($migrationDefinition->getDestinationDriver());
+            $destinationDriver = clone ($this->driverManager->getDestinationDriver($migrationDefinition->getDestinationDriver()));
+            $destinationDriver->configure($migrationDefinition);
             $destIds = $this->mapper->getDestIdsFromSourceIds($migrationId, $sourceIds);
             $entity = $destinationDriver->read($destIds);
 
             $this->entities[$key] = $entity;
+            unset($destinationDriver);
         }
 
         return $this->entities[$key];

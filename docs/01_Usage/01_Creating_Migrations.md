@@ -109,3 +109,14 @@ result from `defaultResult()`.
 
 Once the result has been appropriately transformed, it is returned to be
 written to the destination.
+
+### Getting data from other migrations
+If the migration requires data from other migrations, use the reference store:
+
+```php
+$sourceIds = ['id' => $sourceData['reference']];
+$referencedEntity = $this->referenceStore->get(OtherMigration::class, $sourceIds);
+```
+
+This will read the data written from the given migration (in this example, OtherMigration)
+with the given set of source ids.

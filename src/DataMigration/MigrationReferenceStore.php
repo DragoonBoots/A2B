@@ -5,6 +5,7 @@ namespace DragoonBoots\A2B\DataMigration;
 
 
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
+use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 
 class MigrationReferenceStore implements MigrationReferenceStoreInterface
 {
@@ -52,7 +53,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
     {
         $key = serialize([$migrationId, $sourceIds]);
 
-        if (!isset($this->entities[$key])) {
+        if (!array_key_exists($key, $this->entities)) {
             $migrationDefinition = $this->migrationManager->getMigration($migrationId)
                 ->getDefinition();
             $destinationDriver = clone ($this->driverManager->getDestinationDriver($migrationDefinition->getDestinationDriver()));
@@ -62,6 +63,9 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
 
             $this->entities[$key] = $entity;
             unset($destinationDriver);
+        }
+        if (is_null($this->entities[$key])) {
+            throw new NoMappingForIdsException($sourceIds);
         }
 
         return $this->entities[$key];

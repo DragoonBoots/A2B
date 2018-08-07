@@ -30,13 +30,16 @@ class A2BExtension extends Extension implements CompilerPassInterface
         $loader->load('services.yaml');
 
         $container->registerForAutoconfiguration(DataMigrationInterface::class)
-          ->addTag('a2b.data_migration');
+            ->addTag('a2b.data_migration')
+            ->setParent(new Reference('a2b.migration.abstract_migration'));
+
         $container->registerForAutoconfiguration(SourceDriverInterface::class)
           ->addTag('a2b.driver.source')
-          ->setParent('a2b.source.abstract_source_driver');
+          ->setParent(new Reference('a2b.source.abstract_source_driver'));
+
         $container->registerForAutoconfiguration(DestinationDriverInterface::class)
           ->addTag('a2b.driver.destination')
-          ->setParent('a2b.destination.abstract_destination_driver');
+          ->setParent(new Reference('a2b.destination.abstract_destination_driver'));
     }
 
     /**

@@ -89,6 +89,13 @@ class DataMigration
     protected $destinationIds;
 
     /**
+     * A list of migration FQCNs this depends on
+     *
+     * @var string[]
+     */
+    protected $depends = [];
+
+    /**
      * DataMigration constructor.
      *
      * @param array $values
@@ -101,8 +108,13 @@ class DataMigration
         $this->sourceDriver = $values['sourceDriver'] ?? null;
         $this->destination = $values['destination'] ?? null;
         $this->destinationDriver = $values['destinationDriver'] ?? null;
-        $this->sourceIds = $values['sourceIds'] ?? null;
-        $this->destinationIds = $values['destinationIds'] ?? null;
+        $this->sourceIds = $values['sourceIds'] ?? [];
+        $this->destinationIds = $values['destinationIds'] ?? [];
+
+        // Normalize dependency list to remove leading backslash
+        foreach ($values['depends'] ?? [] as $dependency) {
+            $this->depends[] = ltrim($dependency, '\\');
+        }
     }
 
     /**
@@ -162,6 +174,20 @@ class DataMigration
     }
 
     /**
+     * @internal
+     *
+     * @param string $sourceDriver
+     *
+     * @return self
+     */
+    public function setSourceDriver(string $sourceDriver): self
+    {
+        $this->sourceDriver = $sourceDriver;
+
+        return $this;
+    }
+
+    /**
      * @return string
      *
      * @codeCoverageIgnore
@@ -198,6 +224,20 @@ class DataMigration
     }
 
     /**
+     * @internal
+     *
+     * @param string $destinationDriver
+     *
+     * @return self
+     */
+    public function setDestinationDriver(string $destinationDriver): self
+    {
+        $this->destinationDriver = $destinationDriver;
+
+        return $this;
+    }
+
+    /**
      * @return IdField[]
      *
      * @codeCoverageIgnore
@@ -215,5 +255,15 @@ class DataMigration
     public function getDestinationIds(): array
     {
         return $this->destinationIds;
+    }
+
+    /**
+     * @return string[]
+     *
+     * @codeCoverageIgnore
+     */
+    public function getDepends(): array
+    {
+        return $this->depends;
     }
 }

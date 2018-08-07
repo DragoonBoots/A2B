@@ -7,6 +7,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
+use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use League\Uri\Parser;
 use Symfony\Component\Console\Command\Command;
@@ -15,7 +16,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\VarDumper\Cloner\ClonerInterface;
 use Symfony\Component\VarDumper\Dumper\AbstractDumper;
 
@@ -53,11 +53,6 @@ class MigrateCommand extends Command
     protected $uriParser;
 
     /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBag;
-
-    /**
      * @var AbstractDumper
      */
     protected $varDumper;
@@ -80,7 +75,6 @@ class MigrateCommand extends Command
      * @param DataMigrationExecutorInterface $executor
      * @param DataMigrationMapperInterface   $mapper
      * @param Parser                         $uriParser
-     * @param ParameterBagInterface          $parameterBag
      * @param AbstractDumper                 $varDumper
      * @param ClonerInterface                $varCloner
      */
@@ -92,7 +86,6 @@ class MigrateCommand extends Command
         DataMigrationExecutorInterface $executor,
         DataMigrationMapperInterface $mapper,
         Parser $uriParser,
-        ParameterBagInterface $parameterBag,
         AbstractDumper $varDumper,
         ClonerInterface $varCloner
     ) {
@@ -103,7 +96,6 @@ class MigrateCommand extends Command
         $this->executor = $executor;
         $this->mapper = $mapper;
         $this->uriParser = $uriParser;
-        $this->parameterBag = $parameterBag;
         $this->varDumper = $varDumper;
         $this->varCloner = $varCloner;
     }
@@ -136,6 +128,11 @@ class MigrateCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Keep destination entities that do not exist in the source.'
+            )->addOption(
+                'no-deps',
+                null,
+                InputOption::VALUE_NONE,
+                'Ignore dependencies migrations require.'
             )->addArgument(
                 'migrations', InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
                 'A list of migration classes to run.  Do not specify any migrations to run all migrations.',
@@ -166,6 +163,8 @@ class MigrateCommand extends Command
      * @throws \DragoonBoots\A2B\Exception\NonexistentDriverException
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
+     * @throws \MJS\TopSort\CircularDependencyException
+     * @throws \MJS\TopSort\ElementNotFoundException
      * @throws \ReflectionException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -178,6 +177,9 @@ class MigrateCommand extends Command
         }
 
         $migrations = $this->getMigrations($input->getOption('group'), $input->getArgument('migrations'));
+        if (!$input->getOption('no-deps')) {
+            $migrations = $this->dataMigrationManager->resolveDependencies($migrations);
+        }
 
         $outputFormatter = new ConsoleOutputFormatter($input, $output);
         $outputFormatter->configure(['total' => count($migrations)]);
@@ -186,31 +188,15 @@ class MigrateCommand extends Command
         foreach ($migrations as $migration) {
             $definition = $migration->getDefinition();
 
-            // Resolve container parameters source/destination urls
-            $this->injectProperty($definition, 'source', $this->parameterBag->resolveValue($definition->getSource()));
             if ($input->getOption('simulate')) {
                 $this->injectProperty($definition, 'destination', 'debug:stderr');
-            } else {
-                $this->injectProperty($definition, 'destination', $this->parameterBag->resolveValue($definition->getDestination()));
+                $this->injectProperty($definition, 'destinationDriver', DebugDestinationDriver::class);
             }
 
-            // Get source driver
-            if (!is_null($definition->getSourceDriver())) {
-                $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
-            } else {
-                $sourceUri = $this->uriParser->parse($definition->getSource());
-                $sourceDriver = $this->driverManager->getSourceDriverForScheme($sourceUri['scheme']);
-            }
+            $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
             $sourceDriver->configure($definition);
             $migration->configureSource($sourceDriver);
-
-            // Get destination driver
-            if (!is_null($definition->getDestinationDriver())) {
-                $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
-            } else {
-                $destinationUri = $this->uriParser->parse($definition->getDestination());
-                $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
-            }
+            $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
             $destinationDriver->configure($definition);
             $migration->configureDestination($destinationDriver);
 

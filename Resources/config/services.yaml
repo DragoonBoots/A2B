@@ -11,6 +11,9 @@ services:
         lazy: true
         arguments:
         - '@annotation_reader'
+        - '@a2b.league.uri.parser'
+        - '@a2b.driver_manager'
+        - '@parameter_bag'
     DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface: '@a2b.data_migration_manager'
 
     a2b.driver_manager:
@@ -44,6 +47,16 @@ services:
             $inflector: '@a2b.doctrine.inflector'
             $dataMigrationManager: '@a2b.data_migration_manager'
     DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
+
+    a2b.reference_store:
+        class: DragoonBoots\A2B\DataMigration\MigrationReferenceStore
+        public: true
+        lazy: true
+        arguments:
+        - '@a2b.mapper'
+        - '@a2b.data_migration_manager'
+        - '@a2b.driver_manager'
+    DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface: '@a2b.reference_store'
 
     a2b.source.dbal:
         parent: a2b.source.abstract_source_driver
@@ -85,6 +98,14 @@ services:
         arguments:
         - '@a2b.league.uri.parser'
 
+    a2b.migration.abstract_migration:
+        class: DragoonBoots\A2B\DataMigration\AbstractDataMigration
+        abstract: true
+        public: false
+        arguments:
+        - '@a2b.reference_store'
+    DragoonBoots\A2B\DataMigration\AbstractDataMigration: '@a2b.migration.abstract_migration'
+
     a2b.command.migrate:
         class: DragoonBoots\A2B\Command\MigrateCommand
         lazy: true
@@ -94,7 +115,6 @@ services:
         - '@a2b.executor'
         - '@a2b.mapper'
         - '@a2b.league.uri.parser'
-        - '@parameter_bag'
         - '@a2b.symfony.dumper.cli'
         - '@a2b.symfony.dumper.cloner'
         tags:

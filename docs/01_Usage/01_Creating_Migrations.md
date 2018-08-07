@@ -27,7 +27,8 @@ use DragoonBoots\A2B\Drivers\SourceDriverInterface;
  *     destination="csv:///%kernel.project_dir%/resources/data/data.csv",
  *     destinationDriver="DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver",
  *     sourceIds={@IdField(name="id")},
- *     destinationIds={@IdField(name="identifier", type="string")}
+ *     destinationIds={@IdField(name="identifier", type="string")},
+ *     depends={"App\Migrations\DependentMigration"}
  * )
  */
  public class ExampleMigration extends AbstractDataMigration implements DataMigrationInterface
@@ -61,6 +62,8 @@ rows to their destinations and allow for updating.  Each `@IdField` has a
 field to specify the data type.  Valid data types are `int` and `string`; the
 default is `int`.
 
+### depends
+*(optional)* A list of migration FQCNs that must be run before this migration.
 
 Configuration
 -------------
@@ -106,3 +109,14 @@ result from `defaultResult()`.
 
 Once the result has been appropriately transformed, it is returned to be
 written to the destination.
+
+### Getting data from other migrations
+If the migration requires data from other migrations, use the reference store:
+
+```php
+$sourceIds = ['id' => $sourceData['reference']];
+$referencedEntity = $this->referenceStore->get(OtherMigration::class, $sourceIds);
+```
+
+This will read the data written from the given migration (in this example, OtherMigration)
+with the given set of source ids.

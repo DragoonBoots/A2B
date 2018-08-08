@@ -6,7 +6,6 @@ namespace DragoonBoots\A2B\Drivers\Destination;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
-use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\MigrationException;
@@ -35,11 +34,6 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     protected $reader;
 
     /**
-     * @var IdField[]
-     */
-    protected $destIds;
-
-    /**
      * @var bool
      */
     protected $headerWritten = false;
@@ -59,23 +53,11 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     protected $tempFile;
 
     /**
-     * @var DataMigration
-     */
-    protected $migrationDefinition;
-
-    protected $destUri;
-
-    /**
      * {@inheritdoc}
      */
     public function configure(DataMigration $definition)
     {
-        $this->migrationDefinition = $definition;
-
-        $destination = $definition->getDestination();
-        $this->destIds = $definition->getDestinationIds();
-
-        $this->destUri = $this->uriParser->parse($destination);
+        parent::configure($definition);
 
         // Ensure the destination exists.
         if (!is_dir(dirname($this->destUri['path']))) {

@@ -5,6 +5,8 @@ namespace DragoonBoots\A2B\DataMigration;
 
 
 use DragoonBoots\A2B\Annotations\DataMigration;
+use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
+use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 
 /**
  * Base class for Data Migrations
@@ -40,6 +42,22 @@ abstract class AbstractDataMigration implements DataMigrationInterface
     public function defaultResult()
     {
         return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureSource(SourceDriverInterface $sourceDriver)
+    {
+        // Do nothing
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureDestination(DestinationDriverInterface $destinationDriver)
+    {
+        // Do nothing
     }
 
     /**

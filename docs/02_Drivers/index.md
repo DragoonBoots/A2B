@@ -40,5 +40,10 @@ Destination
             <td><code>csv</code></td>
             <td>One CSV file per migration</td>
         </tr>
+        <tr>
+            <td><a href="01_Destination/YamlDestinationDriver">YamlDestinationDriver</a></td>
+            <td><code>yaml</code><code>yml</code></td>
+            <td>A directory (with optional subdirectories depending on migration ids) with one yaml file per entity.</td>
+        </tr>
     </tbody>
 </table>

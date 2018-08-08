@@ -31,6 +31,13 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
      */
     protected $cloner;
 
+    /**
+     * DebugDestinationDriver constructor.
+     *
+     * @param Parser          $uriParser
+     * @param AbstractDumper  $dumper
+     * @param ClonerInterface $cloner
+     */
     public function __construct(Parser $uriParser, AbstractDumper $dumper, ClonerInterface $cloner)
     {
         parent::__construct($uriParser);
@@ -44,10 +51,9 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
      */
     public function configure(DataMigration $definition)
     {
-        $destination = $definition->getDestination();
+        parent::configure($definition);
 
-        $uri = $this->uriParser->parse($destination);
-        switch ($uri['path']) {
+        switch ($this->destUri['path']) {
             case 'stdout':
                 $this->dumper->setOutput(STDOUT);
 
@@ -58,7 +64,7 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
                 return;
         }
 
-        throw new BadUriException($destination);
+        throw new BadUriException($definition->getDestination());
     }
 
     /**
@@ -87,6 +93,9 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
         return null;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function readMultiple(array $destIdSet)
     {
         return [];

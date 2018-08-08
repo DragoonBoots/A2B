@@ -11,7 +11,6 @@ use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Factory\FinderFactory;
-use DragoonBoots\A2B\Factory\YamlDumperFactory;
 use League\Uri\Parser;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -105,7 +104,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         $ids = [];
         foreach ($this->finder->getIterator() as $fileInfo) {
-            $ids[] = $this->getFileId($fileInfo);
+            $ids[] = $this->buildIdsFromFilePath($fileInfo);
         }
 
         return $ids;
@@ -124,7 +123,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * @return array
      */
-    protected function getFileId($fileInfo): array
+    protected function buildIdsFromFilePath(SplFileInfo $fileInfo): array
     {
         $pathParts = explode('/', $fileInfo->getPath());
         $pathParts[] = $fileInfo->getBasename('.'.$fileInfo->getExtension());
@@ -146,16 +145,40 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         $finder = $this->findEntities([$destIds]);
 
         if ($finder->count() > 1) {
+            // The filesystem would normally enforce uniqueness here, however,
+            // because both "yaml" and "yml" extensions are allowed, it's
+            // conceivable that a file could exist with both extensions.
             throw new \RangeException(sprintf("More than one entity matched the ids:\n%s\n", var_export($destIds, true)));
         } elseif ($finder->count() == 1) {
             /** @var SplFileInfo $fileInfo */
             $fileInfo = $finder->getIterator()->current();
             $entity = $this->yamlParser->parse($fileInfo->getContents());
+            $entity = $this->addIdsToEntity($destIds, $entity);
 
             return $entity;
         }
 
         return null;
+    }
+
+    /**
+     * Add the given ids back to the entity
+     *
+     * Ids are removed from the entity when it is saved (as this information is
+     * now stored in the path), so they need to be added back to the entity.
+     *
+     * @param array $destIds
+     * @param array $entity
+     *
+     * @return array
+     */
+    protected function addIdsToEntity(array $destIds, array $entity)
+    {
+        foreach ($destIds as $destId => $value) {
+            $entity[$destId] = $value;
+        }
+
+        return $entity;
     }
 
     /**
@@ -172,7 +195,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             ->ignoreDotFiles(true);
 
         foreach ($destIdSet as $destIds) {
-            $finder->path(sprintf('`%s$`', $this->buildFilePath($destIds, 'ya?ml')));
+            $finder->path(sprintf('`%s$`', $this->buildFilePathFromIds($destIds, 'ya?ml')));
         }
 
         return $finder;
@@ -187,7 +210,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * @return string
      */
-    protected function buildFilePath(array $destIds, string $ext = 'yaml'): string
+    protected function buildFilePathFromIds(array $destIds, string $ext = 'yaml'): string
     {
         $pathParts = [];
         foreach ($destIds as $destId => $value) {
@@ -210,6 +233,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         $entities = [];
         foreach ($finder as $fileInfo) {
             $entity = $this->yamlParser->parse($fileInfo->getContents());
+            $destIds = $this->buildIdsFromFilePath($fileInfo);
+            $entity = $this->addIdsToEntity($destIds, $entity);
             $entities[] = $entity;
         }
 
@@ -236,12 +261,12 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         }
         $yaml = $this->yamlDumper->dump($data, $this->options['inline'], 0, $flagValue);
 
-        $path = $this->buildFilePath($destIds);
+        $path = $this->buildFilePathFromIds($destIds);
 
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path), 0755, true);
         }
-        file_put_contents($path, $yaml, LOCK_EX);
+        file_put_contents($path, $yaml);
 
         return $destIds;
     }
@@ -254,7 +279,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *   (multiline) arrays to the inline representation.
      * - flags: Special flags for the YAML dumper.  See
      *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
-     *   for valid flags.
+     *   for valid flags.  *This will overwrite all flags, including defaults.*
+     *   Use setFlag() and unsetFlag() to control flags.
      *
      * @param string $option
      * @param mixed  $value
@@ -282,7 +308,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     public function setFlag($flag)
     {
         if (!in_array($flag, $this->options['flags'])) {
-            $this->options[] = $flag;
+            $this->options['flags'][] = $flag;
         }
 
         return $this;

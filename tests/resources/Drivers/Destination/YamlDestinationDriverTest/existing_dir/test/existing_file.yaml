@@ -1,0 +1,6 @@
+field: value
+list: &anchor
+  - item1
+  - item2
+
+referenced_list: *anchor

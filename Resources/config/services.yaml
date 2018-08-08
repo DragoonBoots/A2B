@@ -92,7 +92,7 @@ services:
             - a2b.driver.destination
         arguments:
             $yamlParser: '@a2b.symfony.yaml.parser'
-            $yamlDumperFactory: '@a2b.factory.yaml.dumper'
+            $yamlDumper: '@a2b.symfony.yaml.dumper'
             $finderFactory: '@a2b.factory.finder'
 
     a2b.source.abstract_source_driver:
@@ -145,9 +145,6 @@ services:
     a2b.factory.finder:
         class: DragoonBoots\A2B\Factory\FinderFactory
         lazy: true
-    a2b.factory.yaml.dumper:
-        class: DragoonBoots\A2B\Factory\YamlDumperFactory
-        lazy: true
 
     # Vendors
     a2b.doctrine.inflector:
@@ -168,3 +165,5 @@ services:
     a2b.symfony.yaml.dumper:
         class: Symfony\Component\Yaml\Dumper
         lazy: true
+        arguments:
+        - 2

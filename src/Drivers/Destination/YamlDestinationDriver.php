@@ -33,13 +33,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     protected $yamlParser;
 
     /**
-     * @var YamlDumperFactory
-     */
-    protected $yamlDumperFactory;
-
-    /**
-     * This dumper is created per migration
-     *
      * @var YamlDumper
      */
     protected $yamlDumper;
@@ -61,24 +54,23 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      */
     protected $options = [
         'inline' => 3,
-        'indent' => 2,
         'flags' => [Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK],
     ];
 
     /**
      * YamlDestinationDriver constructor.
      *
-     * @param Parser            $uriParser
-     * @param YamlParser        $yamlParser
-     * @param YamlDumperFactory $yamlDumperFactory
-     * @param FinderFactory     $finderFactory
+     * @param Parser        $uriParser
+     * @param YamlParser    $yamlParser
+     * @param YamlDumper    $yamlDumper
+     * @param FinderFactory $finderFactory
      */
-    public function __construct(Parser $uriParser, YamlParser $yamlParser, YamlDumperFactory $yamlDumperFactory, FinderFactory $finderFactory)
+    public function __construct(Parser $uriParser, YamlParser $yamlParser, YamlDumper $yamlDumper, FinderFactory $finderFactory)
     {
         parent::__construct($uriParser);
 
         $this->yamlParser = $yamlParser;
-        $this->yamlDumperFactory = $yamlDumperFactory;
+        $this->yamlDumper = $yamlDumper;
         $this->finderFactory = $finderFactory;
     }
 
@@ -94,8 +86,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     public function configure(DataMigration $definition)
     {
         parent::configure($definition);
-
-        $this->yamlDumper = null;
 
         if (!is_dir($this->destUri['path'])) {
             mkdir($this->destUri['path'], 0755, true);
@@ -231,10 +221,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      */
     public function write($data)
     {
-        if (!$this->yamlDumper) {
-            $this->yamlDumper = $this->yamlDumperFactory->get($this->options['indent']);
-        }
-
         $destIds = [];
         foreach ($this->destIds as $idField) {
             $destIds[$idField->getName()] = $this->resolveDestId($idField, $data[$idField->getName()]);
@@ -266,7 +252,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      * Valid options are:
      * - inline: The level at which the output switches from expanded
      *   (multiline) arrays to the inline representation.
-     * - indent:  The indentation level.
      * - flags: Special flags for the YAML dumper.  See
      *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
      *   for valid flags.

@@ -20,7 +20,7 @@ class ConsoleOutputFormatter extends AbstractOutputFormatter implements OutputFo
     protected const PROGRESS_BAR_FORMAT = <<<TXT
  %last_migrated%
  %message%
- %current%/%max% (%percent%) [%bar%]
+ %current%/%max% (%percent%%) [%bar%]
  %elapsed%/%estimated% (%remaining% remaining)
  %memory%
  

@@ -190,6 +190,8 @@ class <?= $class_name ?> extends AbstractDataMigration implements DataMigrationI
     public function transform($sourceData, $destinationData)
     {
         // TODO: Implement transform() method.
+
+        return $destinationData;
     }
 
     /**

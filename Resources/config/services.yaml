@@ -84,6 +84,17 @@ services:
         tags:
         - a2b.driver.destination
 
+    a2b.destination.yaml:
+        parent: a2b.destination.abstract_destination_driver
+        class: DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver
+        public: true
+        tags:
+            - a2b.driver.destination
+        arguments:
+            $yamlParser: '@a2b.symfony.yaml.parser'
+            $yamlDumperFactory: '@a2b.factory.yaml.dumper'
+            $finderFactory: '@a2b.factory.finder'
+
     a2b.source.abstract_source_driver:
         class: DragoonBoots\A2B\Drivers\AbstractSourceDriver
         abstract: true
@@ -130,6 +141,14 @@ services:
         tags:
         - 'maker.command'
 
+    # Factories
+    a2b.factory.finder:
+        class: DragoonBoots\A2B\Factory\FinderFactory
+        lazy: true
+    a2b.factory.yaml.dumper:
+        class: DragoonBoots\A2B\Factory\YamlDumperFactory
+        lazy: true
+
     # Vendors
     a2b.doctrine.inflector:
         class: Doctrine\Common\Inflector\Inflector
@@ -142,4 +161,10 @@ services:
         lazy: true
     a2b.symfony.dumper.cloner:
         class: Symfony\Component\VarDumper\Cloner\VarCloner
+        lazy: true
+    a2b.symfony.yaml.parser:
+        class: Symfony\Component\Yaml\Parser
+        lazy: true
+    a2b.symfony.yaml.dumper:
+        class: Symfony\Component\Yaml\Dumper
         lazy: true

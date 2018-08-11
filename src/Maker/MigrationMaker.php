@@ -120,6 +120,9 @@ class MigrationMaker extends AbstractMaker
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
         $class = $input->getOption('class');
+        if ($input->getOption('group')) {
+            $class = $input->getOption('group').'\\'.$class;
+        }
 
         // Don't allow generating something that already exists.
         $classNameDetails = $generator->createClassNameDetails($class, 'DataMigration');
@@ -282,12 +285,12 @@ class MigrationMaker extends AbstractMaker
                     if (!in_array($value, $validIdTypes)) {
                         throw new \RuntimeException(sprintf('Valid id types are %s.', implode(', ', $validIdTypes)));
                     }
+
+                    return $value;
                 }
             );
             $newIdType = $io->askQuestion($q);
-            if ($newIdType !== 'int') {
-                $idValues['type'] = $newIdType;
-            }
+            $idValues['type'] = $newIdType;
 
             $ids[] = new IdField($idValues);
         }

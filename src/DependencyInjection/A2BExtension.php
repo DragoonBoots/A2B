@@ -10,18 +10,18 @@ use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class A2BExtension extends Extension implements CompilerPassInterface
+class A2BExtension extends ConfigurableExtension implements CompilerPassInterface
 {
 
     /**
      * {@inheritdoc}
      * @throws \Exception
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function loadInternal(array $config, ContainerBuilder $container)
     {
         $loader = new YamlFileLoader(
           $container,

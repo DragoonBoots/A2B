@@ -29,6 +29,26 @@ class A2BExtension extends ConfigurableExtension implements CompilerPassInterfac
         );
         $loader->load('services.yaml');
 
+        // Register source and destination keys
+        $migrationManagerDefinition = $container->getDefinition('a2b.data_migration_manager');
+        foreach ($config['sources'] as $source => $info) {
+            $migrationManagerDefinition->addMethodCall(
+                'addSource', [
+                    $source,
+                    $info['uri'],
+                ]
+            );
+        }
+        foreach ($config['destinations'] as $source => $info) {
+            $migrationManagerDefinition->addMethodCall(
+                'addDestination', [
+                    $source,
+                    $info['uri'],
+                ]
+            );
+        }
+
+        // Autoconfigure services
         $container->registerForAutoconfiguration(DataMigrationInterface::class)
             ->addTag('a2b.data_migration')
             ->setParent(new Reference('a2b.migration.abstract_migration'));

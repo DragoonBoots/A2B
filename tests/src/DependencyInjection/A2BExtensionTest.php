@@ -31,16 +31,23 @@ class A2BExtensionTest extends A2BKernelTestCase
 
     public function servicesDataProvider()
     {
-        // service id, service class/type hint
-        return [
+        // service id => service class/type hint
+        $services = [
             // @formatter:off
-            ['a2b.data_migration_manager', DataMigrationManagerInterface::class, true],
-            ['a2b.driver_manager', DriverManagerInterface::class, true],
-            ['a2b.executor', DataMigrationExecutorInterface::class, true],
-            ['a2b.mapper', DataMigrationMapperInterface::class, true],
-            ['a2b.reference_store', MigrationReferenceStoreInterface::class, true],
+            'a2b.data_migration_manager' => [DataMigrationManagerInterface::class, true],
+            'a2b.driver_manager' => [DriverManagerInterface::class, true],
+            'a2b.executor' => [DataMigrationExecutorInterface::class, true],
+            'a2b.mapper' => [DataMigrationMapperInterface::class, true],
+            'a2b.reference_store' => [MigrationReferenceStoreInterface::class, true],
             // @formatter:on
         ];
+
+        $ret = [];
+        foreach ($services as $serviceId => $expectations) {
+            $ret[$serviceId] = array_merge([$serviceId], $expectations);
+        }
+
+        return $ret;
     }
 
     protected function setUp()

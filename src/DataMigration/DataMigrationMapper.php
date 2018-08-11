@@ -141,15 +141,15 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         $toSchema = clone $fromSchema;
         try {
             $table = $toSchema->getTable($tableName);
+            $createPrimaryKey = false;
         } catch (SchemaException $e) {
             if ($e->getCode() == SchemaException::TABLE_DOESNT_EXIST) {
                 // Create the table.
                 $table = $toSchema->createTable($tableName);
                 $table->addOption('comment', sprintf('Data migration map for "%s"', $migrationId));
-                $table->addColumn('id', Type::INTEGER);
                 $table->addColumn('updated', Type::DATETIMETZ_IMMUTABLE);
-                $table->setPrimaryKey(['id']);
                 $table->addIndex(['updated'], sprintf('ix_%s_updated', $tableName));
+                $createPrimaryKey = true;
             } else {
                 throw $e;
             }
@@ -158,23 +158,25 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         // Ensure mapping columns are present.
         $sourceIdFields = $migrationDefinition->getSourceIds();
         $destIdFields = $migrationDefinition->getDestinationIds();
+        $sourceIdColumnNames = [];
         foreach ($sourceIdFields as $sourceIdField) {
+            $columnName = $this->getMappingColumnName($sourceIdField, self::MAPPING_SOURCE);
+            $sourceIdColumnNames[] = $columnName;
             $this->conformMappingColumn($table, $sourceIdField, self::MAPPING_SOURCE);
         }
+        $destIdColumnNames = [];
         foreach ($destIdFields as $destIdField) {
+            $columnName = $this->getMappingColumnName($destIdField, self::MAPPING_DEST);
+            $destIdColumnNames[] = $columnName;
             $this->conformMappingColumn($table, $destIdField, self::MAPPING_DEST);
+        }
+        if ($createPrimaryKey) {
+            $table->setPrimaryKey($destIdColumnNames);
         }
 
         // Create indexes
         $this->conformMappingIndexes($table, $sourceIdFields, self::MAPPING_SOURCE);
-        $this->conformMappingIndexes($table, $destIdFields, self::MAPPING_DEST);
-        $allIdColumnNames = [];
-        foreach ($sourceIdFields as $sourceIdField) {
-            $allIdColumnNames[] = $this->getMappingColumnName($sourceIdField, self::MAPPING_SOURCE);
-        }
-        foreach ($destIdFields as $destIdField) {
-            $allIdColumnNames[] = $this->getMappingColumnName($destIdField, self::MAPPING_DEST);
-        }
+        $allIdColumnNames = array_merge($sourceIdColumnNames, $destIdColumnNames);
         $allIdIndexName = sprintf('ix_%s_mapping', $tableName);
         try {
             $index = $table->getIndex($allIdIndexName);

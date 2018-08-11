@@ -48,6 +48,16 @@ class DataMigrationManager implements DataMigrationManagerInterface
     protected $groups;
 
     /**
+     * @var string[]
+     */
+    protected $sources;
+
+    /**
+     * @var string[]
+     */
+    protected $destinations;
+
+    /**
      * DataMigrationManager constructor.
      *
      * @param Reader                 $annotationReader
@@ -72,6 +82,36 @@ class DataMigrationManager implements DataMigrationManagerInterface
     }
 
     /**
+     * Add a source key
+     *
+     * @internal
+     *
+     * @param string $name
+     * @param string $uri
+     */
+    public function addSource(string $name, string $uri)
+    {
+        if (!isset($this->sources[$name])) {
+            $this->sources[$name] = $uri;
+        }
+    }
+
+    /**
+     * Add a destination key
+     *
+     * @internal
+     *
+     * @param string $name
+     * @param string $uri
+     */
+    public function addDestination(string $name, string $uri)
+    {
+        if (!isset($this->destinations[$name])) {
+            $this->destinations[$name] = $uri;
+        }
+    }
+
+    /**
      * Add a new migration
      *
      * @internal
@@ -87,8 +127,9 @@ class DataMigrationManager implements DataMigrationManagerInterface
         $reflClass = new \ReflectionClass($migration);
         /** @var DataMigration $definition */
         $definition = $this->annotationReader->getClassAnnotation($reflClass, DataMigration::class);
-        $this->injectProperty($definition, 'source', $this->parameterBag->resolveValue($definition->getSource()));
-        $this->injectProperty($definition, 'destination', $this->parameterBag->resolveValue($definition->getDestination()));
+        foreach (['source', 'destination'] as $propertyName) {
+            $this->resolveDefinitionProperty($definition, $propertyName);
+        }
 
         if (is_null($definition->getSourceDriver())) {
             $source = $definition->getSource();
@@ -106,6 +147,41 @@ class DataMigrationManager implements DataMigrationManagerInterface
         $migration->setDefinition($definition);
         $this->migrations[get_class($migration)] = $migration;
         $this->groups[$definition->getGroup()] = $definition->getGroup();
+    }
+
+    /**
+     * Resolve the migration definition property into something usable.
+     *
+     * This will
+     * - Lookup the property in the appropriate key map and substitute the found
+     *   value if it exists
+     * - Resolve parameters contained within
+     *
+     * @param DataMigration $definition
+     * @param string        $propertyName
+     *
+     * @throws \ReflectionException
+     */
+    private function resolveDefinitionProperty(DataMigration $definition, string $propertyName)
+    {
+        $getters = [
+            'source' => [$definition, 'getSource'],
+            'destination' => [$definition, 'getDestination'],
+        ];
+        $keyMaps = [
+            'source' => $this->sources,
+            'destination' => $this->destinations,
+        ];
+
+        $value = call_user_func($getters[$propertyName]);
+        $keyMap = $keyMaps[$propertyName];
+
+        if (isset($keyMap[$value])) {
+            $value = $keyMap[$value];
+        }
+        $value = $this->parameterBag->resolveValue($value);
+
+        $this->injectProperty($definition, $propertyName, $value);
     }
 
     /**

@@ -50,6 +50,10 @@ Set the source/destination for this migration.  This is a special URL that
 drivers parse when setting up the migration. See the
 [list of drivers](02_Drivers) for details on valid values.
 
+Common values may be defined in configuration to avoid repeating the same URL.
+See [Configuration](03_Configuration.md#page_Sources-and-Destinations) for
+details.
+
 ### sourceDriver/destinationDriver
 *(optional)* If more than one driver implements a given URL scheme, specify the
 FQCN of the desired driver here.  If this is omitted, the correct driver will

@@ -11,9 +11,7 @@ class A2BKernelTestCase extends KernelTestCase
 
     protected function tearDown()
     {
-        $cacheDir = self::$kernel->getCacheDir();
-        parent::tearDown();
-        $this->rmDirContents($cacheDir);
+        self::tearDownTest();
     }
 
     /**
@@ -23,15 +21,21 @@ class A2BKernelTestCase extends KernelTestCase
      *
      * @return bool
      */
-    private function rmDirContents(string $path)
+    private static function rmDirContents(string $path)
     {
         $files = array_diff(scandir($path), ['.', '..']);
         foreach ($files as $file) {
             $contentsPath = sprintf('%s/%s', $path, $file);
-            (is_dir($contentsPath)) ? $this->rmDirContents($contentsPath) : unlink($contentsPath);
+            (is_dir($contentsPath)) ? self::rmDirContents($contentsPath) : unlink($contentsPath);
         }
 
         return rmdir($path);
+    }
+
+    protected static function tearDownTest(): void
+    {
+        $cacheDir = self::$kernel->getCacheDir();
+        self::rmDirContents($cacheDir);
     }
 
 }

@@ -61,7 +61,7 @@ services:
     a2b.source.dbal:
         parent: a2b.source.abstract_source_driver
         class: DragoonBoots\A2B\Drivers\Source\DbalSourceDriver
-        public: true
+        public: false
         tags:
         - a2b.driver.source
         arguments:
@@ -70,7 +70,7 @@ services:
     a2b.destination.debug:
         parent: a2b.destination.abstract_destination_driver
         class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver
-        public: true
+        public: false
         tags:
         - a2b.driver.destination
         arguments:
@@ -80,14 +80,14 @@ services:
     a2b.destination.csv:
         parent: a2b.destination.abstract_destination_driver
         class: DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver
-        public: true
+        public: false
         tags:
         - a2b.driver.destination
 
     a2b.destination.yaml:
         parent: a2b.destination.abstract_destination_driver
         class: DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver
-        public: true
+        public: false
         tags:
             - a2b.driver.destination
         arguments:

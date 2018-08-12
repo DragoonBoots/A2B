@@ -26,6 +26,14 @@ use Symfony\Component\Yaml\Yaml;
 class YamlDestinationDriver extends AbstractDestinationDriver implements DestinationDriverInterface
 {
 
+    const DEFAULT_OPTIONS = [
+        'inline' => 3,
+        'refs' => false,
+        'flags' => [Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK],
+    ];
+
+    const INDENT_SPACES = 2;
+
     /**
      * @var YamlParser
      */
@@ -51,10 +59,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * @var array
      */
-    protected $options = [
-        'inline' => 3,
-        'flags' => [Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK],
-    ];
+    protected $options = self::DEFAULT_OPTIONS;
 
     /**
      * YamlDestinationDriver constructor.
@@ -85,6 +90,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     public function configure(DataMigration $definition)
     {
         parent::configure($definition);
+        $this->options = self::DEFAULT_OPTIONS;
 
         if (!is_dir($this->destUri['path'])) {
             mkdir($this->destUri['path'], 0755, true);
@@ -144,14 +150,17 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         $finder = $this->findEntities([$destIds]);
 
-        if ($finder->count() > 1) {
+        $count = $finder->count();
+        if ($count > 1) {
             // The filesystem would normally enforce uniqueness here, however,
             // because both "yaml" and "yml" extensions are allowed, it's
             // conceivable that a file could exist with both extensions.
             throw new \RangeException(sprintf("More than one entity matched the ids:\n%s\n", var_export($destIds, true)));
-        } elseif ($finder->count() == 1) {
+        } elseif ($count == 1) {
             /** @var SplFileInfo $fileInfo */
-            $fileInfo = $finder->getIterator()->current();
+            $iterator = $finder->getIterator();
+            $iterator->rewind();
+            $fileInfo = $iterator->current();
             $entity = $this->yamlParser->parse($fileInfo->getContents());
             $entity = $this->addIdsToEntity($destIds, $entity);
 
@@ -159,26 +168,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         }
 
         return null;
-    }
-
-    /**
-     * Add the given ids back to the entity
-     *
-     * Ids are removed from the entity when it is saved (as this information is
-     * now stored in the path), so they need to be added back to the entity.
-     *
-     * @param array $destIds
-     * @param array $entity
-     *
-     * @return array
-     */
-    protected function addIdsToEntity(array $destIds, array $entity)
-    {
-        foreach ($destIds as $destId => $value) {
-            $entity[$destId] = $value;
-        }
-
-        return $entity;
     }
 
     /**
@@ -195,7 +184,14 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             ->ignoreDotFiles(true);
 
         foreach ($destIdSet as $destIds) {
-            $finder->path(sprintf('`%s$`', $this->buildFilePathFromIds($destIds, 'ya?ml')));
+            $searchPath = ltrim(
+                str_replace(
+                    $this->destUri['path'],
+                    '',
+                    $this->buildFilePathFromIds($destIds, 'ya?ml')
+                ), '/'
+            );
+            $finder->path(sprintf('`^%s$`', $searchPath));
         }
 
         return $finder;
@@ -221,6 +217,26 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         $filePath = sprintf('%s/%s/%s', $this->destUri['path'], implode('/', $pathParts), $fileName);
 
         return $filePath;
+    }
+
+    /**
+     * Add the given ids back to the entity
+     *
+     * Ids are removed from the entity when it is saved (as this information is
+     * now stored in the path), so they need to be added back to the entity.
+     *
+     * @param array $destIds
+     * @param array $entity
+     *
+     * @return array
+     */
+    protected function addIdsToEntity(array $destIds, array $entity)
+    {
+        foreach ($destIds as $destId => $value) {
+            $entity[$destId] = $value;
+        }
+
+        return $entity;
     }
 
     /**
@@ -255,11 +271,11 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             unset($data[$idField->getName()]);
         }
 
-        $flagValue = 0;
-        foreach ($this->options['flags'] as $flag) {
-            $flagValue |= $flag;
+        $yaml = $this->dumpYaml($data);
+        if ($this->options['refs']) {
+            $this->compileAnchors($data, $anchors, $useAnchors);
+            $this->addRefs($yaml, $useAnchors);
         }
-        $yaml = $this->yamlDumper->dump($data, $this->options['inline'], 0, $flagValue);
 
         $path = $this->buildFilePathFromIds($destIds);
 
@@ -272,11 +288,101 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     }
 
     /**
+     * Dump the data into YAML format according to configured options.
+     *
+     * @param array $data
+     * @param int   $depth
+     *   The depth of this dump stage, for internal use.
+     *
+     * @return string
+     */
+    protected function dumpYaml(array $data, $depth = 0): string
+    {
+        $flagValue = 0;
+        foreach ($this->options['flags'] as $flag) {
+            $flagValue |= $flag;
+        }
+        $yaml = $this->yamlDumper->dump($data, $this->options['inline'], $depth * self::INDENT_SPACES, $flagValue);
+
+        return $yaml;
+    }
+
+    /**
+     * Create a list of possible anchors to use.
+     *
+     * @param array $data
+     * @param array $anchors
+     *   An array, passed by reference, to store the possible anchors in.
+     *   Anchors are named by separating their first path with a "."
+     * @param array $useAnchors
+     *   An array, passed by reference, to store a a list of anchors that should
+     *   be used.
+     * @param array $path
+     */
+    protected function compileAnchors(array $data, ?array &$anchors, ?array &$useAnchors, array $path = [])
+    {
+        if (!isset($anchors)) {
+            $anchors = [];
+        }
+        if (!isset($useAnchors)) {
+            $useAnchors = [];
+        }
+        foreach ($data as $key => $value) {
+            $valuePath = array_merge($path, [$key]);
+            $anchor = implode('.', $valuePath);
+            if (is_array($value)) {
+                $yamlValue = $this->dumpYaml($value, count($path) + 1);
+            } else {
+                $yamlValue = $this->dumpYaml([$key => $value], count($path));
+            }
+            $yamlValue = rtrim($yamlValue);
+
+            $useAnchor = array_search($yamlValue, $anchors);
+            if ($useAnchor !== false) {
+                $useAnchors[$useAnchor] = $yamlValue;
+            } else {
+                $anchors[$anchor] = $yamlValue;
+                if (is_array($value)) {
+                    $this->compileAnchors($value, $anchors, $useAnchors, $valuePath);
+                }
+            }
+        }
+    }
+
+    /**
+     * Replace values with anchors where appropriate
+     *
+     * @param string $yaml
+     *   The yaml string to act upon, passed by reference
+     * @param array  $useAnchors
+     */
+    protected function addRefs(string &$yaml, array $useAnchors)
+    {
+        foreach ($useAnchors as $anchor => $value) {
+            // Add the anchor on the first occurrence
+            $pos = strpos($yaml, $value);
+            if ($pos === false) {
+                continue;
+            }
+            $before = substr($yaml, 0, $pos - 1);
+            $space = substr($yaml, $pos - 1, 1);
+            $firstValueWithAnchor = ' &'.$anchor.$space.$value;
+            $after = substr($yaml, $pos + strlen($value));
+
+            // Replace later occurrences with an alias.
+            $after = str_replace($space.$value, ' *'.$anchor, $after);
+            $yaml = $before.$firstValueWithAnchor.$after;
+        }
+    }
+
+    /**
      * Set an option for the YAML dumper.
      *
      * Valid options are:
      * - inline: The level at which the output switches from expanded
      *   (multiline) arrays to the inline representation.
+     * - refs: Automaticlly generate YAML anchors and references.  *This is a
+     *   slow process!*
      * - flags: Special flags for the YAML dumper.  See
      *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
      *   for valid flags.  *This will overwrite all flags, including defaults.*

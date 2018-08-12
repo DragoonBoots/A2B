@@ -273,13 +273,22 @@ class YamlDestinationDriverTest extends TestCase
         $this->assertEquals($destIdSet, $foundIds);
     }
 
-    public function testWrite()
+    /**
+     * @param bool   $useRefs
+     * @param string $expected
+     *
+     * @throws \DragoonBoots\A2B\Exception\BadUriException
+     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
+     *
+     * @dataProvider writeDataProvider
+     */
+    public function testWrite(bool $useRefs, string $expected)
     {
         $destIds = ['group' => 'new_group', 'identifier' => 'new_file'];
         $newEntity = [
             'group' => 'new_group',
             'identifier' => 'new_file',
-            'field' => 'value',
+            'scalar_field' => 'value',
             'list' => [
                 'item1',
                 'item2',
@@ -287,6 +296,16 @@ class YamlDestinationDriverTest extends TestCase
             'referenced_list' => [
                 'item1',
                 'item2',
+            ],
+            'referenced_scalar' => 'value',
+            'mapping_field' => [
+                'inner_field' => 'inner_value',
+            ],
+            'other_mapping_field' => [
+                'inner_field' => 'inner_value',
+            ],
+            'deep_mapping_field' => [
+                'other_field' => 'inner_value',
             ],
         ];
         $path = vfsStream::url('data/existing_dir');
@@ -306,6 +325,7 @@ class YamlDestinationDriverTest extends TestCase
 
         $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
+        $driver->setOption('refs', $useRefs);
         $newIds = $driver->write($newEntity);
 
         // Test proper ids are returned
@@ -313,19 +333,63 @@ class YamlDestinationDriverTest extends TestCase
 
         // Test file contents are written properly
         $driver->flush();
-        $driver->flush();
         $innerPath = str_replace('vfs://', '', $path);
         /** @var vfsStreamFile|null $file */
         $file = vfsStreamWrapper::getRoot()
             ->getChild($innerPath.'/new_group/new_file.yaml');
         $this->assertNotNull($file, 'File was not copied to destination.');
-        $writtenData = Yaml::parse($file->getContent());
-        // The written data shouldn't have any ids written to it.
-        $newEntityWithoutIds = $newEntity;
-        foreach (array_keys($destIds) as $idName) {
-            unset($newEntityWithoutIds[$idName]);
-        }
-        $this->assertEquals($newEntityWithoutIds, $writtenData);
+        $this->assertEquals($expected, $file->getContent());
+
+        // Test that output is valid yaml
+        $parsedEntity = Yaml::parse($file->getContent());
+        $parsedEntity['group'] = $newEntity['group'];
+        $parsedEntity['identifier'] = $newEntity['identifier'];
+        $this->assertEquals($newEntity, $parsedEntity);
+    }
+
+    public function writeDataProvider()
+    {
+        return [
+            'no refs' => [
+                false,
+                <<<YAML
+scalar_field: value
+list:
+  - item1
+  - item2
+referenced_list:
+  - item1
+  - item2
+referenced_scalar: value
+mapping_field:
+  inner_field: inner_value
+other_mapping_field:
+  inner_field: inner_value
+deep_mapping_field:
+  other_field: inner_value
+
+YAML
+                ,
+            ],
+            'with refs' => [
+                true,
+                <<<YAML
+scalar_field: &scalar_field value
+list: &list
+  - item1
+  - item2
+referenced_list: *list
+referenced_scalar: *scalar_field
+mapping_field: &mapping_field
+  inner_field: &mapping_field.inner_field inner_value
+other_mapping_field: *mapping_field
+deep_mapping_field:
+  other_field: *mapping_field.inner_field
+
+YAML
+                ,
+            ],
+        ];
     }
 
     protected function setUp()

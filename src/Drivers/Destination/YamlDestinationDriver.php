@@ -27,7 +27,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
 {
 
     const DEFAULT_OPTIONS = [
-        'inline' => 3,
+        'inline' => PHP_INT_MAX,
         'refs' => false,
         'flags' => [Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK],
     ];
@@ -333,7 +333,10 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             if (is_array($value)) {
                 $yamlValue = $this->dumpYaml($value, count($path) + 1);
             } else {
-                $yamlValue = $this->dumpYaml([$key => $value], count($path));
+                // Need to isolate the dumper's decision on quoting, so fake a
+                // list and remove the list characters.
+                $yamlValue = $this->dumpYaml([$value]);
+                $yamlValue = str_replace('- ', '', $yamlValue);
             }
             $yamlValue = rtrim($yamlValue);
 
@@ -360,10 +363,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         foreach ($useAnchors as $anchor => $value) {
             // Add the anchor on the first occurrence
-            $pos = strpos($yaml, $value);
-            if ($pos === false) {
-                continue;
-            }
+            preg_match('`\s+'.$value.'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
+            $pos = $matches[0][1]+1;
             $before = substr($yaml, 0, $pos - 1);
             $space = substr($yaml, $pos - 1, 1);
             $firstValueWithAnchor = ' &'.$anchor.$space.$value;
@@ -380,8 +381,9 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * Valid options are:
      * - inline: The level at which the output switches from expanded
-     *   (multiline) arrays to the inline representation.
-     * - refs: Automaticlly generate YAML anchors and references.  *This is a
+     *   (multiline) arrays to the inline representation.  Reference generation
+     *   is not available with inline arrays.
+     * - refs: Automatically generate YAML anchors and references.  *This is a
      *   slow process!*
      * - flags: Special flags for the YAML dumper.  See
      *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags

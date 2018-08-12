@@ -282,7 +282,7 @@ class YamlDestinationDriverTest extends TestCase
      *
      * @dataProvider writeDataProvider
      */
-    public function testWrite(bool $useRefs, string $expected)
+    public function testWrite($useRefs, string $expected)
     {
         $destIds = ['group' => 'new_group', 'identifier' => 'new_file'];
         $newEntity = [
@@ -297,7 +297,7 @@ class YamlDestinationDriverTest extends TestCase
                 'item1',
                 'item2',
             ],
-            'referenced_scalar' => 'value',
+            'referenced_scalar_field' => 'value',
             'mapping_field' => [
                 'inner_field' => 'inner_value',
             ],
@@ -360,7 +360,7 @@ list:
 referenced_list:
   - item1
   - item2
-referenced_scalar: value
+referenced_scalar_field: value
 mapping_field:
   inner_field: inner_value
 other_mapping_field:
@@ -371,7 +371,7 @@ deep_mapping_field:
 YAML
                 ,
             ],
-            'with refs' => [
+            'build all refs' => [
                 true,
                 <<<YAML
 scalar_field: &scalar_field value
@@ -379,12 +379,74 @@ list: &list
   - item1
   - item2
 referenced_list: *list
-referenced_scalar: *scalar_field
+referenced_scalar_field: *scalar_field
 mapping_field: &mapping_field
   inner_field: &mapping_field.inner_field inner_value
 other_mapping_field: *mapping_field
 deep_mapping_field:
   other_field: *mapping_field.inner_field
+
+YAML
+                ,
+            ],
+            'build included refs' => [
+                ['include' => ['`[^.]+field$`']],
+                <<<YAML
+scalar_field: &scalar_field value
+list:
+  - item1
+  - item2
+referenced_list:
+  - item1
+  - item2
+referenced_scalar_field: *scalar_field
+mapping_field: &mapping_field
+  inner_field: &mapping_field.inner_field inner_value
+other_mapping_field: *mapping_field
+deep_mapping_field:
+  other_field: *mapping_field.inner_field
+
+YAML
+                ,
+            ],
+            'build excluded refs' => [
+                ['exclude' => ['`[^.]+field$`']],
+                <<<YAML
+scalar_field: value
+list: &list
+  - item1
+  - item2
+referenced_list: *list
+referenced_scalar_field: value
+mapping_field:
+  inner_field: inner_value
+other_mapping_field:
+  inner_field: inner_value
+deep_mapping_field:
+  other_field: inner_value
+
+YAML
+                ,
+            ],
+            'build complex refs' => [
+                [
+                    'include' => ['`[^.]+field$`'],
+                    'exclude' => ['`.+\.inner_field`'],
+                ],
+                <<<YAML
+scalar_field: &scalar_field value
+list:
+  - item1
+  - item2
+referenced_list:
+  - item1
+  - item2
+referenced_scalar_field: *scalar_field
+mapping_field: &mapping_field
+  inner_field: inner_value
+other_mapping_field: *mapping_field
+deep_mapping_field:
+  other_field: inner_value
 
 YAML
                 ,

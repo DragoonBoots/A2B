@@ -340,24 +340,25 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             $anchor = implode('.', $valuePath);
 
             // Should an anchor be built for this path?
-            if ($this->options['refs'] !== false) {
-                $include = $this->options['refs']['include'] ?? ['`.+`'];
-                $exclude = $this->options['refs']['include'] ?? [];
-                $buildAnchor = false;
-                foreach ($include as $includePattern) {
-                    $buildAnchor = (preg_match($includePattern, $anchor) === 1);
-                    if ($buildAnchor) {
-                        break;
-                    }
+            $include = $this->options['refs']['include'] ?? ['`.+`'];
+            $exclude = $this->options['refs']['exclude'] ?? [];
+            $buildAnchor = false;
+            foreach ($include as $includePattern) {
+                $buildAnchor = (preg_match($includePattern, $anchor) === 1);
+                if ($buildAnchor) {
+                    break;
                 }
-                foreach ($exclude as $excludePattern) {
-                    $buildAnchor = (preg_match($excludePattern, $anchor) === 0);
-                    if (!$buildAnchor) {
-                        break;
-                    }
+            }
+            // None of the include patterns match, so don't bother
+            // checking the exclude patterns.
+            if (!$buildAnchor) {
+                continue;
+            }
+            foreach ($exclude as $excludePattern) {
+                $buildAnchor = (preg_match($excludePattern, $anchor) === 0);
+                if (!$buildAnchor) {
+                    break;
                 }
-            } else {
-                $buildAnchor = true;
             }
             if (!$buildAnchor) {
                 continue;

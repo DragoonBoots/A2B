@@ -273,8 +273,15 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
 
         $yaml = $this->dumpYaml($data);
         if ($this->options['refs']) {
-            $this->compileAnchors($data, $anchors, $useAnchors);
-            $useAnchors = array_reverse($useAnchors, true);
+            $this->compileAnchors($data, $useAnchors);
+            // Sort by increasing depth to ensure replacement search strings
+            // can be found.
+            uksort(
+                $useAnchors,
+                function (string $a, $b) {
+                    return substr_count($a, '.') - substr_count($b, '.');
+                }
+            );
             $this->addRefs($yaml, $useAnchors);
         }
 
@@ -312,15 +319,15 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      * Create a list of possible anchors to use.
      *
      * @param array $data
-     * @param array $anchors
-     *   An array, passed by reference, to store the possible anchors in.
-     *   Anchors are named by separating their first path with a "."
      * @param array $useAnchors
      *   An array, passed by reference, to store a a list of anchors that should
      *   be used.
+     * @param array $anchors
+     *   An array, passed by reference, to store the possible anchors in.
+     *   Anchors are named by separating their first path with a "."
      * @param array $path
      */
-    protected function compileAnchors(array $data, ?array &$anchors, ?array &$useAnchors, array $path = [])
+    protected function compileAnchors(array $data, ?array &$useAnchors, ?array &$anchors = null, array $path = [])
     {
         if (!isset($anchors)) {
             $anchors = [];
@@ -347,7 +354,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             } else {
                 $anchors[$anchor] = $yamlValue;
                 if (is_array($value)) {
-                    $this->compileAnchors($value, $anchors, $useAnchors, $valuePath);
+                    $this->compileAnchors($value, $useAnchors, $anchors, $valuePath);
                 }
             }
         }
@@ -385,7 +392,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *   (multiline) arrays to the inline representation.  Reference generation
      *   is not available with inline arrays.
      * - refs: Automatically generate YAML anchors and references.  *This is a
-     *   slow process!*
+     *   slow process!*  See the [docs](https://dragoonboots.gitlab.io/a2b/Drivers/Destination/YamlDestinationDriver.html)
+     *   for further detail.
      * - flags: Special flags for the YAML dumper.  See
      *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
      *   for valid flags.  *This will overwrite all flags, including defaults.*

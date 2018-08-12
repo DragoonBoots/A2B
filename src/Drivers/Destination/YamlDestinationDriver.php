@@ -273,7 +273,15 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
 
         $yaml = $this->dumpYaml($data);
         if ($this->options['refs']) {
-            $this->compileAnchors($data, $anchors, $useAnchors);
+            $this->compileAnchors($data, $useAnchors);
+            // Sort by increasing depth to ensure replacement search strings
+            // can be found.
+            uksort(
+                $useAnchors,
+                function (string $a, $b) {
+                    return substr_count($a, '.') - substr_count($b, '.');
+                }
+            );
             $this->addRefs($yaml, $useAnchors);
         }
 
@@ -311,15 +319,15 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      * Create a list of possible anchors to use.
      *
      * @param array $data
-     * @param array $anchors
-     *   An array, passed by reference, to store the possible anchors in.
-     *   Anchors are named by separating their first path with a "."
      * @param array $useAnchors
      *   An array, passed by reference, to store a a list of anchors that should
      *   be used.
+     * @param array $anchors
+     *   An array, passed by reference, to store the possible anchors in.
+     *   Anchors are named by separating their first path with a "."
      * @param array $path
      */
-    protected function compileAnchors(array $data, ?array &$anchors, ?array &$useAnchors, array $path = [])
+    protected function compileAnchors(array $data, ?array &$useAnchors, ?array &$anchors = null, array $path = [])
     {
         if (!isset($anchors)) {
             $anchors = [];
@@ -330,6 +338,32 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($data as $key => $value) {
             $valuePath = array_merge($path, [$key]);
             $anchor = implode('.', $valuePath);
+
+            // Should an anchor be built for this path?
+            $include = $this->options['refs']['include'] ?? ['`.+`'];
+            $exclude = $this->options['refs']['exclude'] ?? [];
+            $buildAnchor = false;
+            foreach ($include as $includePattern) {
+                $buildAnchor = (preg_match($includePattern, $anchor) === 1);
+                if ($buildAnchor) {
+                    break;
+                }
+            }
+            // None of the include patterns match, so don't bother
+            // checking the exclude patterns.
+            if (!$buildAnchor) {
+                continue;
+            }
+            foreach ($exclude as $excludePattern) {
+                $buildAnchor = (preg_match($excludePattern, $anchor) === 0);
+                if (!$buildAnchor) {
+                    break;
+                }
+            }
+            if (!$buildAnchor) {
+                continue;
+            }
+
             if (is_array($value)) {
                 $yamlValue = $this->dumpYaml($value, count($path) + 1);
             } else {
@@ -346,7 +380,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             } else {
                 $anchors[$anchor] = $yamlValue;
                 if (is_array($value)) {
-                    $this->compileAnchors($value, $anchors, $useAnchors, $valuePath);
+                    $this->compileAnchors($value, $useAnchors, $anchors, $valuePath);
                 }
             }
         }
@@ -363,7 +397,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         foreach ($useAnchors as $anchor => $value) {
             // Add the anchor on the first occurrence
-            preg_match('`\s+'.$value.'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
+            preg_match('`\s+'.preg_quote($value, '`').'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
             $pos = $matches[0][1]+1;
             $before = substr($yaml, 0, $pos - 1);
             $space = substr($yaml, $pos - 1, 1);
@@ -384,7 +418,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *   (multiline) arrays to the inline representation.  Reference generation
      *   is not available with inline arrays.
      * - refs: Automatically generate YAML anchors and references.  *This is a
-     *   slow process!*
+     *   slow process!*  See the [docs](https://dragoonboots.gitlab.io/a2b/Drivers/Destination/YamlDestinationDriver.html)
+     *   for further detail.
      * - flags: Special flags for the YAML dumper.  See
      *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
      *   for valid flags.  *This will overwrite all flags, including defaults.*

@@ -370,7 +370,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
                 // Need to isolate the dumper's decision on quoting, so fake a
                 // list and remove the list characters.
                 $yamlValue = $this->dumpYaml([$value]);
-                $yamlValue = str_replace('- ', '', $yamlValue);
+                $yamlValue = preg_replace('`^\s*- `', '', $yamlValue, 1);
+                $yamlValue = str_replace("\n", "\n".str_repeat(' ', count($path) * self::INDENT_SPACES), $yamlValue);
             }
             $yamlValue = rtrim($yamlValue);
 
@@ -398,7 +399,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($useAnchors as $anchor => $value) {
             // Add the anchor on the first occurrence
             preg_match('`\s+'.preg_quote($value, '`').'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
-            $pos = $matches[0][1]+1;
+            $pos = $matches[0][1] + 1;
             $before = substr($yaml, 0, $pos - 1);
             $space = substr($yaml, $pos - 1, 1);
             $firstValueWithAnchor = ' &'.$anchor.$space.$value;

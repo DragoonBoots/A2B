@@ -274,6 +274,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         $yaml = $this->dumpYaml($data);
         if ($this->options['refs']) {
             $this->compileAnchors($data, $anchors, $useAnchors);
+            $useAnchors = array_reverse($useAnchors, true);
             $this->addRefs($yaml, $useAnchors);
         }
 
@@ -363,7 +364,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         foreach ($useAnchors as $anchor => $value) {
             // Add the anchor on the first occurrence
-            preg_match('`\s+'.$value.'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
+            preg_match('`\s+'.preg_quote($value, '`').'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
             $pos = $matches[0][1]+1;
             $before = substr($yaml, 0, $pos - 1);
             $space = substr($yaml, $pos - 1, 1);

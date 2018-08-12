@@ -100,8 +100,33 @@ A few caveats:
   
 To enable this feature:
 ```php
-// Automaticlly generate references
+// Automaticlly generate references for all keys
 $destinationDriver->setOption('refs', true);
+
+// Generate references only for keys matching these regular expressions
+// Depth is shown with a period (".") between each level
+// Matches "first.effect", "test.first.effect", but not "second.effect".
+$destinationDriver->setOption('refs', ['include' => [
+    '`.*first\.effect`',
+]]);
+
+// Generate references only for keys NOT matching these regular expressions
+// Matches "test.effect" but not "test.short_effect".
+$destinationDriver->setOption('refs', ['exclude' => [
+    '`.*short_effect.*`',
+]]);
+
+// Generate references with complex requirements
+// Matches "test.name", "test.effect", but not "test.short_effect", "other.short_effect"
+$destinationDriver->setOption('refs', [
+    'include' => [
+        '`test\..+`',    
+    ],
+    'exclude' => [
+        '`.+\.short_effect`',
+    ]
+]);
+
 ```
 
 ### Advanced flags

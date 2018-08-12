@@ -338,6 +338,31 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($data as $key => $value) {
             $valuePath = array_merge($path, [$key]);
             $anchor = implode('.', $valuePath);
+
+            // Should an anchor be built for this path?
+            if ($this->options['refs'] !== false) {
+                $include = $this->options['refs']['include'] ?? ['`.+`'];
+                $exclude = $this->options['refs']['include'] ?? [];
+                $buildAnchor = false;
+                foreach ($include as $includePattern) {
+                    $buildAnchor = (preg_match($includePattern, $anchor) === 1);
+                    if ($buildAnchor) {
+                        break;
+                    }
+                }
+                foreach ($exclude as $excludePattern) {
+                    $buildAnchor = (preg_match($excludePattern, $anchor) === 0);
+                    if (!$buildAnchor) {
+                        break;
+                    }
+                }
+            } else {
+                $buildAnchor = true;
+            }
+            if (!$buildAnchor) {
+                continue;
+            }
+
             if (is_array($value)) {
                 $yamlValue = $this->dumpYaml($value, count($path) + 1);
             } else {

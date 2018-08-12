@@ -75,6 +75,35 @@ for more examples on what this affects.
 $destinationDriver->setOption('inline', 5);
 ```
 
+**NOTE:** Array inlining is not compatible with automatic reference generation.
+
+### Automatic reference generation
+YAML supports aliases to refer to previously defined content.  This is an
+example from the [YAML Spec](http://yaml.org/spec/1.2/spec.html):
+```yaml
+First occurrence: &anchor Foo
+Second occurrence: *anchor
+Override anchor: &anchor Bar
+Reuse anchor: *anchor
+```
+
+The driver can search the output for repeated content and create these anchors.
+
+A few caveats:
+- This will significantly increase the time output takes, as the driver must
+  create a list of every single value in the result to search for repetition.
+- Because this process must occur after the YAML representation has been
+  created, it is not compatible with inline array representations.
+- As an automatic process, the driver has no way of determining if two repeated
+  values are equal in context.  Examine the output before editing manually
+  to ensure that a referenced value is used where appropriate.
+  
+To enable this feature:
+```php
+// Automaticlly generate references
+$destinationDriver->setOption('refs', true);
+```
+
 ### Advanced flags
 The Symfony YAML dumper supports a number of flags for advanced use cases.
 See [here](https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags)

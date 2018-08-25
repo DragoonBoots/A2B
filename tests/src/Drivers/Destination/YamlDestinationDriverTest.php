@@ -6,6 +6,7 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver;
 use DragoonBoots\A2B\Factory\FinderFactory;
+use DragoonBoots\A2B\Tests\Drivers\FinderTestTrait;
 use League\Uri\Parser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
@@ -21,6 +22,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class YamlDestinationDriverTest extends TestCase
 {
+
+    use FinderTestTrait;
 
     /**
      * @var Parser|MockObject
@@ -467,19 +470,7 @@ YAML
         $this->yamlParser = new YamlParser();
 
         $this->finder = $this->createMock(Finder::class);
-        // Create the fluent interface for the finder
-        $finderMethodBlacklist = [
-            '__construct',
-            'getIterator',
-            'hasResults',
-            'count',
-        ];
-        foreach ((new \ReflectionClass(Finder::class))->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
-            if (!$reflectionMethod->isStatic() && !in_array($reflectionMethod->getName(), $finderMethodBlacklist)) {
-                $this->finder->method($reflectionMethod->getName())
-                    ->willReturnSelf();
-            }
-        }
+        $this->finder = $this->buildFinderMock($this->finder);
         $this->finderFactory = $this->createMock(FinderFactory::class);
         $this->finderFactory->method('get')->willReturn($this->finder);
     }

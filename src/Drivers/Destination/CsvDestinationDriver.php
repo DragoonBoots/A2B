@@ -114,7 +114,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
             if (!isset($data[$destId->getName()])) {
                 throw new NoIdSetException($destId->getName(), $data);
             }
-            $destIds[$destId->getName()] = $this->resolveDestId($destId, $data[$destId->getName()]);
+            $destIds[$destId->getName()] = $this->resolveIdType($destId, $data[$destId->getName()]);
         }
 
         return $destIds;

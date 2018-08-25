@@ -13,6 +13,7 @@ use League\Uri\Parser;
  */
 abstract class AbstractDestinationDriver implements DestinationDriverInterface
 {
+    use IdTypeConversionTrait;
 
     /**
      * @var Driver|null
@@ -59,26 +60,6 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
         $this->definition = $definition;
         $this->destUri = $this->uriParser->parse($definition->getDestination());
         $this->destIds = $definition->getDestinationIds();
-    }
-
-    /**
-     * Perform the necessary typecasting on the destination id value.
-     *
-     * @param IdField $idField
-     * @param         $value
-     *
-     * @return int|mixed
-     */
-    protected function resolveDestId(IdField $idField, $value)
-    {
-        $idType = $idField->getType();
-        if ($idType == 'int') {
-            $value = (int)$value;
-        } elseif ($idType == 'string') {
-            $value = (string)$value;
-        }
-
-        return $value;
     }
 
     /**

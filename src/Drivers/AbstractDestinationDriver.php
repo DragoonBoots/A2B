@@ -71,8 +71,11 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
      */
     protected function resolveDestId(IdField $idField, $value)
     {
-        if ($idField->getType() == 'int') {
+        $idType = $idField->getType();
+        if ($idType == 'int') {
             $value = (int)$value;
+        } elseif ($idType == 'string') {
+            $value = (string)$value;
         }
 
         return $value;

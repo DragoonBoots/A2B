@@ -8,6 +8,7 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
+use DragoonBoots\A2B\Exception\BadUriException;
 use League\Uri\Parser;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -66,9 +67,13 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
         parent::configure($definition);
 
         // Replace forward slashes with back slashes in FQCN.
-        $source = $this->destUri['path'];
-        $source = str_replace('/', '\\', $source);
-        $this->destUri['path'] = $source;
+        $dest = $this->destUri['path'];
+        $dest = str_replace('/', '\\', $dest);
+        $this->destUri['path'] = $dest;
+
+        if (!class_exists($dest)) {
+            throw new BadUriException($definition->getDestination());
+        }
 
         // Reset to the default entity manager.
         $this->em = $this->defaultEm;
@@ -171,6 +176,8 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
     public function setEm(EntityManagerInterface $em): self
     {
         $this->em = $em;
+        // Force getting the repo from the new entity manager.
+        $this->repo = null;
 
         return $this;
     }

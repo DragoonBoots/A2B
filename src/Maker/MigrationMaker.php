@@ -363,6 +363,8 @@ class MigrationMaker extends AbstractMaker
                             throw new \RuntimeException(sprintf('The migration %s has already been declared a dependency.', $value));
                         }
                     }
+
+                    return $value;
                 }
             );
             $dependency = $io->askQuestion($q);

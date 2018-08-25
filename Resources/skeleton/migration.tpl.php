@@ -21,6 +21,8 @@
  */
 const A2B_ARRAY_INLINE_LIMIT = 2;
 
+$GLOBALS['noStringWrap'] = [];
+
 /**
  * Format a string for insertion into an annotation.
  *
@@ -30,7 +32,16 @@ const A2B_ARRAY_INLINE_LIMIT = 2;
  */
 function format_string(string $string)
 {
-    return sprintf('"%s"', $string);
+    global $noStringWrap;
+
+    if (!in_array($string, $noStringWrap)) {
+        $formatted = sprintf('"%s"', $string);
+        $noStringWrap[] = $formatted;
+
+        return $formatted;
+    } else {
+        return $string;
+    }
 }
 
 /**
@@ -42,7 +53,16 @@ function format_string(string $string)
  */
 function format_array(array $array)
 {
-    return sprintf('{%s}', implode(', ', $array));
+    global $noStringWrap;
+
+    $parts = [];
+    foreach ($array as $item) {
+        $parts[] = format_string($item);
+    }
+    $formatted = sprintf('{%s}', implode(', ', $parts));
+    $noStringWrap[] = $formatted;
+
+    return $formatted;
 }
 
 /**
@@ -55,13 +75,18 @@ function format_array(array $array)
  */
 function format_field(string $key, $value)
 {
+    global $noStringWrap;
+
     if (is_array($value)) {
         $string = format_array($value);
     } else {
         $string = format_string($value);
     }
 
-    return sprintf('%s=%s', $key, $string);
+    $formatted = sprintf('%s=%s', $key, $string);
+    $noStringWrap[] = $formatted;
+
+    return $formatted;
 }
 
 /**
@@ -75,6 +100,8 @@ function format_field(string $key, $value)
  */
 function format_annotation(string $annotation, $value, bool $root = false)
 {
+    global $noStringWrap;
+
     if (is_array($value)) {
         $multiline = $root || count($value) > A2B_ARRAY_INLINE_LIMIT;
         if ($multiline) {
@@ -105,7 +132,10 @@ function format_annotation(string $annotation, $value, bool $root = false)
         $closer = ')';
     }
 
-    return sprintf('@%s(%s%s', $annotation, $string, $closer);
+    $formatted = sprintf('@%s(%s%s', $annotation, $string, $closer);
+    $noStringWrap[] = $formatted;
+
+    return $formatted;
 }
 
 /**
@@ -117,6 +147,8 @@ function format_annotation(string $annotation, $value, bool $root = false)
  */
 function format_id_fields(array $idFields)
 {
+    global $noStringWrap;
+
     $idStrings = [];
     foreach ($idFields as $idField) {
         $idFieldValues['name'] = $idField->getName();
@@ -166,7 +198,7 @@ if ($destination_driver) {
 }
 $fields['destinationIds'] = format_id_fields($destination_ids);
 if ($dependencies) {
-    $fields['depends'] = format_array($dependencies);
+    $fields['depends'] = $dependencies;
 }
 echo format_annotation('DataMigration', $fields, true);
 // @formatter:off

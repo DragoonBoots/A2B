@@ -1,196 +1,196 @@
 parameters:
-    a2b.mapper.db:
-        url: 'sqlite:///%kernel.project_dir%/resources/data/data_migration_map.sqlite'
+  a2b.mapper.db:
+    url: 'sqlite:///%kernel.project_dir%/resources/data/data_migration_map.sqlite'
 services:
-    _defaults:
-        public: false
+  _defaults:
+    public: false
 
-    a2b.data_migration_manager:
-        class: DragoonBoots\A2B\DataMigration\DataMigrationManager
-        public: true
-        lazy: true
-        arguments:
-        - '@annotation_reader'
-        - '@a2b.league.uri.parser'
-        - '@a2b.driver_manager'
-        - '@parameter_bag'
-    DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface: '@a2b.data_migration_manager'
+  a2b.data_migration_manager:
+    class: DragoonBoots\A2B\DataMigration\DataMigrationManager
+    public: true
+    lazy: true
+    arguments:
+      - '@annotation_reader'
+      - '@a2b.league.uri.parser'
+      - '@a2b.driver_manager'
+      - '@parameter_bag'
+  DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface: '@a2b.data_migration_manager'
 
-    a2b.driver_manager:
-        class: DragoonBoots\A2B\Drivers\DriverManager
-        public: true
-        lazy: true
-        arguments:
-        - '@annotation_reader'
-    DragoonBoots\A2B\Drivers\DriverManagerInterface: '@a2b.driver_manager'
+  a2b.driver_manager:
+    class: DragoonBoots\A2B\Drivers\DriverManager
+    public: true
+    lazy: true
+    arguments:
+      - '@annotation_reader'
+  DragoonBoots\A2B\Drivers\DriverManagerInterface: '@a2b.driver_manager'
 
-    a2b.executor:
-        class: DragoonBoots\A2B\DataMigration\DataMigrationExecutor
-        public: true
-        lazy: true
-        arguments:
-        - '@a2b.mapper'
-    DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
+  a2b.executor:
+    class: DragoonBoots\A2B\DataMigration\DataMigrationExecutor
+    public: true
+    lazy: true
+    arguments:
+      - '@a2b.mapper'
+  DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
 
-    a2b.mapper.connection:
-        class: 'Doctrine\DBAL\Connection'
-        factory: 'doctrine.dbal.connection_factory:createConnection'
-        lazy: true
-        arguments:
-        - '%a2b.mapper.db%'
-    a2b.mapper:
-        class: DragoonBoots\A2B\DataMigration\DataMigrationMapper
-        public: true
-        lazy: true
-        arguments:
-            $connection: '@a2b.mapper.connection'
-            $inflector: '@a2b.doctrine.inflector'
-            $dataMigrationManager: '@a2b.data_migration_manager'
-    DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
+  a2b.mapper.connection:
+    class: 'Doctrine\DBAL\Connection'
+    factory: 'doctrine.dbal.connection_factory:createConnection'
+    lazy: true
+    arguments:
+      - '%a2b.mapper.db%'
+  a2b.mapper:
+    class: DragoonBoots\A2B\DataMigration\DataMigrationMapper
+    public: true
+    lazy: true
+    arguments:
+      $connection: '@a2b.mapper.connection'
+      $inflector: '@a2b.doctrine.inflector'
+      $dataMigrationManager: '@a2b.data_migration_manager'
+  DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
 
-    a2b.reference_store:
-        class: DragoonBoots\A2B\DataMigration\MigrationReferenceStore
-        public: true
-        lazy: true
-        arguments:
-        - '@a2b.mapper'
-        - '@a2b.data_migration_manager'
-        - '@a2b.driver_manager'
-    DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface: '@a2b.reference_store'
+  a2b.reference_store:
+    class: DragoonBoots\A2B\DataMigration\MigrationReferenceStore
+    public: true
+    lazy: true
+    arguments:
+      - '@a2b.mapper'
+      - '@a2b.data_migration_manager'
+      - '@a2b.driver_manager'
+  DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface: '@a2b.reference_store'
 
-    a2b.source.dbal:
-        parent: a2b.source.abstract_source_driver
-        class: DragoonBoots\A2B\Drivers\Source\DbalSourceDriver
-        public: false
-        tags:
-        - a2b.driver.source
-        arguments:
-            $connectionFactory: '@doctrine.dbal.connection_factory'
+  a2b.source.dbal:
+    parent: a2b.source.abstract_source_driver
+    class: DragoonBoots\A2B\Drivers\Source\DbalSourceDriver
+    public: false
+    tags:
+      - a2b.driver.source
+    arguments:
+      $connectionFactory: '@doctrine.dbal.connection_factory'
 
-    a2b.source.csv:
-        parent: a2b.source.abstract_source_driver
-        class: DragoonBoots\A2B\Drivers\Source\CsvSourceDriver
-        public: false
-        tags:
-        - a2b.driver.source
+  a2b.source.csv:
+    parent: a2b.source.abstract_source_driver
+    class: DragoonBoots\A2B\Drivers\Source\CsvSourceDriver
+    public: false
+    tags:
+      - a2b.driver.source
 
-    a2b.source.yaml:
-        parent: a2b.source.abstract_source_driver
-        class: DragoonBoots\A2B\Drivers\Source\YamlSourceDriver
-        public: false
-        tags:
-            - a2b.driver.source
-        arguments:
-            $yamlParser: '@a2b.symfony.yaml.parser'
-            $finderFactory: '@a2b.factory.finder'
+  a2b.source.yaml:
+    parent: a2b.source.abstract_source_driver
+    class: DragoonBoots\A2B\Drivers\Source\YamlSourceDriver
+    public: false
+    tags:
+      - a2b.driver.source
+    arguments:
+      $yamlParser: '@a2b.symfony.yaml.parser'
+      $finderFactory: '@a2b.factory.finder'
 
-    a2b.destination.debug:
-        parent: a2b.destination.abstract_destination_driver
-        class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver
-        public: false
-        tags:
-        - a2b.driver.destination
-        arguments:
-            $dumper: '@a2b.symfony.dumper.cli'
-            $cloner: '@a2b.symfony.dumper.cloner'
+  a2b.destination.debug:
+    parent: a2b.destination.abstract_destination_driver
+    class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver
+    public: false
+    tags:
+      - a2b.driver.destination
+    arguments:
+      $dumper: '@a2b.symfony.dumper.cli'
+      $cloner: '@a2b.symfony.dumper.cloner'
 
-    a2b.destination.csv:
-        parent: a2b.destination.abstract_destination_driver
-        class: DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver
-        public: false
-        tags:
-        - a2b.driver.destination
+  a2b.destination.csv:
+    parent: a2b.destination.abstract_destination_driver
+    class: DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver
+    public: false
+    tags:
+      - a2b.driver.destination
 
-    a2b.destination.yaml:
-        parent: a2b.destination.abstract_destination_driver
-        class: DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver
-        public: false
-        tags:
-            - a2b.driver.destination
-        arguments:
-            $yamlParser: '@a2b.symfony.yaml.parser'
-            $yamlDumper: '@a2b.symfony.yaml.dumper'
-            $finderFactory: '@a2b.factory.finder'
+  a2b.destination.yaml:
+    parent: a2b.destination.abstract_destination_driver
+    class: DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver
+    public: false
+    tags:
+      - a2b.driver.destination
+    arguments:
+      $yamlParser: '@a2b.symfony.yaml.parser'
+      $yamlDumper: '@a2b.symfony.yaml.dumper'
+      $finderFactory: '@a2b.factory.finder'
 
-    a2b.destination.doctrine:
-        parent: a2b.destination.abstract_destination_driver
-        class: DragoonBoots\A2B\Drivers\Destination\DoctrineDestinationDriver
-        public: false
-        tags:
-            - a2b.driver.destination
-        arguments:
-            $em: '@doctrine.orm.default_entity_manager'
-            $propertyAccess: '@property_accessor'
+  a2b.destination.doctrine:
+    parent: a2b.destination.abstract_destination_driver
+    class: DragoonBoots\A2B\Drivers\Destination\DoctrineDestinationDriver
+    public: false
+    tags:
+      - a2b.driver.destination
+    arguments:
+      $em: '@doctrine.orm.default_entity_manager'
+      $propertyAccess: '@property_accessor'
 
-    a2b.source.abstract_source_driver:
-        class: DragoonBoots\A2B\Drivers\AbstractSourceDriver
-        abstract: true
-        public: false
-        arguments:
-            $uriParser: '@a2b.league.uri.parser'
+  a2b.source.abstract_source_driver:
+    class: DragoonBoots\A2B\Drivers\AbstractSourceDriver
+    abstract: true
+    public: false
+    arguments:
+      $uriParser: '@a2b.league.uri.parser'
 
-    a2b.destination.abstract_destination_driver:
-        class: DragoonBoots\A2B\Drivers\AbstractDestinationDriver
-        abstract: true
-        public: false
-        arguments:
-        - '@a2b.league.uri.parser'
+  a2b.destination.abstract_destination_driver:
+    class: DragoonBoots\A2B\Drivers\AbstractDestinationDriver
+    abstract: true
+    public: false
+    arguments:
+      - '@a2b.league.uri.parser'
 
-    a2b.migration.abstract_migration:
-        class: DragoonBoots\A2B\DataMigration\AbstractDataMigration
-        abstract: true
-        public: false
-        arguments:
-        - '@a2b.reference_store'
-    DragoonBoots\A2B\DataMigration\AbstractDataMigration: '@a2b.migration.abstract_migration'
+  a2b.migration.abstract_migration:
+    class: DragoonBoots\A2B\DataMigration\AbstractDataMigration
+    abstract: true
+    public: false
+    arguments:
+      - '@a2b.reference_store'
+  DragoonBoots\A2B\DataMigration\AbstractDataMigration: '@a2b.migration.abstract_migration'
 
-    a2b.command.migrate:
-        class: DragoonBoots\A2B\Command\MigrateCommand
-        lazy: true
-        arguments:
-        - '@a2b.data_migration_manager'
-        - '@a2b.driver_manager'
-        - '@a2b.executor'
-        - '@a2b.mapper'
-        - '@a2b.league.uri.parser'
-        - '@a2b.symfony.dumper.cli'
-        - '@a2b.symfony.dumper.cloner'
-        tags:
-        - console.command
+  a2b.command.migrate:
+    class: DragoonBoots\A2B\Command\MigrateCommand
+    lazy: true
+    arguments:
+      - '@a2b.data_migration_manager'
+      - '@a2b.driver_manager'
+      - '@a2b.executor'
+      - '@a2b.mapper'
+      - '@a2b.league.uri.parser'
+      - '@a2b.symfony.dumper.cli'
+      - '@a2b.symfony.dumper.cloner'
+    tags:
+      - console.command
 
-    a2b.maker.migration:
-        class: DragoonBoots\A2B\Maker\MigrationMaker
-        lazy: true
-        arguments:
-        - '@a2b.data_migration_manager'
-        - '@a2b.driver_manager'
-        - '@a2b.doctrine.inflector'
-        tags:
-        - 'maker.command'
+  a2b.maker.migration:
+    class: DragoonBoots\A2B\Maker\MigrationMaker
+    lazy: true
+    arguments:
+      - '@a2b.data_migration_manager'
+      - '@a2b.driver_manager'
+      - '@a2b.doctrine.inflector'
+    tags:
+      - 'maker.command'
 
-    # Factories
-    a2b.factory.finder:
-        class: DragoonBoots\A2B\Factory\FinderFactory
-        lazy: true
+  # Factories
+  a2b.factory.finder:
+    class: DragoonBoots\A2B\Factory\FinderFactory
+    lazy: true
 
-    # Vendors
-    a2b.doctrine.inflector:
-        class: Doctrine\Common\Inflector\Inflector
-        lazy: true
-    a2b.league.uri.parser:
-        class: League\Uri\Parser
-        lazy: true
-    a2b.symfony.dumper.cli:
-        class: Symfony\Component\VarDumper\Dumper\CliDumper
-        lazy: true
-    a2b.symfony.dumper.cloner:
-        class: Symfony\Component\VarDumper\Cloner\VarCloner
-        lazy: true
-    a2b.symfony.yaml.parser:
-        class: Symfony\Component\Yaml\Parser
-        lazy: true
-    a2b.symfony.yaml.dumper:
-        class: Symfony\Component\Yaml\Dumper
-        lazy: true
-        arguments:
-        - 2
+  # Vendors
+  a2b.doctrine.inflector:
+    class: Doctrine\Common\Inflector\Inflector
+    lazy: true
+  a2b.league.uri.parser:
+    class: League\Uri\Parser
+    lazy: true
+  a2b.symfony.dumper.cli:
+    class: Symfony\Component\VarDumper\Dumper\CliDumper
+    lazy: true
+  a2b.symfony.dumper.cloner:
+    class: Symfony\Component\VarDumper\Cloner\VarCloner
+    lazy: true
+  a2b.symfony.yaml.parser:
+    class: Symfony\Component\Yaml\Parser
+    lazy: true
+  a2b.symfony.yaml.dumper:
+    class: Symfony\Component\Yaml\Dumper
+    lazy: true
+    arguments:
+      - 2

@@ -50,5 +50,10 @@ Destination
             <td><code>yaml</code><code>yml</code></td>
             <td>A directory (with optional subdirectories depending on migration ids) with one yaml file per entity.</td>
         </tr>
+        <tr>
+            <td><a href="Destination/DoctrineDestinationDriver">DoctrineDestinationDriver</a></td>
+            <td><code>doctrine</code></td>
+            <td><a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/index.html">Doctrine ORM</a> entities</td>
+        </tr>
     </tbody>
 </table>

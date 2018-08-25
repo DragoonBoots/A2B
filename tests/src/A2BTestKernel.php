@@ -78,8 +78,11 @@ class A2BTestKernel extends Kernel
     {
         return [
             'doctrine' => [
-                'dbal' => [],
-            ],
+                'dbal' => [
+                    'url' => 'sqlite:///:memory:',
+                ],
+                'orm' => null,
+            ]
         ];
     }
 }

@@ -90,7 +90,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
             $id = [];
             foreach ($this->destIds as $destId) {
                 $idName = $destId->getName();
-                $id[$idName] = $this->resolveDestId($destId, $this->propertyAccess->getValue($entity, $idName));
+                $id[$idName] = $this->resolveIdType($destId, $this->propertyAccess->getValue($entity, $idName));
             }
             $ids[] = $id;
         }
@@ -146,7 +146,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
         $id = [];
         foreach ($this->destIds as $destId) {
             $idName = $destId->getName();
-            $id[$idName] = $this->resolveDestId($destId, $this->propertyAccess->getValue($data, $idName));
+            $id[$idName] = $this->resolveIdType($destId, $this->propertyAccess->getValue($data, $idName));
         }
 
         return $id;

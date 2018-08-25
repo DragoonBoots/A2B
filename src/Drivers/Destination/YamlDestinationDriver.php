@@ -6,9 +6,9 @@ namespace DragoonBoots\A2B\Drivers\Destination;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
-use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
+use DragoonBoots\A2B\Drivers\YamlDriverTrait;
 use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use League\Uri\Parser;
@@ -25,6 +25,8 @@ use Symfony\Component\Yaml\Yaml;
  */
 class YamlDestinationDriver extends AbstractDestinationDriver implements DestinationDriverInterface
 {
+
+    use YamlDriverTrait;
 
     const DEFAULT_OPTIONS = [
         'inline' => PHP_INT_MAX,
@@ -110,37 +112,10 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         $ids = [];
         foreach ($this->finder->getIterator() as $fileInfo) {
-            $ids[] = $this->buildIdsFromFilePath($fileInfo);
+            $ids[] = $this->buildIdsFromFilePath($fileInfo, $this->destIds);
         }
 
         return $ids;
-    }
-
-    /**
-     * Get id field values from the file path.
-     *
-     * The Id is built as in this example:
-     * - Id fields: a, b, c
-     * - Path: w/x/y/z.yaml
-     * - Result: a=x, b=y, c=z (note that w is ignored because there are only
-     *   3 id fields.
-     *
-     * @param SplFileInfo $fileInfo
-     *
-     * @return array
-     */
-    protected function buildIdsFromFilePath(SplFileInfo $fileInfo): array
-    {
-        $pathParts = explode('/', $fileInfo->getPath());
-        $pathParts[] = $fileInfo->getBasename('.'.$fileInfo->getExtension());
-
-        $id = [];
-        foreach (array_reverse($this->destIds) as $idField) {
-            /** @var IdField $idField */
-            $id[$idField->getName()] = $this->resolveDestId($idField, array_pop($pathParts));
-        }
-
-        return $id;
     }
 
     /**
@@ -188,55 +163,13 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
                 str_replace(
                     $this->destUri['path'],
                     '',
-                    $this->buildFilePathFromIds($destIds, 'ya?ml')
+                    $this->buildFilePathFromIds($destIds, $this->destUri['path'], 'ya?ml')
                 ), '/'
             );
             $finder->path(sprintf('`^%s$`', $searchPath));
         }
 
         return $finder;
-    }
-
-    /**
-     * Build the file path an entity with the given ids will be stored at.
-     *
-     * @param array  $destIds
-     * @param string $ext
-     *   File extension to use.  Defaults to "yaml".
-     *
-     * @return string
-     */
-    protected function buildFilePathFromIds(array $destIds, string $ext = 'yaml'): string
-    {
-        $pathParts = [];
-        foreach ($destIds as $destId => $value) {
-            $pathParts[] = $value;
-        }
-
-        $fileName = array_pop($pathParts).'.'.$ext;
-        $filePath = sprintf('%s/%s/%s', $this->destUri['path'], implode('/', $pathParts), $fileName);
-
-        return $filePath;
-    }
-
-    /**
-     * Add the given ids back to the entity
-     *
-     * Ids are removed from the entity when it is saved (as this information is
-     * now stored in the path), so they need to be added back to the entity.
-     *
-     * @param array $destIds
-     * @param array $entity
-     *
-     * @return array
-     */
-    protected function addIdsToEntity(array $destIds, array $entity)
-    {
-        foreach ($destIds as $destId => $value) {
-            $entity[$destId] = $value;
-        }
-
-        return $entity;
     }
 
     /**
@@ -249,7 +182,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         $entities = [];
         foreach ($finder as $fileInfo) {
             $entity = $this->yamlParser->parse($fileInfo->getContents());
-            $destIds = $this->buildIdsFromFilePath($fileInfo);
+            $destIds = $this->buildIdsFromFilePath($fileInfo, $this->destIds);
             $entity = $this->addIdsToEntity($destIds, $entity);
             $entities[] = $entity;
         }
@@ -264,7 +197,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         $destIds = [];
         foreach ($this->destIds as $idField) {
-            $destIds[$idField->getName()] = $this->resolveDestId($idField, $data[$idField->getName()]);
+            $destIds[$idField->getName()] = $this->resolveIdType($idField, $data[$idField->getName()]);
 
             // Remove the id from the data, as it will be represented in the
             // file path.
@@ -285,7 +218,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             $this->addRefs($yaml, $useAnchors);
         }
 
-        $path = $this->buildFilePathFromIds($destIds);
+        $path = $this->buildFilePathFromIds($destIds, $this->destUri['path']);
 
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path), 0755, true);

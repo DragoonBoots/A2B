@@ -26,6 +26,11 @@ Source
             <td><code>csv</code></td>
             <td>A CSV file</td>
         </tr>
+        <tr>
+            <td><a href="Source/YamlSourceDriver">YamlSourceDriver</a></td>
+            <td><code>yaml</code><code>yml</code></td>
+            <td>A directory with YAML files</td>
+        </tr>
     </tbody>
 </table>
 
@@ -48,7 +53,7 @@ Destination
         <tr>
             <td><a href="Destination/YamlDestinationDriver">YamlDestinationDriver</a></td>
             <td><code>yaml</code><code>yml</code></td>
-            <td>A directory (with optional subdirectories depending on migration ids) with one yaml file per entity.</td>
+            <td>A directory (with optional subdirectories depending on migration ids) with one YAML file per entity.</td>
         </tr>
         <tr>
             <td><a href="Destination/DoctrineDestinationDriver">DoctrineDestinationDriver</a></td>

@@ -74,6 +74,16 @@ services:
         tags:
         - a2b.driver.source
 
+    a2b.source.yaml:
+        parent: a2b.source.abstract_source_driver
+        class: DragoonBoots\A2B\Drivers\Source\YamlSourceDriver
+        public: false
+        tags:
+            - a2b.driver.source
+        arguments:
+            $yamlParser: '@a2b.symfony.yaml.parser'
+            $finderFactory: '@a2b.factory.finder'
+
     a2b.destination.debug:
         parent: a2b.destination.abstract_destination_driver
         class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver

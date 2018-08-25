@@ -3,7 +3,9 @@
 
 namespace DragoonBoots\A2B\Drivers;
 
+use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
+use DragoonBoots\A2B\Annotations\IdField;
 use League\Uri\Parser;
 
 /**
@@ -23,6 +25,23 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
     protected $uriParser;
 
     /**
+     * @var DataMigration
+     */
+    protected $migrationDefinition;
+
+    /**
+     * @var array
+     *
+     * @see \League\Uri\Parser::parse()
+     */
+    protected $sourceUri;
+
+    /**
+     * @var IdField[]
+     */
+    protected $sourceIds;
+
+    /**
      * AbstractSourceDriver constructor.
      *
      * @param Parser $uriParser
@@ -30,6 +49,16 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
     public function __construct(Parser $uriParser)
     {
         $this->uriParser = $uriParser;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configure(DataMigration $definition)
+    {
+        $this->definition = $definition;
+        $this->sourceUri = $this->uriParser->parse($definition->getSource());
+        $this->sourceIds = $definition->getSourceIds();
     }
 
     /**

@@ -21,6 +21,11 @@ Source
             </td>
             <td>Anything supported by the <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/introduction.html#introduction">Doctrine DBAL</a>
         </tr>
+        <tr>
+            <td><a href="Source/CsvSourceDriver">CsvDestinationDriver</a></td>
+            <td><code>csv</code></td>
+            <td>A CSV file</td>
+        </tr>
     </tbody>
 </table>
 

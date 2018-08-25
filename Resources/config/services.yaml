@@ -67,6 +67,13 @@ services:
         arguments:
             $connectionFactory: '@doctrine.dbal.connection_factory'
 
+    a2b.source.csv:
+        parent: a2b.source.abstract_source_driver
+        class: DragoonBoots\A2B\Drivers\Source\CsvSourceDriver
+        public: false
+        tags:
+        - a2b.driver.source
+
     a2b.destination.debug:
         parent: a2b.destination.abstract_destination_driver
         class: DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver

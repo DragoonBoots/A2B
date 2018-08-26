@@ -2,6 +2,20 @@
     "name": "dragoonboots/a2b",
     "description": "PHP data migration/transformation library",
     "type": "symfony-bundle",
+    "homepage": "https://dragoonboots.gitlab.io/a2b/index.html",
+    "readme": "https://gitlab.com/DragoonBoots/a2b/raw/master/README.md",
+    "support": {
+        "issues": "https://gitlab.com/DragoonBoots/a2b/issues",
+        "source": "https://gitlab.com/DragoonBoots/a2b",
+        "docs": "https://dragoonboots.gitlab.io/a2b/index.html"
+    },
+    "license": "LGPL-3.0-only",
+    "authors": [
+        {
+            "name": "Dan Keenan",
+            "email": "dk@dankeenan.org"
+        }
+    ],
     "require": {
         "php": "^7.2",
         "doctrine/annotations": "^1.6",
@@ -28,13 +42,6 @@
     "suggest": {
         "symfony/maker-bundle": "Generate migrations from the command line."
     },
-    "license": "LGPL-3.0-only",
-    "authors": [
-        {
-            "name": "Dan Keenan",
-            "email": "dk@dankeenan.org"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "DragoonBoots\\A2B\\": "src/"

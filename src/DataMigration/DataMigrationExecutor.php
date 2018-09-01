@@ -149,10 +149,18 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             }
         } catch (NoMappingForIdsException $e) {
             $entity = $this->migration->defaultResult();
+        } catch (\Throwable $e) {
+            $this->outputFormatter->message("Error encountered reading existing data for source ids:\n".var_export($sourceIds, true));
+            throw $e;
         }
         $entity = $this->migration->transform($sourceRow, $entity);
 
-        $destIds = $this->destinationDriver->write($entity);
+        try {
+            $destIds = $this->destinationDriver->write($entity);
+        } catch (\Throwable $e) {
+            $this->outputFormatter->message("Error encountered writing data for source ids:\n".var_export($sourceIds, true));
+            throw $e;
+        }
         $this->mapper->addMapping(get_class($this->migration), $this->migration->getDefinition(), $sourceIds, $destIds);
         $this->rowCounter++;
         $this->outputFormatter->writeProgress($this->rowCounter, $sourceIds, $destIds);

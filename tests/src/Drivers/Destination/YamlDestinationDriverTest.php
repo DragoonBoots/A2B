@@ -302,13 +302,13 @@ class YamlDestinationDriverTest extends TestCase
             ],
             'referenced_scalar_field' => 'value',
             'mapping_field' => [
-                'inner_field' => 'inner_value',
+                'inner_field' => 'inner value',
             ],
             'other_mapping_field' => [
-                'inner_field' => 'inner_value',
+                'inner_field' => 'inner value',
             ],
             'deep_mapping_field' => [
-                'other_field' => 'inner_value',
+                'other_field' => 'inner value',
             ],
         ];
         $path = vfsStream::url('data/existing_dir');
@@ -365,11 +365,11 @@ referenced_list:
   - item2
 referenced_scalar_field: value
 mapping_field:
-  inner_field: inner_value
+  inner_field: 'inner value'
 other_mapping_field:
-  inner_field: inner_value
+  inner_field: 'inner value'
 deep_mapping_field:
-  other_field: inner_value
+  other_field: 'inner value'
 
 YAML
                 ,
@@ -384,7 +384,7 @@ list: &list
 referenced_list: *list
 referenced_scalar_field: *scalar_field
 mapping_field: &mapping_field
-  inner_field: &mapping_field.inner_field inner_value
+  inner_field: &mapping_field.inner_field 'inner value'
 other_mapping_field: *mapping_field
 deep_mapping_field:
   other_field: *mapping_field.inner_field
@@ -404,7 +404,7 @@ referenced_list:
   - item2
 referenced_scalar_field: *scalar_field
 mapping_field: &mapping_field
-  inner_field: &mapping_field.inner_field inner_value
+  inner_field: &mapping_field.inner_field 'inner value'
 other_mapping_field: *mapping_field
 deep_mapping_field:
   other_field: *mapping_field.inner_field
@@ -422,11 +422,11 @@ list: &list
 referenced_list: *list
 referenced_scalar_field: value
 mapping_field:
-  inner_field: inner_value
+  inner_field: 'inner value'
 other_mapping_field:
-  inner_field: inner_value
+  inner_field: 'inner value'
 deep_mapping_field:
-  other_field: inner_value
+  other_field: 'inner value'
 
 YAML
                 ,
@@ -446,10 +446,10 @@ referenced_list:
   - item2
 referenced_scalar_field: *scalar_field
 mapping_field: &mapping_field
-  inner_field: inner_value
+  inner_field: 'inner value'
 other_mapping_field: *mapping_field
 deep_mapping_field:
-  other_field: inner_value
+  other_field: 'inner value'
 
 YAML
                 ,

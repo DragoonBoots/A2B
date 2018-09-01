@@ -332,6 +332,22 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($useAnchors as $anchor => $value) {
             // Add the anchor on the first occurrence
             preg_match('`\s+'.preg_quote($value, '`').'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
+            if (empty($matches)) {
+                // $useAnchors should contain only anchors that exist and should
+                // be used.  If one of those anchors can't be found, it probably
+                // means the YAML file has been mutated improperly and is no
+                // longer valid YAML, with or without the problem anchor.
+                throw new \LogicException(
+                    implode(
+                        "\n", [
+                            'Could not replace value with an anchor reference.  This is probably a bug.',
+                            'Anchor: '.var_export($anchor, true),
+                            'Value: '.var_export($value, true),
+                            'Current YAML state:'.var_export($yaml, true),
+                        ]
+                    )
+                );
+            }
             $pos = $matches[0][1] + 1;
             $before = substr($yaml, 0, $pos - 1);
             $space = substr($yaml, $pos - 1, 1);
@@ -339,7 +355,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             $after = substr($yaml, $pos + strlen($value));
 
             // Replace later occurrences with an alias.
-            $after = str_replace($space.$value, ' *'.$anchor, $after);
+            $after = str_replace(':'.$space.$value, ': *'.$anchor, $after);
             $yaml = $before.$firstValueWithAnchor.$after;
         }
     }

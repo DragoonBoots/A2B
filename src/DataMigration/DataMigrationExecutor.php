@@ -208,7 +208,11 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             $destIds = $destinationDriver->write($orphan);
 
             // Make a fake set of source ids for the mapper.
-            $sourceIds = array_fill_keys(array_keys($destIds), null);
+            $sourceIdFields = [];
+            foreach ($migration->getDefinition()->getSourceIds() as $sourceId) {
+                $sourceIdFields[] = $sourceId->getName();
+            }
+            $sourceIds = array_fill_keys($sourceIdFields, null);
             $this->mapper->addMapping(get_class($migration), $migration->getDefinition(), $sourceIds, $destIds);
         }
     }

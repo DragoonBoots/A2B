@@ -282,7 +282,7 @@ class DataMigrationExecutorTest extends TestCase
             $mapperAddParams[] = [
                 get_class($migration),
                 $migration->getDefinition(),
-                array_fill_keys(array_keys($orphanDestId), null),
+                ['id' => null],
                 $orphanDestId,
             ];
         }
@@ -374,7 +374,7 @@ class DataMigrationExecutorTest extends TestCase
             $mapperAddParams[] = [
                 get_class($migration),
                 $migration->getDefinition(),
-                array_fill_keys(array_keys($orphanDestId), null),
+                ['id' => null],
                 $orphanDestId,
             ];
         }

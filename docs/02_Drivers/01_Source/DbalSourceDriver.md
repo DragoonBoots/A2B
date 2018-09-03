@@ -12,14 +12,14 @@ for a list of supported URL formats.
 Usage
 -----
 In the migration's `configureSource`, two steps are required.  For the main
-source data set, create a Doctrine DBAL `Statement` object and pass it to
-`setStatement`.  For fetching the count, pass a `Statement` to
-`setCountStatement`.
+source data set, call `setStatement` with the query.  For fetching the count,
+call `setCountStatement` with a query; the first field returned is used as the
+count.
 
 ```php
 public function configureSource(SourceDriverInterface $sourceDriver)
 {
-    $statement = $sourceDriver->getConnection()->prepare(
+    $sourceDriver->setStatement(
         <<<SQL
 SELECT
     "generations"."id",
@@ -27,18 +27,19 @@ SELECT
     "regions"."identifier" AS "main_region"
 FROM "generations"
     JOIN "generation_names" ON "generations"."id" = "generation_names"."generation_id"
-    JOIN "regions" ON "generations"."main_region_id" = "regions"."id"
+    JOIN "regions" ON "generations"."main_region_id" = "regions"."id";
 SQL
     );
-    $sourceDriver->setStatement($statement);
 
-    $countStatement = $sourceDriver->getConnection()->prepare(
+    $sourceDriver->setCountStatement(
         <<<SQL
 SELECT
     count(*)
-FROM "generations"
+FROM "generations";
 SQL
     );
-    $sourceDriver->setCountStatement($countStatement);
 }
 ```
+
+If you need to do something complicated, pass a `Statement` object to either
+method instead of an SQL string.

@@ -13,6 +13,7 @@ use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Source\DbalSourceDriver;
 use DragoonBoots\A2B\Exception\BadUriException;
 use League\Uri\Parser;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class DbalSourceDriverTest extends TestCase
@@ -83,7 +84,7 @@ class DbalSourceDriverTest extends TestCase
         $driver->configure($definition);
     }
 
-    public function testSetStatement()
+    public function testSetPreparedStatement()
     {
         /** @var DataMigration $definition */
         /** @var Connection $connection */
@@ -98,7 +99,27 @@ class DbalSourceDriverTest extends TestCase
         $this->assertSame($statement, $driver->getIterator());
     }
 
-    public function testSetCountStatement()
+    public function testSetStatement()
+    {
+        /** @var DataMigration $definition */
+        /** @var Connection|MockObject $connection */
+        /** @var DbalSourceDriver $driver */
+        $this->setupDriver($definition, $connection, $driver);
+        $driver->configure($definition);
+
+        $testSql = 'TEST';
+        $statement = $this->createMock(Statement::class);
+        $statement->expects($this->once())->method('execute');
+        $connection->expects($this->once())
+            ->method('prepare')
+            ->with($testSql)
+            ->willReturn($statement);
+        $driver->setStatement($testSql);
+
+        $this->assertSame($statement, $driver->getIterator());
+    }
+
+    public function testSetPreparedCountStatement()
     {
         /** @var DataMigration $definition */
         /** @var Connection $connection */
@@ -114,6 +135,31 @@ class DbalSourceDriverTest extends TestCase
             ->method('fetchColumn')
             ->willReturn((string)$count);
         $driver->setCountStatement($statement);
+
+        $this->assertEquals($count, $driver->count());
+    }
+
+    public function testSetCountStatement()
+    {
+        /** @var DataMigration $definition */
+        /** @var Connection|MockObject $connection */
+        /** @var DbalSourceDriver $driver */
+        $this->setupDriver($definition, $connection, $driver);
+        $driver->configure($definition);
+
+        $count = 5;
+        $testSql = 'TEST';
+        $statement = $this->createMock(Statement::class);
+        $statement->expects($this->once())
+            ->method('execute');
+        $statement->expects($this->once())
+            ->method('fetchColumn')
+            ->willReturn((string)$count);
+        $connection->expects($this->once())
+            ->method('prepare')
+            ->with($testSql)
+            ->willReturn($statement);
+        $driver->setCountStatement($testSql);
 
         $this->assertEquals($count, $driver->count());
     }

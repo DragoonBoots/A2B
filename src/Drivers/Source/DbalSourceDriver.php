@@ -113,10 +113,14 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     /**
      * Set the statement used for the main result set.
      *
-     * @param Statement $statement
+     * @param Statement|string $statement
      */
-    public function setStatement(Statement $statement)
+    public function setStatement($statement)
     {
+        if (is_string($statement)) {
+            $statement = $this->getConnection()->prepare($statement);
+        }
+
         $statement->execute();
         $this->resultIterator = $statement;
     }
@@ -127,10 +131,14 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
      * This should select a single field.  The first field in the result
      * will be used as the count.
      *
-     * @param Statement $statement
+     * @param Statement|string $statement
      */
-    public function setCountStatement(Statement $statement)
+    public function setCountStatement($statement)
     {
+        if (is_string($statement)) {
+            $statement = $this->getConnection()->prepare($statement);
+        }
+
         $statement->execute();
         $this->count = (int)$statement->fetchColumn();
     }

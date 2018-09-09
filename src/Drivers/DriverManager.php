@@ -113,7 +113,7 @@ class DriverManager implements DriverManagerInterface
         $useDrivers = $drivers->filter(
             function ($driver) use ($scheme) {
                 /** @var SourceDriverInterface|DestinationDriverInterface $driver */
-                return in_array($scheme, $driver->getDefinition()->getValue());
+                return in_array($scheme, $driver->getDefinition()->getSchemes());
           }
         );
 

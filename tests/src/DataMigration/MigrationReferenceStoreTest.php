@@ -3,6 +3,7 @@
 namespace DragoonBoots\A2B\Tests\DataMigration;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
+use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
@@ -37,9 +38,14 @@ class MigrationReferenceStoreTest extends TestCase
      */
     protected $referenceStore;
 
-    protected function setupReferenceStore()
+    protected function setupReferenceStore(Driver $driverDefinition = null)
     {
+        if (is_null($driverDefinition)) {
+            $driverDefinition = new Driver();
+        }
         $this->destinationDriver = $this->createMock(DestinationDriverInterface::class);
+        $this->destinationDriver->method('getDefinition')
+            ->willReturn($driverDefinition);
         $driverManager = $this->createMock(DriverManagerInterface::class);
         $driverManager->expects($this->once())
             ->method('getDestinationDriver')
@@ -146,7 +152,7 @@ class MigrationReferenceStoreTest extends TestCase
 
     public function testGetMapperFailStub()
     {
-        $this->setupReferenceStore();
+        $this->setupReferenceStore(new Driver(['supportsStubs' => true]));
 
         $sourceIds = [
             'id' => 1,
@@ -171,7 +177,7 @@ class MigrationReferenceStoreTest extends TestCase
 
     public function testGetDestinationFailStub()
     {
-        $this->setupReferenceStore();
+        $this->setupReferenceStore(new Driver(['supportsStubs' => true]));
 
         $sourceIds = [
             'id' => 1,
@@ -197,5 +203,25 @@ class MigrationReferenceStoreTest extends TestCase
             ->willReturn($stub);
 
         $this->assertSame($this->referenceStore->get(get_class($this->migration), $sourceIds, true), $stub);
+    }
+
+    public function testGetStubUnsupported()
+    {
+        $this->setupReferenceStore();
+
+        $sourceIds = [
+            'id' => 1,
+        ];
+
+        $this->destinationDriver->expects($this->never())
+            ->method('read');
+
+        $this->mapper->expects($this->once())
+            ->method('getDestIdsFromSourceIds')
+            ->with(get_class($this->migration), $sourceIds)
+            ->willThrowException(new NoMappingForIdsException($sourceIds, get_class($this->migration)));
+
+        $this->expectException(NoMappingForIdsException::class);
+        $this->referenceStore->get(get_class($this->migration), $sourceIds, true);
     }
 }

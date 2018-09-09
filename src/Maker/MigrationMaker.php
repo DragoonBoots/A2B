@@ -183,7 +183,7 @@ class MigrationMaker extends AbstractMaker
         $schemes = [];
         foreach ($driverList as $driver) {
             $definition = $driver->getDefinition();
-            foreach ($definition->getValue() as $scheme) {
+            foreach ($definition->getSchemes() as $scheme) {
                 $schemes[$scheme] = $scheme;
             }
         }

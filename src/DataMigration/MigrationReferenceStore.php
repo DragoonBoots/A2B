@@ -60,6 +60,13 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
             $migrationDefinition = $dataMigration->getDefinition();
             $destinationDriver = clone ($this->driverManager->getDestinationDriver($migrationDefinition->getDestinationDriver()));
             $destinationDriver->configure($migrationDefinition);
+
+            // If the driver does not support stubbing, disallow it even if
+            // it has been requested.
+            if (!$destinationDriver->getDefinition()->supportsStubs()) {
+                $stub = false;
+            }
+
             try {
                 $destIds = $this->mapper->getDestIdsFromSourceIds($migrationId, $sourceIds);
                 $entity = $destinationDriver->read($destIds);

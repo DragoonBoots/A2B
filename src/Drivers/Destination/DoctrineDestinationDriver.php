@@ -15,7 +15,7 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 /**
  * Doctrine ORM entity Destination driver
  *
- * @Driver("doctrine")
+ * @Driver(schemes="doctrine", supportsStubs=true)
  */
 class DoctrineDestinationDriver extends AbstractDestinationDriver implements DestinationDriverInterface
 {

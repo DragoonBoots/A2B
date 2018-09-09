@@ -54,7 +54,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $annotations['TestMigration1'], $sourceIds, $destIds);
+        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
 
         // Check the results
         $mappings = $this->connection->query('SELECT * FROM "test_migration1"')
@@ -175,7 +175,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $annotations['TestMigration1'], $sourceIds, $destIds);
+        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
 
         // Check the results
         $mappings = $this->connection->query('SELECT * FROM "test_migration1"')
@@ -194,7 +194,7 @@ class DataMigrationMapperTest extends TestCase
         // Wait one second to ensure the updated time will roll over to a new
         // (greater) value.
         sleep(1);
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $annotations['TestMigration1'], $sourceIds, $destIds);
+        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
         $mappings = $this->connection->query('SELECT * FROM "test_migration1"')
             ->fetchAll();
         $this->assertCount(1, $mappings);
@@ -217,7 +217,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $annotations['TestMigration1'], $sourceIds, $destIds);
+        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
         $this->assertEquals($destIds, $mapper->getDestIdsFromSourceIds(get_class($migrations['TestMigration1']), $sourceIds));
     }
 
@@ -235,7 +235,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $annotations['TestMigration1'], $sourceIds, $destIds);
+        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
         $this->expectException(NoMappingForIdsException::class);
         $mapper->getDestIdsFromSourceIds(get_class($migrations['TestMigration1']), ['identifier' => 'nope']);
     }
@@ -254,7 +254,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $annotations['TestMigration1'], $sourceIds, $destIds);
+        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
         $this->assertEquals($sourceIds, $mapper->getSourceIdsFromDestIds(get_class($migrations['TestMigration1']), $destIds));
     }
 
@@ -272,7 +272,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $annotations['TestMigration1'], $sourceIds, $destIds);
+        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
         $this->expectException(NoMappingForIdsException::class);
         $mapper->getSourceIdsFromDestIds(get_class($migrations['TestMigration1']), ['id' => 12]);
     }

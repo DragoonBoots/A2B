@@ -12,6 +12,9 @@ interface MigrationReferenceStoreInterface
      *   The migration id that created the desired entity
      * @param array  $sourceIds
      *   The source keys for the desired entity.
+     * @param bool $stub
+     *   Should a stub object be returned when the requested entity does not
+     *   exist?
      *
      * @return mixed
      *
@@ -21,5 +24,5 @@ interface MigrationReferenceStoreInterface
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      *   Thrown when the specified migration does not exist
      */
-    public function get(string $migrationId, array $sourceIds);
+    public function get(string $migrationId, array $sourceIds, bool $stub = false);
 }

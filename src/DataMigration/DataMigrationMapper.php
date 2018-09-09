@@ -23,6 +23,10 @@ class DataMigrationMapper implements DataMigrationMapperInterface
 
     public const MAPPING_DEST = 'dest';
 
+    public const STATUS_MIGRATED = 0;
+
+    public const STATUS_STUB = 1;
+
     /**
      * @var Connection
      */
@@ -39,6 +43,11 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     protected $dataMigrationManager;
 
     /**
+     * @var StubberInterface
+     */
+    protected $stubber;
+
+    /**
      * A list of migrations for which the mapping tables have been conformed.
      *
      * The key is the migration class name, the values is true or false
@@ -49,27 +58,39 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     protected $mappingConformed = [];
 
     /**
+     * A list of stubs created for this migration.
+     *
+     * @var array
+     */
+    protected $stubs = [];
+
+    /**
      * DataMigrationMapper constructor.
      *
      * @param Connection                    $connection
      * @param Inflector                     $inflector
      * @param DataMigrationManagerInterface $dataMigrationManager
+     * @param StubberInterface              $stubber
      */
     public function __construct(
         Connection $connection,
         Inflector $inflector,
-        DataMigrationManagerInterface $dataMigrationManager
+        DataMigrationManagerInterface $dataMigrationManager,
+        StubberInterface $stubber
     ) {
         $this->connection = $connection;
         $this->inflector = $inflector;
         $this->dataMigrationManager = $dataMigrationManager;
+        $this->stubber = $stubber;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function addMapping($migrationId, DataMigration $migrationDefinition, array $sourceIds, array $destIds)
+    public function addMapping($migrationId, array $sourceIds, array $destIds, int $status = self::STATUS_MIGRATED)
     {
+        $migrationDefinition = $this->dataMigrationManager->getMigration($migrationId)
+            ->getDefinition();
         $tableName = $this->getMappingTableName($migrationId);
         $mappingConformed = $this->mappingConformed[$migrationId] ?? false;
         if (!$mappingConformed) {
@@ -105,7 +126,37 @@ class DataMigrationMapper implements DataMigrationMapperInterface
             $setFunction = 'set';
         }
         $q->$setFunction('updated', $q->createNamedParameter(date('c')));
+        $q->$setFunction('status', $q->createNamedParameter($status));
         $q->execute();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createStub(string $migrationId, array $sourceIds)
+    {
+        ksort($sourceIds);
+        $key = [
+            'migrationId' => $migrationId,
+            'sourceIds' => $sourceIds,
+        ];
+        $key = serialize($key);
+        if (!isset($this->stubs[$key])) {
+            $this->stubs[$key] = $this->stubber->createStub($migrationId);
+        }
+
+        return $this->stubs[$key];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAndPurgeStubs(): array
+    {
+        $stubs = $this->stubs;
+        $this->stubs = [];
+
+        return $stubs;
     }
 
     /**
@@ -149,6 +200,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
                 $table->addOption('comment', sprintf('Data migration map for "%s"', $migrationId));
                 $table->addColumn('updated', Type::DATETIMETZ_IMMUTABLE);
                 $table->addIndex(['updated'], sprintf('ix_%s_updated', $tableName));
+                $table->addColumn('status', Type::SMALLINT);
                 $createPrimaryKey = true;
             } else {
                 throw $e;

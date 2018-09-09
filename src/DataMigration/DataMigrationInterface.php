@@ -48,7 +48,7 @@ interface DataMigrationInterface
      *
      * @return mixed
      */
-    public static function defaultResult();
+    public function defaultResult();
 
     /**
      * Get the settings defined for this migration.

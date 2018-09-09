@@ -146,10 +146,10 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             $destIds = $this->mapper->getDestIdsFromSourceIds(get_class($this->migration), $sourceIds);
             $entity = $this->destinationDriver->read($destIds);
             if (is_null($entity)) {
-                $entity = $this->migration::defaultResult();
+                $entity = $this->migration->defaultResult();
             }
         } catch (NoMappingForIdsException $e) {
-            $entity = $this->migration::defaultResult();
+            $entity = $this->migration->defaultResult();
         } catch (\Throwable $e) {
             $this->outputFormatter->message("Error encountered reading existing data for source ids:\n".var_export($sourceIds, true));
             throw $e;
@@ -229,7 +229,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
                 $sourceIdFields[] = $sourceId->getName();
             }
             $sourceIds = array_fill_keys($sourceIdFields, null);
-            $this->mapper->addMapping(get_class($migration), $sourceIds, $destIds, self::STATUS_MIGRATED);
+            $this->mapper->addMapping(get_class($migration), $sourceIds, $destIds);
         }
     }
 

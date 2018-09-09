@@ -50,12 +50,12 @@ interface DataMigrationMapperInterface
     /**
      * Create a stub for an entity that does not yet exist.
      *
-     * @param string $migrationId
-     * @param array  $sourceIds
+     * @param DataMigrationInterface $migration
+     * @param array                  $sourceIds
      *
      * @return object
      */
-    public function createStub(string $migrationId, array $sourceIds);
+    public function createStub(DataMigrationInterface $migration, array $sourceIds);
 
     /**
      * Get the stubs that have been created and forget about them.

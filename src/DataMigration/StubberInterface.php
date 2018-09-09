@@ -8,9 +8,9 @@ interface StubberInterface
     /**
      * Create a stub for the given migration.
      *
-     * @param string $migrationId
+     * @param DataMigrationInterface $migration
      *
      * @return object
      */
-    public function createStub(string $migrationId);
+    public function createStub(DataMigrationInterface $migration): object ;
 }

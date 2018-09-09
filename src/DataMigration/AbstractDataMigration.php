@@ -39,7 +39,7 @@ abstract class AbstractDataMigration implements DataMigrationInterface
      *
      * @codeCoverageIgnore
      */
-    public static function defaultResult()
+    public function defaultResult()
     {
         return [];
     }

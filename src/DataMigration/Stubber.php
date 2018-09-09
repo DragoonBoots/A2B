@@ -31,9 +31,9 @@ class Stubber implements StubberInterface
         $this->em = $em;
     }
 
-    public function createStub(string $migrationId)
+    public function createStub(DataMigrationInterface $migration): object
     {
-        $stub = call_user_func([$migrationId, 'defaultResult']);
+        $stub = $migration->defaultResult();
         $meta = $this->em->getClassMetadata(get_class($stub));
 
         $fieldNames = array_diff($meta->getFieldNames(), $meta->getIdentifierFieldNames());

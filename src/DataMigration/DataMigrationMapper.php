@@ -133,16 +133,16 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function createStub(string $migrationId, array $sourceIds)
+    public function createStub(DataMigrationInterface $migration, array $sourceIds)
     {
         ksort($sourceIds);
         $key = [
-            'migrationId' => $migrationId,
+            'migrationId' => get_class($migration),
             'sourceIds' => $sourceIds,
         ];
         $key = serialize($key);
         if (!isset($this->stubs[$key])) {
-            $this->stubs[$key] = $this->stubber->createStub($migrationId);
+            $this->stubs[$key] = $this->stubber->createStub($migration);
         }
 
         return $this->stubs[$key];

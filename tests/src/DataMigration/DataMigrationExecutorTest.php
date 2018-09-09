@@ -4,6 +4,7 @@ namespace DragoonBoots\A2B\Tests\DataMigration;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
+use DragoonBoots\A2B\DataMigration\AbstractDataMigration;
 use DragoonBoots\A2B\DataMigration\DataMigrationExecutor;
 use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
@@ -281,7 +282,6 @@ class DataMigrationExecutorTest extends TestCase
         foreach ($orphanDestIds as $orphanDestId) {
             $mapperAddParams[] = [
                 get_class($migration),
-                $migration->getDefinition(),
                 ['id' => null],
                 $orphanDestId,
             ];
@@ -373,7 +373,6 @@ class DataMigrationExecutorTest extends TestCase
         foreach ($orphanDestIds as $orphanDestId) {
             $mapperAddParams[] = [
                 get_class($migration),
-                $migration->getDefinition(),
                 ['id' => null],
                 $orphanDestId,
             ];

@@ -56,8 +56,8 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
         if (!array_key_exists($key, $this->entities)) {
             $stubbed = false;
 
-            $migrationDefinition = $this->migrationManager->getMigration($migrationId)
-                ->getDefinition();
+            $dataMigration = $this->migrationManager->getMigration($migrationId);
+            $migrationDefinition = $dataMigration->getDefinition();
             $destinationDriver = clone ($this->driverManager->getDestinationDriver($migrationDefinition->getDestinationDriver()));
             $destinationDriver->configure($migrationDefinition);
             try {
@@ -65,7 +65,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
                 $entity = $destinationDriver->read($destIds);
             } catch (NoMappingForIdsException $e) {
                 if ($stub) {
-                    $entity = $this->mapper->createStub($migrationId, $sourceIds);
+                    $entity = $this->mapper->createStub($dataMigration, $sourceIds);
                     $stubbed = true;
                 } else {
                     throw $e;

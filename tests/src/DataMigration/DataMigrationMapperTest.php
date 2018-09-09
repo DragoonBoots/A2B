@@ -11,6 +11,8 @@ use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManager;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapper;
+use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
+use DragoonBoots\A2B\DataMigration\StubberInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
@@ -28,6 +30,21 @@ class DataMigrationMapperTest extends TestCase
      */
     protected $connection;
 
+    /**
+     * @var DataMigrationInterface[]
+     */
+    protected $migrations;
+
+    /**
+     * @var DataMigration[]
+     */
+    protected $definitions;
+
+    /**
+     * @var DataMigrationMapperInterface
+     */
+    protected $mapper;
+
     public function setUp()
     {
         $this->connection = new Connection(['memory' => true], new PDOSqlite\Driver());
@@ -42,10 +59,7 @@ class DataMigrationMapperTest extends TestCase
 
     public function testAddMappingFirstRun()
     {
-        /** @var DataMigrationInterface[] $migrations */
-        /** @var DataMigration[] $annotations */
-        /** @var DataMigrationMapper $mapper */
-        $this->setupMapper($migrations, $annotations, $mapper);
+        $this->setupMapper();
 
         // Add the mapping
         $sourceIds = [
@@ -54,7 +68,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
+        $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
 
         // Check the results
         $mappings = $this->connection->query('SELECT * FROM "test_migration1"')
@@ -72,16 +86,12 @@ class DataMigrationMapperTest extends TestCase
     }
 
     /**
-     * @param DataMigrationInterface[]|null $migrations
-     * @param DataMigration[]|null          $definitions
-     * @param DataMigrationMapper|null      $mapper
-     *
      * @throws \ReflectionException
      */
-    protected function setupMapper(?array &$migrations, ?array &$definitions, ?DataMigrationMapper &$mapper)
+    protected function setupMapper()
     {
         /** @var DataMigrationInterface[]|MockObject[] $migrations */
-        $migrations = [
+        $this->migrations = [
             'TestMigration1' => $this->getMockBuilder(DataMigrationInterface::class)
                 ->disableOriginalConstructor()
                 ->setMockClassName('TestMigration1')
@@ -92,7 +102,7 @@ class DataMigrationMapperTest extends TestCase
                 ->getMock(),
         ];
         /** @var DataMigration[] $definitions */
-        $definitions = [
+        $this->definitions = [
             'TestMigration1' => new DataMigration(
                 [
                     'source' => 'test://test',
@@ -124,9 +134,9 @@ class DataMigrationMapperTest extends TestCase
                 ]
             ),
         ];
-        foreach ($migrations as $migrationId => $migration) {
+        foreach ($this->migrations as $migrationId => $migration) {
             $migration->method('getDefinition')
-                ->willReturn($definitions[$migrationId]);
+                ->willReturn($this->definitions[$migrationId]);
         }
 
         // Test with a real inflector and migration manager as their output can
@@ -135,8 +145,8 @@ class DataMigrationMapperTest extends TestCase
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
-                function (\ReflectionClass $reflectionClass, string $annotationName) use ($migrations, $definitions) {
-                    return $definitions[$reflectionClass->getName()];
+                function (\ReflectionClass $reflectionClass, string $annotationName) {
+                    return $this->definitions[$reflectionClass->getName()];
                 }
             );
         $uriParser = $this->createMock(Parser::class);
@@ -149,24 +159,23 @@ class DataMigrationMapperTest extends TestCase
             ->willReturn($this->createMock(DestinationDriverInterface::class));
 
         $parameterBag = $this->createMock(ParameterBagInterface::class);
-        $parameterBag->expects($this->exactly(count($migrations) * 2))
+        $parameterBag->expects($this->exactly(count($this->migrations) * 2))
             ->method('resolveValue')
             ->willReturnArgument(0);
 
         $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
-        foreach ($migrations as $migration) {
+        foreach ($this->migrations as $migration) {
             $dataMigrationManager->addMigration($migration);
         }
 
-        $mapper = new DataMigrationMapper($this->connection, $inflector, $dataMigrationManager);
+        $stubber = $this->createMock(StubberInterface::class);
+
+        $this->mapper = new DataMigrationMapper($this->connection, $inflector, $dataMigrationManager, $stubber);
     }
 
     public function testAddMappingSecondRun()
     {
-        /** @var DataMigrationInterface[] $migrations */
-        /** @var DataMigration[] $annotations */
-        /** @var DataMigrationMapper $mapper */
-        $this->setupMapper($migrations, $annotations, $mapper);
+        $this->setupMapper();
 
         // Add the mapping
         $sourceIds = [
@@ -175,7 +184,7 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
+        $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
 
         // Check the results
         $mappings = $this->connection->query('SELECT * FROM "test_migration1"')
@@ -194,7 +203,7 @@ class DataMigrationMapperTest extends TestCase
         // Wait one second to ensure the updated time will roll over to a new
         // (greater) value.
         sleep(1);
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
+        $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
         $mappings = $this->connection->query('SELECT * FROM "test_migration1"')
             ->fetchAll();
         $this->assertCount(1, $mappings);
@@ -205,10 +214,7 @@ class DataMigrationMapperTest extends TestCase
 
     public function testGetDestIdsFromSourceIds()
     {
-        /** @var DataMigrationInterface[] $migrations */
-        /** @var DataMigration[] $annotations */
-        /** @var DataMigrationMapper $mapper */
-        $this->setupMapper($migrations, $annotations, $mapper);
+        $this->setupMapper();
 
         // Add the mapping
         $sourceIds = [
@@ -217,16 +223,13 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
-        $this->assertEquals($destIds, $mapper->getDestIdsFromSourceIds(get_class($migrations['TestMigration1']), $sourceIds));
+        $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
+        $this->assertEquals($destIds, $this->mapper->getDestIdsFromSourceIds(get_class($this->migrations['TestMigration1']), $sourceIds));
     }
 
     public function testGetDestIdsFromSourceIdsBad()
     {
-        /** @var DataMigrationInterface[] $migrations */
-        /** @var DataMigration[] $annotations */
-        /** @var DataMigrationMapper $mapper */
-        $this->setupMapper($migrations, $annotations, $mapper);
+        $this->setupMapper();
 
         // Add the mapping
         $sourceIds = [
@@ -235,17 +238,14 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
+        $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
         $this->expectException(NoMappingForIdsException::class);
-        $mapper->getDestIdsFromSourceIds(get_class($migrations['TestMigration1']), ['identifier' => 'nope']);
+        $this->mapper->getDestIdsFromSourceIds(get_class($this->migrations['TestMigration1']), ['identifier' => 'nope']);
     }
 
     public function testGetSourceIdsFromDestIds()
     {
-        /** @var DataMigrationInterface[] $migrations */
-        /** @var DataMigration[] $annotations */
-        /** @var DataMigrationMapper $mapper */
-        $this->setupMapper($migrations, $annotations, $mapper);
+        $this->setupMapper();
 
         // Add the mapping
         $sourceIds = [
@@ -254,16 +254,13 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
-        $this->assertEquals($sourceIds, $mapper->getSourceIdsFromDestIds(get_class($migrations['TestMigration1']), $destIds));
+        $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
+        $this->assertEquals($sourceIds, $this->mapper->getSourceIdsFromDestIds(get_class($this->migrations['TestMigration1']), $destIds));
     }
 
     public function testGetSourceIdsFromDestIdsBad()
     {
-        /** @var DataMigrationInterface[] $migrations */
-        /** @var DataMigration[] $annotations */
-        /** @var DataMigrationMapper $mapper */
-        $this->setupMapper($migrations, $annotations, $mapper);
+        $this->setupMapper();
 
         // Add the mapping
         $sourceIds = [
@@ -272,8 +269,8 @@ class DataMigrationMapperTest extends TestCase
         $destIds = [
             'id' => 1,
         ];
-        $mapper->addMapping(get_class($migrations['TestMigration1']), $sourceIds, $destIds);
+        $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
         $this->expectException(NoMappingForIdsException::class);
-        $mapper->getSourceIdsFromDestIds(get_class($migrations['TestMigration1']), ['id' => 12]);
+        $this->mapper->getSourceIdsFromDestIds(get_class($this->migrations['TestMigration1']), ['id' => 12]);
     }
 }

@@ -57,7 +57,7 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
      */
     public function configure(DataMigration $definition)
     {
-        $this->definition = $definition;
+        $this->migrationDefinition = $definition;
         $this->destUri = $this->uriParser->parse($definition->getDestination());
         $this->destIds = $definition->getDestinationIds();
     }

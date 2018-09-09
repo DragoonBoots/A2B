@@ -56,7 +56,7 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
      */
     public function configure(DataMigration $definition)
     {
-        $this->definition = $definition;
+        $this->migrationDefinition = $definition;
         $this->sourceUri = $this->uriParser->parse($definition->getSource());
         $this->sourceIds = $definition->getSourceIds();
     }

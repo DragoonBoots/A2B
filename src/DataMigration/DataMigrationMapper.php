@@ -404,10 +404,10 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         try {
             $result = $q->execute()->fetch();
         } catch (TableNotFoundException $e) {
-            throw new NoMappingForIdsException($sourceIds, $e->getCode(), $e);
+            throw new NoMappingForIdsException($sourceIds, $migrationId, $e->getCode(), $e);
         }
         if (!$result) {
-            throw new NoMappingForIdsException($sourceIds);
+            throw new NoMappingForIdsException($sourceIds, $migrationId);
         }
 
         // Need to remove the column prefix from the keys for use elsewhere.

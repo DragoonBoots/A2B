@@ -65,7 +65,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
             unset($destinationDriver);
         }
         if (is_null($this->entities[$key])) {
-            throw new NoMappingForIdsException($sourceIds);
+            throw new NoMappingForIdsException($sourceIds, $migrationId);
         }
 
         return $this->entities[$key];

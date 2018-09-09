@@ -2,6 +2,9 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
+/**
+ * Create stubs filled with data when needed for a migration reference
+ */
 interface StubberInterface
 {
 

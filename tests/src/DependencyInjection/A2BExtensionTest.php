@@ -6,6 +6,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface;
+use DragoonBoots\A2B\DataMigration\StubberInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Tests\A2BKernelTestCase;
 use ProxyManager\Proxy\LazyLoadingInterface;

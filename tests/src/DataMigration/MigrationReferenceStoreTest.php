@@ -7,6 +7,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\MigrationReferenceStore;
+use DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
@@ -16,8 +17,62 @@ use PHPUnit\Framework\TestCase;
 class MigrationReferenceStoreTest extends TestCase
 {
 
+    /**
+     * @var DestinationDriverInterface|MockObject
+     */
+    protected $destinationDriver;
+
+    /**
+     * @var DataMigrationInterface|MockObject
+     */
+    protected $migration;
+
+    /**
+     * @var DataMigrationMapperInterface|MockObject
+     */
+    protected $mapper;
+
+    /**
+     * @var MigrationReferenceStoreInterface
+     */
+    protected $referenceStore;
+
+    protected function setupReferenceStore()
+    {
+        $this->destinationDriver = $this->createMock(DestinationDriverInterface::class);
+        $driverManager = $this->createMock(DriverManagerInterface::class);
+        $driverManager->expects($this->once())
+            ->method('getDestinationDriver')
+            ->with(get_class($this->destinationDriver))
+            ->willReturn($this->destinationDriver);
+
+        $definition = new DataMigration(
+            [
+                'destinationDriver' => get_class($this->destinationDriver),
+            ]
+        );
+        /** @var DataMigrationInterface|MockObject $migration */
+        $this->migration = $this->getMockBuilder(DataMigrationInterface::class)
+            ->disableOriginalConstructor()
+            ->setMockClassName('TestMigration')
+            ->getMock();
+        $this->migration->method('getDefinition')
+            ->willReturn($definition);
+        $migrationManager = $this->createMock(DataMigrationManagerInterface::class);
+        $migrationManager->expects($this->once())
+            ->method('getMigration')
+            ->with(get_class($this->migration))
+            ->willReturn($this->migration);
+
+        $this->mapper = $this->createMock(DataMigrationMapperInterface::class);
+
+        $this->referenceStore = new MigrationReferenceStore($this->mapper, $migrationManager, $driverManager);
+    }
+
     public function testGet()
     {
+        $this->setupReferenceStore();
+
         $sourceIds = [
             'id' => 1,
         ];
@@ -29,50 +84,45 @@ class MigrationReferenceStoreTest extends TestCase
             'identifier' => 'test',
         ];
 
-        $driver = $this->createMock(DestinationDriverInterface::class);
-        $driver->expects($this->once())
+        $this->destinationDriver->expects($this->once())
             ->method('read')
             ->with($destIds)
             ->willReturn($expectedReferencedEntity);
-        $driverManager = $this->createMock(DriverManagerInterface::class);
-        $driverManager->expects($this->once())
-            ->method('getDestinationDriver')
-            ->with(get_class($driver))
-            ->willReturn($driver);
-
-        $definition = new DataMigration(
-            [
-                'destinationDriver' => get_class($driver),
-            ]
-        );
-        /** @var DataMigrationInterface|MockObject $migration */
-        $migration = $this->getMockBuilder(DataMigrationInterface::class)
-            ->disableOriginalConstructor()
-            ->setMockClassName('TestMigration')
-            ->getMock();
-        $migration->method('getDefinition')
-            ->willReturn($definition);
-        $migrationManager = $this->createMock(DataMigrationManagerInterface::class);
-        $migrationManager->expects($this->once())
-            ->method('getMigration')
-            ->with(get_class($migration))
-            ->willReturn($migration);
-
-        $mapper = $this->createMock(DataMigrationMapperInterface::class);
-        $mapper->expects($this->once())
+        $this->mapper->expects($this->once())
             ->method('getDestIdsFromSourceIds')
-            ->with(get_class($migration), $sourceIds)
+            ->with(get_class($this->migration), $sourceIds)
             ->willReturn($destIds);
 
-        $referenceStore = new MigrationReferenceStore($mapper, $migrationManager, $driverManager);
-        $this->assertEquals($expectedReferencedEntity, $referenceStore->get(get_class($migration), $sourceIds));
+        $this->assertEquals($expectedReferencedEntity, $this->referenceStore->get(get_class($this->migration), $sourceIds));
 
         // Call a second time to ensure the cache is used instead of fetching again.
-        $this->assertEquals($expectedReferencedEntity, $referenceStore->get(get_class($migration), $sourceIds), 'Not using cached value');
+        $this->assertEquals($expectedReferencedEntity, $this->referenceStore->get(get_class($this->migration), $sourceIds), 'Not using cached value');
     }
 
-    public function testGetNotFound()
+    public function testGetMapperFail()
     {
+        $this->setupReferenceStore();
+
+        $sourceIds = [
+            'id' => 1,
+        ];
+
+        $this->destinationDriver->expects($this->never())
+            ->method('read');
+
+        $this->mapper->expects($this->once())
+            ->method('getDestIdsFromSourceIds')
+            ->with(get_class($this->migration), $sourceIds)
+            ->willThrowException(new NoMappingForIdsException($sourceIds, get_class($this->migration)));
+
+        $this->expectException(NoMappingForIdsException::class);
+        $this->referenceStore->get(get_class($this->migration), $sourceIds);
+    }
+
+    public function testGetDestinationFail()
+    {
+        $this->setupReferenceStore();
+
         $sourceIds = [
             'id' => 1,
         ];
@@ -80,44 +130,72 @@ class MigrationReferenceStoreTest extends TestCase
             'identifier' => 'test',
         ];
 
-        $driver = $this->createMock(DestinationDriverInterface::class);
-        $driver->expects($this->once())
+        $this->destinationDriver->expects($this->once())
             ->method('read')
             ->with($destIds)
             ->willReturn(null);
-        $driverManager = $this->createMock(DriverManagerInterface::class);
-        $driverManager->expects($this->once())
-            ->method('getDestinationDriver')
-            ->with(get_class($driver))
-            ->willReturn($driver);
 
-        $definition = new DataMigration(
-            [
-                'destinationDriver' => get_class($driver),
-            ]
-        );
-        /** @var DataMigrationInterface|MockObject $migration */
-        $migration = $this->getMockBuilder(DataMigrationInterface::class)
-            ->disableOriginalConstructor()
-            ->setMockClassName('TestMigration')
-            ->getMock();
-        $migration->method('getDefinition')
-            ->willReturn($definition);
-        $migrationManager = $this->createMock(DataMigrationManagerInterface::class);
-        $migrationManager->expects($this->once())
-            ->method('getMigration')
-            ->with(get_class($migration))
-            ->willReturn($migration);
-
-        $mapper = $this->createMock(DataMigrationMapperInterface::class);
-        $mapper->expects($this->once())
+        $this->mapper->expects($this->once())
             ->method('getDestIdsFromSourceIds')
-            ->with(get_class($migration), $sourceIds)
+            ->with(get_class($this->migration), $sourceIds)
             ->willReturn($destIds);
 
-        $referenceStore = new MigrationReferenceStore($mapper, $migrationManager, $driverManager);
-
         $this->expectException(NoMappingForIdsException::class);
-        $referenceStore->get(get_class($migration), $sourceIds);
+        $this->referenceStore->get(get_class($this->migration), $sourceIds);
+    }
+
+    public function testGetMapperFailStub()
+    {
+        $this->setupReferenceStore();
+
+        $sourceIds = [
+            'id' => 1,
+        ];
+
+        $this->destinationDriver->expects($this->never())
+            ->method('read');
+
+        $this->mapper->expects($this->once())
+            ->method('getDestIdsFromSourceIds')
+            ->with(get_class($this->migration), $sourceIds)
+            ->willThrowException(new NoMappingForIdsException($sourceIds, get_class($this->migration)));
+
+        $stub = new \stdClass();
+        $this->mapper->expects($this->once())
+            ->method('createStub')
+            ->with($this->migration)
+            ->willReturn($stub);
+
+        $this->assertSame($this->referenceStore->get(get_class($this->migration), $sourceIds, true), $stub);
+    }
+
+    public function testGetDestinationFailStub()
+    {
+        $this->setupReferenceStore();
+
+        $sourceIds = [
+            'id' => 1,
+        ];
+        $destIds = [
+            'identifier' => 'test',
+        ];
+
+        $this->destinationDriver->expects($this->once())
+            ->method('read')
+            ->with($destIds)
+            ->willReturn(null);
+
+        $this->mapper->expects($this->once())
+            ->method('getDestIdsFromSourceIds')
+            ->with(get_class($this->migration), $sourceIds)
+            ->willReturn($destIds);
+
+        $stub = new \stdClass();
+        $this->mapper->expects($this->once())
+            ->method('createStub')
+            ->with($this->migration)
+            ->willReturn($stub);
+
+        $this->assertSame($this->referenceStore->get(get_class($this->migration), $sourceIds, true), $stub);
     }
 }

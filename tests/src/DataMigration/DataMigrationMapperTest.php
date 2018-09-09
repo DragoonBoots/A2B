@@ -31,7 +31,7 @@ class DataMigrationMapperTest extends TestCase
     protected $connection;
 
     /**
-     * @var DataMigrationInterface[]
+     * @var DataMigrationInterface[]|MockObject[]
      */
     protected $migrations;
 
@@ -39,6 +39,11 @@ class DataMigrationMapperTest extends TestCase
      * @var DataMigration[]
      */
     protected $definitions;
+
+    /**
+     * @var StubberInterface|MockObject
+     */
+    protected $stubber;
 
     /**
      * @var DataMigrationMapperInterface
@@ -168,9 +173,9 @@ class DataMigrationMapperTest extends TestCase
             $dataMigrationManager->addMigration($migration);
         }
 
-        $stubber = $this->createMock(StubberInterface::class);
+        $this->stubber = $this->createMock(StubberInterface::class);
 
-        $this->mapper = new DataMigrationMapper($this->connection, $inflector, $dataMigrationManager, $stubber);
+        $this->mapper = new DataMigrationMapper($this->connection, $inflector, $dataMigrationManager, $this->stubber);
     }
 
     public function testAddMappingSecondRun()
@@ -272,5 +277,21 @@ class DataMigrationMapperTest extends TestCase
         $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
         $this->expectException(NoMappingForIdsException::class);
         $this->mapper->getSourceIdsFromDestIds(get_class($this->migrations['TestMigration1']), ['id' => 12]);
+    }
+
+    public function testCreateStub()
+    {
+        $this->setupMapper();
+
+        $defaultResult = new \stdClass();
+        $this->stubber->expects($this->once())
+            ->method('createStub')
+            ->willReturn($defaultResult);
+
+        $stub = $this->mapper->createStub($this->migrations['TestMigration1'], ['identifier' => 'test']);
+        $this->assertSame($defaultResult, $stub);
+
+        $stubs = $this->mapper->getAndPurgeStubs();
+        $this->assertSame($stub, array_pop($stubs));
     }
 }

@@ -74,7 +74,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
 
             if (is_null($entity)) {
                 if ($stub) {
-                    $entity = $this->mapper->createStub($migrationId, $sourceIds);
+                    $entity = $this->mapper->createStub($dataMigration, $sourceIds);
                     $stubbed = true;
                 } else {
                     throw new NoMappingForIdsException($sourceIds, $migrationId);

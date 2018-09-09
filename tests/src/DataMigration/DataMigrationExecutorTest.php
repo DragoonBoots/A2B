@@ -68,6 +68,14 @@ class DataMigrationExecutorTest extends TestCase
         foreach ($testResultData as $testResultRow) {
             $testResultIds[] = ['identifier' => $testResultRow['identifier']];
         }
+        $stub = ['identifier' => 'stub', 'field' => 654534];
+        $stubKey = [
+            'migrationId' => 'TestMigration',
+            'sourceIds' => ['id' => 2],
+        ];
+        $stubKey = serialize($stubKey);
+        $stubs = [$stubKey => $stub];
+        $stubResultIds = ['identifier' => 'stub'];
 
         $definition = new DataMigration(
             [
@@ -114,9 +122,14 @@ class DataMigrationExecutorTest extends TestCase
         // This method can't be hit the first time, as there are no ids to use.
         $destinationDriver->method('read')
             ->willReturn($testResultData[0]);
-        $destinationDriver->method('write')
-            ->with($testResultData[0])
-            ->willReturn($testResultIds[0]);
+        $destinationDriver->expects($this->exactly(count($testSourceData) * 2 + 1))
+            ->method('write')
+            ->willReturnMap(
+                [
+                    [$testResultData[0], $testResultIds[0]],
+                    [$stub, $stubResultIds],
+                ]
+            );
 
         $mapper = $this->createMock(DataMigrationMapperInterface::class);
         $mapper->method('getDestIdsFromSourceIds')->willReturnCallback(
@@ -134,8 +147,12 @@ class DataMigrationExecutorTest extends TestCase
                 return ['identifier' => 'test'];
             }
         );
-        $mapper->expects($this->exactly(count($testSourceData) * 2))
+        $mapper->expects($this->exactly(count($testSourceData) * 2 + 1))
             ->method('addMapping');
+
+        $mapper->expects($this->exactly(count($testSourceData) * 2))
+            ->method('getAndPurgeStubs')
+            ->willReturnOnConsecutiveCalls($stubs, []);
 
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
         $outputFormatter->expects($this->exactly(2))

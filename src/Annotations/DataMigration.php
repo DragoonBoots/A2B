@@ -96,6 +96,17 @@ class DataMigration
     protected $depends = [];
 
     /**
+     * Entities will be flushed after being written.
+     *
+     * This can solve problems with self-referencing entities.
+     *
+     * Use this with care, as it can cause massive performance issues.
+     *
+     * @var bool
+     */
+    protected $flush = false;
+
+    /**
      * DataMigration constructor.
      *
      * @param array $values
@@ -110,6 +121,7 @@ class DataMigration
         $this->destinationDriver = $values['destinationDriver'] ?? null;
         $this->sourceIds = $values['sourceIds'] ?? [];
         $this->destinationIds = $values['destinationIds'] ?? [];
+        $this->flush = $values['flush'] ?? false;
 
         // Normalize dependency list to remove leading backslash
         foreach ($values['depends'] ?? [] as $dependency) {
@@ -265,5 +277,13 @@ class DataMigration
     public function getDepends(): array
     {
         return $this->depends;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getFlush(): bool
+    {
+        return $this->flush;
     }
 }

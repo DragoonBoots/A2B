@@ -49,25 +49,54 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $migrationId, array $sourceIds)
+    public function get(string $migrationId, array $sourceIds, bool $stub = false)
     {
         $key = serialize([$migrationId, $sourceIds]);
 
         if (!array_key_exists($key, $this->entities)) {
-            $migrationDefinition = $this->migrationManager->getMigration($migrationId)
-                ->getDefinition();
+            $stubbed = false;
+
+            $dataMigration = $this->migrationManager->getMigration($migrationId);
+            $migrationDefinition = $dataMigration->getDefinition();
             $destinationDriver = clone ($this->driverManager->getDestinationDriver($migrationDefinition->getDestinationDriver()));
             $destinationDriver->configure($migrationDefinition);
-            $destIds = $this->mapper->getDestIdsFromSourceIds($migrationId, $sourceIds);
-            $entity = $destinationDriver->read($destIds);
 
-            $this->entities[$key] = $entity;
+            // If the driver does not support stubbing, disallow it even if
+            // it has been requested.
+            if (!$destinationDriver->getDefinition()->supportsStubs()) {
+                $stub = false;
+            }
+
+            try {
+                $destIds = $this->mapper->getDestIdsFromSourceIds($migrationId, $sourceIds);
+                $entity = $destinationDriver->read($destIds);
+            } catch (NoMappingForIdsException $e) {
+                if ($stub) {
+                    $entity = $this->mapper->createStub($dataMigration, $sourceIds);
+                    $stubbed = true;
+                } else {
+                    throw $e;
+                }
+            }
+
+            if (is_null($entity)) {
+                if ($stub) {
+                    $entity = $this->mapper->createStub($dataMigration, $sourceIds);
+                    $stubbed = true;
+                } else {
+                    throw new NoMappingForIdsException($sourceIds, $migrationId);
+                }
+            }
+
+            if (!$stubbed) {
+                $this->entities[$key] = $entity;
+            }
+
             unset($destinationDriver);
-        }
-        if (is_null($this->entities[$key])) {
-            throw new NoMappingForIdsException($sourceIds, $migrationId);
+        } else {
+            $entity = $this->entities[$key];
         }
 
-        return $this->entities[$key];
+        return $entity;
     }
 }

@@ -20,7 +20,17 @@ class Driver
      * @var string[]
      * @Annotation\Required
      */
-    protected $value;
+    protected $schemes;
+
+    /**
+     * Does this driver support stubs?
+     *
+     * Most likely this can only be true on drivers that interact with a
+     * database.
+     *
+     * @var bool
+     */
+    protected $supportsStubs = false;
 
     /**
      * Driver constructor.
@@ -29,18 +39,27 @@ class Driver
      */
     public function __construct(array $values = [])
     {
-        $schemes = $values['value'] ?? [];
+        $schemes = $values['value'] ?? $values['schemes'] ?? [];
         if (!is_array($schemes)) {
             $schemes = [$schemes];
         }
-        $this->value = $schemes;
+        $this->schemes = $schemes;
+        $this->supportsStubs = $values['supportsStubs'] ?? false;
     }
 
     /**
      * @return string[]
      */
-    public function getValue(): array
+    public function getSchemes(): array
     {
-        return $this->value;
+        return $this->schemes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function supportsStubs(): bool
+    {
+        return $this->supportsStubs;
     }
 }

@@ -69,6 +69,11 @@ default is `int`.
 ### depends
 *(optional)* A list of migration FQCNs that must be run before this migration.
 
+### flush
+*(optional)* Set this to `true` to flush transformed entities to the destination
+immediately, instead of waiting until all entities have been transformed.
+The effect this can have depends on the destination driver in use.
+
 Configuration
 -------------
 At the beginning of the migration process, the `configureSource()` and
@@ -124,3 +129,35 @@ $referencedEntity = $this->referenceStore->get(OtherMigration::class, $sourceIds
 
 This will read the data written from the given migration (in this example, OtherMigration)
 with the given set of source ids.
+
+#### Handling broken references
+On occasion, the transformation must reference an entity that does not yet
+exist.  Stub entities can be automatically generated to handle this case.
+At present, this functionality is only available for the
+[DoctrineDestinationDriver](../02_Drivers/02_Destination/DoctrineDestinationDriver.md)
+to help with entity relationships.
+
+**NOTE:** This process can seriously impact performance.  It should only be
+used as a last resort when dependent migrations are not possible, e.g. an
+entity that references other entities of the same type.
+
+To avoid odd bugs in the migration process, set [flush](#page_flush) to `true` in
+the `@DataMigration` annotation.  Skipping this step could lead to the stub
+and/or entities referencing it not being updated properly when it is migrated.
+
+Pass `true` as the final argument to `referenceStore->get()` to receive a stub
+if the entity does not exist in the destination.  This stub will be generated
+from that migration's `defaultResult()` method with random data filled in the
+non-nullable fields to allow it to be written to the database.
+
+```php
+$sourceIds = ['id' => $sourceData['reference']];
+$referencedEntity = $this->referenceStore->get(OtherMigration::class, $sourceIds, true);
+```
+
+If the transformation logic must behave differently on stubs, check if the
+entity id field(s) are set.  Id fields are not automatically filled in by the
+stub generation process.
+
+If a stub is created, any created entities will be flushed to the database
+immediately.

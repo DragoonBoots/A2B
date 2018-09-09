@@ -46,6 +46,7 @@ services:
       $connection: '@a2b.mapper.connection'
       $inflector: '@a2b.doctrine.inflector'
       $dataMigrationManager: '@a2b.data_migration_manager'
+      $stubber: '@a2b.stubber'
   DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
 
   a2b.reference_store:
@@ -57,6 +58,13 @@ services:
       - '@a2b.data_migration_manager'
       - '@a2b.driver_manager'
   DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface: '@a2b.reference_store'
+
+  a2b.stubber:
+    class: DragoonBoots\A2B\DataMigration\Stubber
+    arguments:
+      - '@property_accessor'
+      - '@doctrine.orm.default_entity_manager'
+  DragoonBoots\A2B\DataMigration\StubberInterface: '@a2b.stubber'
 
   a2b.source.dbal:
     parent: a2b.source.abstract_source_driver

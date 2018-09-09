@@ -15,16 +15,15 @@ interface DataMigrationMapperInterface
 {
 
     /**
-     * @param string        $migrationId
+     * @param string $migrationId
      *   The class name of the migration being run.
-     * @param DataMigration $migrationDefinition
-     * @param array         $sourceIds
-     * @param array         $destIds
+     * @param array  $sourceIds
+     * @param array  $destIds
+     * @param int    $status
      *
-     * @throws SchemaException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws NonexistentMigrationException
      */
-    public function addMapping($migrationId, DataMigration $migrationDefinition, array $sourceIds, array $destIds);
+    public function addMapping($migrationId, array $sourceIds, array $destIds, int $status = DataMigrationMapper::STATUS_MIGRATED);
 
     /**
      * @param string $migrationId
@@ -47,4 +46,21 @@ interface DataMigrationMapperInterface
      * @throws NoMappingForIdsException
      */
     public function getSourceIdsFromDestIds(string $migrationId, array $destIds);
+
+    /**
+     * Create a stub for an entity that does not yet exist.
+     *
+     * @param DataMigrationInterface $migration
+     * @param array                  $sourceIds
+     *
+     * @return object
+     */
+    public function createStub(DataMigrationInterface $migration, array $sourceIds);
+
+    /**
+     * Get the stubs that have been created and forget about them.
+     *
+     * @return array
+     */
+    public function getAndPurgeStubs(): array;
 }

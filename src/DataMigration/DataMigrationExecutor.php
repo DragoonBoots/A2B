@@ -139,6 +139,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      */
     protected function executeRow(array $sourceRow): array
     {
+        $flush = $this->migration->getDefinition()->getFlush();
         $sourceIds = $this->getSourceIds($sourceRow);
 
         try {
@@ -156,12 +157,27 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $entity = $this->migration->transform($sourceRow, $entity);
 
         try {
+            // Write stubs first
+            $stubs = $this->mapper->getAndPurgeStubs();
+            foreach ($stubs as $serializedKey => $stub) {
+                list('migrationId' => $stubMigrationId, 'sourceIds' => $stubSourceIds) = unserialize($serializedKey);
+                $stubDestIds = $this->destinationDriver->write($stub);
+                $this->mapper->addMapping($stubMigrationId, $stubSourceIds, $stubDestIds, DataMigrationMapper::STATUS_STUB);
+            }
+            if (!empty($stubs)) {
+                // Flush the written stubs so they may be retrieved later.
+                $flush = true;
+            }
+
             $destIds = $this->destinationDriver->write($entity);
+            if ($flush) {
+                $this->destinationDriver->flush();
+            }
         } catch (\Throwable $e) {
             $this->outputFormatter->message("Error encountered writing data for source ids:\n".var_export($sourceIds, true));
             throw $e;
         }
-        $this->mapper->addMapping(get_class($this->migration), $this->migration->getDefinition(), $sourceIds, $destIds);
+        $this->mapper->addMapping(get_class($this->migration), $sourceIds, $destIds);
         $this->rowCounter++;
         $this->outputFormatter->writeProgress($this->rowCounter, $sourceIds, $destIds);
 
@@ -213,7 +229,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
                 $sourceIdFields[] = $sourceId->getName();
             }
             $sourceIds = array_fill_keys($sourceIdFields, null);
-            $this->mapper->addMapping(get_class($migration), $migration->getDefinition(), $sourceIds, $destIds);
+            $this->mapper->addMapping(get_class($migration), $sourceIds, $destIds);
         }
     }
 

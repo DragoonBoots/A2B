@@ -12,6 +12,7 @@ use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 use League\Uri\Parser;
 use MJS\TopSort\Implementations\FixedArraySort;
+use MJS\TopSort\TopSortInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DataMigrationManager implements DataMigrationManagerInterface
@@ -245,25 +246,15 @@ class DataMigrationManager implements DataMigrationManagerInterface
             $extrasAdded = [];
         }
 
-        $requestedMigrationList = [];
+        // Track requested migrations so these don't appear as extras added to
+        // satisfy dependencies.
+        $requestedMigrations = [];
         foreach ($migrations as $migration) {
-            $requestedMigrationList[] = get_class($migration);
+            $requestedMigrations[] = get_class($migration);
         }
 
         $sorter = new FixedArraySort();
-        foreach ($migrations as $migration) {
-            $definition = $migration->getDefinition();
-            $dependencies = $definition->getDepends();
-            foreach ($dependencies as $dependency) {
-                if (!in_array($dependency, $requestedMigrationList)) {
-                    $extrasAdded[] = $dependency;
-                    $requestedMigrationList[] = $dependency;
-                }
-
-                $sorter->add($dependency);
-            }
-            $sorter->add(get_class($migration), $dependencies);
-        }
+        $this->buildDependencyList($migrations, $extrasAdded, $sorter);
         $runList = $sorter->sort();
 
         $runMigrations = new ArrayCollection();
@@ -271,6 +262,40 @@ class DataMigrationManager implements DataMigrationManagerInterface
             $runMigrations->add($this->getMigration($migrationId));
         }
 
+        $extrasAdded = array_unique($extrasAdded);
+        $extrasAdded = array_diff($extrasAdded, $requestedMigrations);
+        $extrasAdded = array_values($extrasAdded);
+
         return $runMigrations;
+    }
+
+    /**
+     * Recursively build the dependency list.
+     *
+     * @param iterable              $migrations
+     * @param array                 $extrasAdded
+     * @param TopSortInterface|null $sorter
+     *
+     * @throws NonexistentMigrationException
+     */
+    protected function buildDependencyList(iterable $migrations, array &$extrasAdded, TopSortInterface &$sorter)
+    {
+        foreach ($migrations as $migration) {
+            if (!is_a($migration, DataMigrationInterface::class)) {
+                if (is_string($migration)) {
+                    $migration = $this->getMigration($migration);
+                } else {
+                    throw new \UnexpectedValueException("$migration is not a DataMigration instance.");
+                }
+            }
+
+            $definition = $migration->getDefinition();
+            $dependencies = $definition->getDepends();
+            $this->buildDependencyList($dependencies, $extrasAdded, $sorter);
+            foreach ($dependencies as $dependency) {
+                $extrasAdded[] = $dependency;
+            }
+            $sorter->add(get_class($migration), $dependencies);
+        }
     }
 }

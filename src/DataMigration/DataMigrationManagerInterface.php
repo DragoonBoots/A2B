@@ -4,6 +4,7 @@ namespace DragoonBoots\A2B\DataMigration;
 
 use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+use MJS\TopSort\TopSortInterface;
 
 
 /**

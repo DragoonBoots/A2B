@@ -310,7 +310,10 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
 
             $useAnchor = array_search($yamlValue, $anchors);
             if ($useAnchor !== false) {
-                $useAnchors[$useAnchor] = $yamlValue;
+                $useAnchors[$useAnchor] = [
+                    'value' => $yamlValue,
+                    'array' => is_array($value),
+                ];
             } else {
                 $anchors[$anchor] = $yamlValue;
                 if (is_array($value)) {
@@ -329,7 +332,9 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      */
     protected function addRefs(string &$yaml, array $useAnchors)
     {
-        foreach ($useAnchors as $anchor => $value) {
+        foreach ($useAnchors as $anchor => $info) {
+            $value = $info['value'];
+
             // Add the anchor on the first occurrence
             preg_match('`\s+'.preg_quote($value, '`').'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
             if (empty($matches)) {
@@ -355,7 +360,20 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             $after = substr($yaml, $pos + strlen($value));
 
             // Replace later occurrences with an alias.
-            $after = str_replace(':'.$space.$value, ': *'.$anchor, $after);
+            if ($info['array']) {
+                preg_match('`^\s*`', $value, $indentMatches);
+                if (empty($indentMatches)) {
+                    $indent = '';
+                } else {
+                    $indent = $indentMatches[0];
+                }
+                // Shift the indentation left one level
+                $indentLeft = substr($indent, min(strlen($indent), 2));
+                $replaceRe = '`'.preg_quote(':'.$space.$value, '`').'(?P<after>\n'.$indentLeft.'[^\s]|$)`';
+            } else {
+                $replaceRe = '`'.preg_quote(':'.$space.$value, '`').'(?P<after>)`';
+            }
+            $after = preg_replace($replaceRe, ': *'.$anchor.'$1', $after);
             $yaml = $before.$firstValueWithAnchor.$after;
         }
     }

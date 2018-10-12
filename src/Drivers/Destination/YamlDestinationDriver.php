@@ -4,9 +4,12 @@
 namespace DragoonBoots\A2B\Drivers\Destination;
 
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
+use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\YamlDriverTrait;
 use DragoonBoots\A2B\Exception\BadUriException;
@@ -14,7 +17,6 @@ use DragoonBoots\A2B\Factory\FinderFactory;
 use League\Uri\Parser;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Yaml\Dumper as YamlDumper;
 use Symfony\Component\Yaml\Parser as YamlParser;
 use Symfony\Component\Yaml\Yaml;
 
@@ -204,19 +206,12 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             unset($data[$idField->getName()]);
         }
 
-        $yaml = $this->dumpYaml($data);
         if ($this->options['refs']) {
-            $this->compileAnchors($data, $useAnchors);
-            // Sort by increasing depth to ensure replacement search strings
-            // can be found.
-            uksort(
-                $useAnchors,
-                function (string $a, $b) {
-                    return substr_count($a, '.') - substr_count($b, '.');
-                }
-            );
-            $this->addRefs($yaml, $useAnchors);
+            $useAnchors = $this->compileAnchors($data);
+        } else {
+            $useAnchors = null;
         }
+        $yaml = $this->dumpYaml($data, $useAnchors);
 
         $path = $this->buildFilePathFromIds($destIds, $this->destUri['path']);
 
@@ -231,19 +226,20 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * Dump the data into YAML format according to configured options.
      *
-     * @param array $data
-     * @param int   $depth
+     * @param array      $data
+     * @param array|null $useAnchors
+     * @param int        $depth
      *   The depth of this dump stage, for internal use.
      *
      * @return string
      */
-    protected function dumpYaml(array $data, $depth = 0): string
+    protected function dumpYaml(array $data, ?array $useAnchors, $depth = 0): string
     {
         $flagValue = 0;
         foreach ($this->options['flags'] as $flag) {
             $flagValue |= $flag;
         }
-        $yaml = $this->yamlDumper->dump($data, $this->options['inline'], $depth * self::INDENT_SPACES, $flagValue);
+        $yaml = $this->yamlDumper->dump($data, $this->options['inline'], $depth * self::INDENT_SPACES, $flagValue, $useAnchors);
 
         return $yaml;
     }
@@ -251,16 +247,19 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * Create a list of possible anchors to use.
      *
-     * @param array $data
-     * @param array $useAnchors
+     * @param array           $data
+     * @param array|null      $useAnchors
      *   An array, passed by reference, to store a a list of anchors that should
      *   be used.
-     * @param array $anchors
+     * @param array|null      $anchors
      *   An array, passed by reference, to store the possible anchors in.
      *   Anchors are named by separating their first path with a "."
-     * @param array $path
+     * @param Collection|null $path
+     *
+     * @return array
+     *   A map of anchor names and their values.
      */
-    protected function compileAnchors(array $data, ?array &$useAnchors, ?array &$anchors = null, array $path = [])
+    protected function compileAnchors(array $data, ?array &$useAnchors = null, ?array &$anchors = null, ?Collection $path = null)
     {
         if (!isset($anchors)) {
             $anchors = [];
@@ -268,9 +267,13 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         if (!isset($useAnchors)) {
             $useAnchors = [];
         }
+        if (!isset($path)) {
+            $path = new ArrayCollection();
+        }
         foreach ($data as $key => $value) {
-            $valuePath = array_merge($path, [$key]);
-            $anchor = implode('.', $valuePath);
+            $valuePath = clone $path;
+            $valuePath->add($key);
+            $anchor = implode('.', $valuePath->toArray());
 
             // Should an anchor be built for this path?
             $include = $this->options['refs']['include'] ?? ['`.+`'];
@@ -297,85 +300,29 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
                 continue;
             }
 
-            if (is_array($value)) {
-                $yamlValue = $this->dumpYaml($value, count($path) + 1);
-            } else {
-                // Need to isolate the dumper's decision on quoting, so fake a
-                // list and remove the list characters.
-                $yamlValue = $this->dumpYaml([$value]);
-                $yamlValue = preg_replace('`^\s*- `', '', $yamlValue, 1);
-                $yamlValue = str_replace("\n", "\n".str_repeat(' ', count($path) * self::INDENT_SPACES), $yamlValue);
+            // Use the anchor if this is an array or the final key in the key
+            // path matches (this means these values are likely similar
+            // contextually.
+            $useAnchor = false;
+            foreach ($anchors as $checkAnchor => $checkValue) {
+                $anchorPath = new ArrayCollection(explode('.', $checkAnchor));
+                if ($checkValue === $value && (is_array($value) || $anchorPath->last() === $valuePath->last())) {
+                    $useAnchor = $checkAnchor;
+                    break;
+                }
             }
-            $yamlValue = rtrim($yamlValue);
 
-            $useAnchor = array_search($yamlValue, $anchors);
             if ($useAnchor !== false) {
-                $useAnchors[$useAnchor] = [
-                    'value' => $yamlValue,
-                    'array' => is_array($value),
-                ];
+                $useAnchors[$useAnchor] = $value;
             } else {
-                $anchors[$anchor] = $yamlValue;
+                $anchors[$anchor] = $value;
                 if (is_array($value)) {
                     $this->compileAnchors($value, $useAnchors, $anchors, $valuePath);
                 }
             }
         }
-    }
 
-    /**
-     * Replace values with anchors where appropriate
-     *
-     * @param string $yaml
-     *   The yaml string to act upon, passed by reference
-     * @param array  $useAnchors
-     */
-    protected function addRefs(string &$yaml, array $useAnchors)
-    {
-        foreach ($useAnchors as $anchor => $info) {
-            $value = $info['value'];
-
-            // Add the anchor on the first occurrence
-            preg_match('`\s+'.preg_quote($value, '`').'\s+`', $yaml, $matches, PREG_OFFSET_CAPTURE);
-            if (empty($matches)) {
-                // $useAnchors should contain only anchors that exist and should
-                // be used.  If one of those anchors can't be found, it probably
-                // means the YAML file has been mutated improperly and is no
-                // longer valid YAML, with or without the problem anchor.
-                throw new \LogicException(
-                    implode(
-                        "\n", [
-                            'Could not replace value with an anchor reference.  This is probably a bug.',
-                            'Anchor: '.var_export($anchor, true),
-                            'Value: '.var_export($value, true),
-                            'Current YAML state:'.var_export($yaml, true),
-                        ]
-                    )
-                );
-            }
-            $pos = $matches[0][1] + 1;
-            $before = substr($yaml, 0, $pos - 1);
-            $space = substr($yaml, $pos - 1, 1);
-            $firstValueWithAnchor = ' &'.$anchor.$space.$value;
-            $after = substr($yaml, $pos + strlen($value));
-
-            // Replace later occurrences with an alias.
-            if ($info['array']) {
-                preg_match('`^\s*`', $value, $indentMatches);
-                if (empty($indentMatches)) {
-                    $indent = '';
-                } else {
-                    $indent = $indentMatches[0];
-                }
-                // Shift the indentation left one level
-                $indentLeft = substr($indent, min(strlen($indent), 2));
-                $replaceRe = '`'.preg_quote(':'.$space.$value, '`').'(?P<after>\n'.$indentLeft.'[^\s]|$)`';
-            } else {
-                $replaceRe = '`'.preg_quote(':'.$space.$value, '`').'(?P<after>)`';
-            }
-            $after = preg_replace($replaceRe, ': *'.$anchor.'$1', $after);
-            $yaml = $before.$firstValueWithAnchor.$after;
-        }
+        return $useAnchors;
     }
 
     /**

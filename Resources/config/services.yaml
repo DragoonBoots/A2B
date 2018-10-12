@@ -109,6 +109,12 @@ services:
     tags:
       - a2b.driver.destination
 
+  a2b.yaml.dumper:
+    class: DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper
+    public: false
+    arguments:
+      - 2
+
   a2b.destination.yaml:
     parent: a2b.destination.abstract_destination_driver
     class: DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver
@@ -117,7 +123,7 @@ services:
       - a2b.driver.destination
     arguments:
       $yamlParser: '@a2b.symfony.yaml.parser'
-      $yamlDumper: '@a2b.symfony.yaml.dumper'
+      $yamlDumper: '@a2b.yaml.dumper'
       $finderFactory: '@a2b.factory.finder'
 
   a2b.destination.doctrine:

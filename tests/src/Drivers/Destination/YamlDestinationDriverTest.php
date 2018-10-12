@@ -4,6 +4,7 @@ namespace DragoonBoots\A2B\Tests\Drivers\Destination;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
+use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use DragoonBoots\A2B\Tests\Drivers\FinderTestTrait;
@@ -16,7 +17,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Yaml\Dumper as YamlDumper;
 use Symfony\Component\Yaml\Parser as YamlParser;
 use Symfony\Component\Yaml\Yaml;
 
@@ -308,7 +308,11 @@ class YamlDestinationDriverTest extends TestCase
                 'inner_field' => 'inner value',
             ],
             'deep_mapping_field' => [
-                'other_field' => 'inner value',
+                'inner_field' => 'inner value',
+            ],
+            'deep_mapping_field_extra' => [
+                'inner_field' => 'inner value',
+                'other_field' => 'other value',
             ],
         ];
         $path = vfsStream::url('data/existing_dir');
@@ -369,7 +373,10 @@ mapping_field:
 other_mapping_field:
   inner_field: 'inner value'
 deep_mapping_field:
-  other_field: 'inner value'
+  inner_field: 'inner value'
+deep_mapping_field_extra:
+  inner_field: 'inner value'
+  other_field: 'other value'
 
 YAML
                 ,
@@ -377,17 +384,19 @@ YAML
             'build all refs' => [
                 true,
                 <<<YAML
-scalar_field: &scalar_field value
+scalar_field: value
 list: &list
   - item1
   - item2
 referenced_list: *list
-referenced_scalar_field: *scalar_field
+referenced_scalar_field: value
 mapping_field: &mapping_field
   inner_field: &mapping_field.inner_field 'inner value'
 other_mapping_field: *mapping_field
-deep_mapping_field:
-  other_field: *mapping_field.inner_field
+deep_mapping_field: *mapping_field
+deep_mapping_field_extra:
+  inner_field: *mapping_field.inner_field
+  other_field: 'other value'
 
 YAML
                 ,
@@ -395,19 +404,21 @@ YAML
             'build included refs' => [
                 ['include' => ['`[^.]+field$`']],
                 <<<YAML
-scalar_field: &scalar_field value
+scalar_field: value
 list:
   - item1
   - item2
 referenced_list:
   - item1
   - item2
-referenced_scalar_field: *scalar_field
+referenced_scalar_field: value
 mapping_field: &mapping_field
-  inner_field: &mapping_field.inner_field 'inner value'
+  inner_field: 'inner value'
 other_mapping_field: *mapping_field
-deep_mapping_field:
-  other_field: *mapping_field.inner_field
+deep_mapping_field: *mapping_field
+deep_mapping_field_extra:
+  inner_field: 'inner value'
+  other_field: 'other value'
 
 YAML
                 ,
@@ -426,7 +437,10 @@ mapping_field:
 other_mapping_field:
   inner_field: 'inner value'
 deep_mapping_field:
-  other_field: 'inner value'
+  inner_field: 'inner value'
+deep_mapping_field_extra:
+  inner_field: 'inner value'
+  other_field: 'other value'
 
 YAML
                 ,
@@ -437,19 +451,21 @@ YAML
                     'exclude' => ['`.+\.inner_field`'],
                 ],
                 <<<YAML
-scalar_field: &scalar_field value
+scalar_field: value
 list:
   - item1
   - item2
 referenced_list:
   - item1
   - item2
-referenced_scalar_field: *scalar_field
+referenced_scalar_field: value
 mapping_field: &mapping_field
   inner_field: 'inner value'
 other_mapping_field: *mapping_field
-deep_mapping_field:
-  other_field: 'inner value'
+deep_mapping_field: *mapping_field
+deep_mapping_field_extra:
+  inner_field: 'inner value'
+  other_field: 'other value'
 
 YAML
                 ,

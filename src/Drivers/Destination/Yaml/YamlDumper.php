@@ -39,11 +39,13 @@ class YamlDumper extends Dumper
                     $depth = substr_count($anchor, '.');
 
                     // Replace the anchor placeholder
+                    $replacementIndent = $indent + ($depth * $this->indentation) + $this->indentation;
                     if (is_array($value)) {
-                        $yamlValue = rtrim(parent::dump($value, $inline, $indent + ($depth * $this->indentation) + $this->indentation, $flags));
+                        $yamlValue = rtrim(parent::dump($value, $inline, $replacementIndent, $flags));
                         $replacement = '&'.$anchor."\n".$yamlValue;
                     } else {
-                        $yamlValue = rtrim(parent::dump($value, $inline, 0, $flags));
+                        $yamlValue = trim(parent::dump([$value], $inline, $replacementIndent - $this->indentation, $flags));
+                        $yamlValue = preg_replace('`^\s*- `', '', $yamlValue);
                         $replacement = '&'.$anchor.' '.$yamlValue;
                     }
                     $yaml = str_replace($placeholder.'__ANCHOR', $replacement, $yaml, $anchorReplacementCount);

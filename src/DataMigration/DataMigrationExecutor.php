@@ -31,6 +31,11 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     protected $outputFormatter;
 
     /**
+     * @var MigrationReferenceStoreInterface
+     */
+    protected $referenceStore;
+
+    /**
      * @var DataMigrationInterface
      */
     protected $migration;
@@ -63,13 +68,23 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     protected $rowCounter = 0;
 
     /**
+     * PHP memory limit (bytes)
+     *
+     * @var int
+     */
+    protected $memoryLimit;
+
+    /**
      * DataMigrationExecutor constructor.
      *
-     * @param DataMigrationMapperInterface $mapper
+     * @param DataMigrationMapperInterface     $mapper
+     * @param MigrationReferenceStoreInterface $referenceStore
      */
-    public function __construct(DataMigrationMapperInterface $mapper)
+    public function __construct(DataMigrationMapperInterface $mapper, MigrationReferenceStoreInterface $referenceStore)
     {
         $this->mapper = $mapper;
+        $this->referenceStore = $referenceStore;
+        $this->memoryLimit = $this->phpMemoryLimit();
     }
 
     /**
@@ -82,12 +97,14 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
 
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
     public function execute(
         DataMigrationInterface $migration,
         SourceDriverInterface $sourceDriver,
         DestinationDriverInterface $destinationDriver
     ) {
+        gc_enable();
         $definition = $migration->getDefinition();
         $this->migration = $migration;
         $this->sourceIds = $definition->getSourceIds();
@@ -120,6 +137,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             $this->destinationIds,
             $this->destinationDriver
         );
+        $this->freeMemoryIfNeeded(0.5);
 
         return $orphans;
     }
@@ -134,11 +152,14 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      *   Thrown when there is no value set for an id in this row.
      * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\NoDestinationException
-     * @throws \Doctrine\DBAL\Schema\SchemaException
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     * @throws \Throwable
      */
     protected function executeRow(array $sourceRow): array
     {
+        $this->freeMemoryIfNeeded();
+
         $flush = $this->migration->getDefinition()->getFlush();
         $sourceIds = $this->getSourceIds($sourceRow);
 
@@ -182,6 +203,38 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $this->outputFormatter->writeProgress($this->rowCounter, $sourceIds, $destIds);
 
         return $destIds;
+    }
+
+    /**
+     * Check if memory needs to be freed and attempt to if necessary.
+     *
+     * @param float $memoryPercentageUsed
+     *   When memory usage reaches this percentage of available memory, attempt
+     *   to clean up.  Defaults to 0.7 (70%)
+     *
+     * @throws \Exception
+     *   Thrown when memory cannot be freed.
+     *
+     * @codeCoverageIgnore
+     */
+    protected function freeMemoryIfNeeded(float $memoryPercentageUsed = 0.7): void
+    {
+        $memoryPreLimit = (int)($this->memoryLimit * $memoryPercentageUsed);
+        if (memory_get_usage() >= $memoryPreLimit) {
+            $this->outputFormatter->message('Freeing memory...', OutputFormatterInterface::MESSAGE_INFO);
+            gc_collect_cycles();
+            $this->referenceStore->freeMemory();
+            gc_collect_cycles();
+            $this->sourceDriver->freeMemory();
+            gc_collect_cycles();
+            $this->destinationDriver->freeMemory();
+            gc_collect_cycles();
+
+            if (memory_get_usage() >= $memoryPreLimit) {
+                throw new \Exception(sprintf('Cannot free enough memory to continue. (%s / %s bytes used)', memory_get_usage(), $this->memoryLimit));
+            }
+            $this->outputFormatter->message('Memory freed, continuing...', OutputFormatterInterface::MESSAGE_INFO);
+        }
     }
 
     /**
@@ -286,5 +339,36 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         );
 
         return $orphans;
+    }
+
+    /**
+     * Get the PHP memory limit
+     *
+     * @return int
+     */
+    private function phpMemoryLimit(): int
+    {
+        $val = trim(ini_get('memory_limit'));
+        $last = strtolower($val[strlen($val) - 1]);
+        if (!is_numeric($last)) {
+            $val = (int)substr($val, 0, -1);
+        } else {
+            $val = (int)$val;
+        }
+
+        if ($val == -1) {
+            return PHP_INT_MAX;
+        }
+
+        switch ($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+
+        return $val;
     }
 }

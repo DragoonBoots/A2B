@@ -181,4 +181,14 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function freeMemory(): void
+    {
+        parent::freeMemory();
+
+        $this->em->flush();
+    }
 }

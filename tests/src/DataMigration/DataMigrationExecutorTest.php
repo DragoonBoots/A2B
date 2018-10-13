@@ -10,6 +10,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapper;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
+use DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\OutputFormatterInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
@@ -154,13 +155,15 @@ class DataMigrationExecutorTest extends TestCase
             ->method('getAndPurgeStubs')
             ->willReturnOnConsecutiveCalls($stubs, []);
 
+        $referenceStore = $this->createMock(MigrationReferenceStoreInterface::class);
+
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
         $outputFormatter->expects($this->exactly(2))
             ->method('start');
         $outputFormatter->expects($this->exactly(2))
             ->method('finish');
 
-        $executor = new DataMigrationExecutor($mapper);
+        $executor = new DataMigrationExecutor($mapper, $referenceStore);
         $executor->setOutputFormatter($outputFormatter);
         // Run twice to test that updating logic works.  The assertions are all
         // in the migration drivers that observe the process.
@@ -263,9 +266,11 @@ class DataMigrationExecutorTest extends TestCase
             }
         );
 
+        $referenceStore = $this->createMock(MigrationReferenceStoreInterface::class);
+
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
 
-        $executor = new DataMigrationExecutor($mapper);
+        $executor = new DataMigrationExecutor($mapper, $referenceStore);
         $executor->setOutputFormatter($outputFormatter);
         $resultOrphans = $executor->execute($migration, $sourceDriver, $destinationDriver);
         $this->assertEquals([$orphan], $resultOrphans);
@@ -308,7 +313,10 @@ class DataMigrationExecutorTest extends TestCase
         $mapper->expects($this->exactly(count($orphans)))
             ->method('addMapping')
             ->withConsecutive(...$mapperAddParams);
-        $executor = new DataMigrationExecutor($mapper);
+
+        $referenceStore = $this->createMock(MigrationReferenceStoreInterface::class);
+
+        $executor = new DataMigrationExecutor($mapper, $referenceStore);
 
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
         $outputFormatter->expects($this->once())
@@ -399,7 +407,10 @@ class DataMigrationExecutorTest extends TestCase
         $mapper->expects($this->exactly($writeCount))
             ->method('addMapping')
             ->withConsecutive(...$mapperAddParams);
-        $executor = new DataMigrationExecutor($mapper);
+
+        $referenceStore = $this->createMock(MigrationReferenceStoreInterface::class);
+
+        $executor = new DataMigrationExecutor($mapper, $referenceStore);
 
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
         $outputFormatter->expects($this->exactly(2))

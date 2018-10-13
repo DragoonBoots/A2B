@@ -99,4 +99,13 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
 
         return $entity;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function freeMemory(): void
+    {
+        // Clear internal entity cache.
+        $this->entities = [];
+    }
 }

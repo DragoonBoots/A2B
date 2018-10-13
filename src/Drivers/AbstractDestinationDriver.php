@@ -108,4 +108,11 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function freeMemory(): void
+    {
+    }
 }

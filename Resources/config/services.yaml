@@ -30,6 +30,7 @@ services:
     lazy: true
     arguments:
       - '@a2b.mapper'
+      - '@a2b.reference_store'
   DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface: '@a2b.executor'
 
   a2b.mapper.connection:

@@ -25,4 +25,9 @@ interface MigrationReferenceStoreInterface
      *   Thrown when the specified migration does not exist
      */
     public function get(string $migrationId, array $sourceIds, bool $stub = false);
+
+    /**
+     * Called when the system needs to free memory before crashing.
+     */
+    public function freeMemory(): void;
 }

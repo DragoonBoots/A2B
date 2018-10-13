@@ -82,4 +82,11 @@ abstract class AbstractSourceDriver implements SourceDriverInterface
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function freeMemory(): void
+    {
+    }
 }

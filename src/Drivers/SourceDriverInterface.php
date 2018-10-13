@@ -53,4 +53,9 @@ interface SourceDriverInterface extends \IteratorAggregate, \Countable
      * @return self
      */
     public function setDefinition(Driver $definition);
+
+    /**
+     * Called when the system needs to free memory before crashing.
+     */
+    public function freeMemory(): void;
 }

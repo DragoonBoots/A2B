@@ -171,10 +171,6 @@ class YamlDestinationDriverTest extends TestCase
         $this->uriParser->expects($this->once())
             ->method('parse')
             ->willReturn(['scheme' => 'yaml', 'path' => $path]);
-        $this->finder->method('count')
-            ->willReturn(2);
-        $this->finder->expects($this->never())
-            ->method('getIterator');
 
         $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);

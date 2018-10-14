@@ -48,7 +48,7 @@ trait YamlDriverTrait
      *
      * @return array
      */
-    protected function buildIdsFromFilePath(SplFileInfo $fileInfo, array $ids): array
+    protected function buildIdsFromFilePath(\SplFileInfo $fileInfo, array $ids): array
     {
         $pathParts = explode('/', $fileInfo->getPath());
         $pathParts[] = $fileInfo->getBasename('.'.$fileInfo->getExtension());

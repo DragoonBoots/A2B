@@ -16,7 +16,6 @@ use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use League\Uri\Parser;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Parser as YamlParser;
 use Symfony\Component\Yaml\Yaml;
 
@@ -125,53 +124,44 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      */
     public function read(array $destIds)
     {
-        $finder = $this->findEntities([$destIds]);
-
-        $count = $finder->count();
-        if ($count > 1) {
-            // The filesystem would normally enforce uniqueness here, however,
-            // because both "yaml" and "yml" extensions are allowed, it's
-            // conceivable that a file could exist with both extensions.
-            throw new \RangeException(sprintf("More than one entity matched the ids:\n%s\n", var_export($destIds, true)));
-        } elseif ($count == 1) {
-            /** @var SplFileInfo $fileInfo */
-            $iterator = $finder->getIterator();
-            $iterator->rewind();
-            $fileInfo = $iterator->current();
-            $entity = $this->yamlParser->parse($fileInfo->getContents());
-            $entity = $this->addIdsToEntity($destIds, $entity);
-
-            return $entity;
+        $entityFiles = $this->findEntities([$destIds]);
+        if (empty($entityFiles)) {
+            return null;
         }
 
-        return null;
+        $entityFile = array_pop($entityFiles);
+        $entity = $this->yamlParser->parse(file_get_contents($entityFile->getPathname()));
+        $entity = $this->addIdsToEntity($destIds, $entity);
+
+        return $entity;
     }
 
     /**
      * @param array $destIdSet
      *
-     * @return Finder
+     * @return \SplFileInfo[]
      */
-    protected function findEntities(array $destIdSet)
+    protected function findEntities(array $destIdSet): array
     {
-        $finder = $this->finderFactory->get()
-            ->files()
-            ->in($this->destUri['path'])
-            ->followLinks()
-            ->ignoreDotFiles(true);
-
+        $entityFiles = [];
         foreach ($destIdSet as $destIds) {
-            $searchPath = ltrim(
-                str_replace(
-                    $this->destUri['path'],
-                    '',
-                    $this->buildFilePathFromIds($destIds, $this->destUri['path'], 'ya?ml')
-                ), '/'
-            );
-            $finder->path(sprintf('`^%s$`', $searchPath));
+            $matched = 0;
+            foreach (['yaml', 'yml'] as $ext) {
+                $searchPath = $this->buildFilePathFromIds($destIds, $this->destUri['path'], $ext);
+                if (file_exists($searchPath)) {
+                    $matched++;
+                    $entityFiles[] = new \SplFileInfo($searchPath);
+                }
+            }
+            if ($matched > 1) {
+                // The filesystem would normally enforce uniqueness here, however,
+                // because both "yaml" and "yml" extensions are allowed, it's
+                // conceivable that a file could exist with both extensions.
+                throw new \RangeException(sprintf("More than one entity matched the ids:\n%s\n", var_export($destIds, true)));
+            }
         }
 
-        return $finder;
+        return $entityFiles;
     }
 
     /**
@@ -179,11 +169,11 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      */
     public function readMultiple(array $destIdSet)
     {
-        $finder = $this->findEntities($destIdSet);
+        $entityFiles = $this->findEntities($destIdSet);
 
         $entities = [];
-        foreach ($finder as $fileInfo) {
-            $entity = $this->yamlParser->parse($fileInfo->getContents());
+        foreach ($entityFiles as $fileInfo) {
+            $entity = $this->yamlParser->parse(file_get_contents($fileInfo->getPathname()));
             $destIds = $this->buildIdsFromFilePath($fileInfo, $this->destIds);
             $entity = $this->addIdsToEntity($destIds, $entity);
             $entities[] = $entity;

@@ -104,7 +104,7 @@ class YamlDumper extends Dumper
                     // This is an array with an entry in the replacements table,
                     // check that table for sub-entries that need placeholders.
                     foreach ($replacements[$placeholderMap[$itemPathKey]] as $replacementKey => &$replacementValue) {
-                        $replacementValue = $this->replaceItemWithPlaceholder($replacementValue, $itemPathKey, $refs, $placeholderMap);
+                        $replacementValue = $this->replaceItemWithPlaceholder($replacementValue, $itemPathKey.'.'.$replacementKey, $refs, $placeholderMap);
                     }
                 }
             }
@@ -136,6 +136,12 @@ class YamlDumper extends Dumper
         }
         if ($anchor !== false && isset($placeholderMap[$anchor])) {
             $item = $placeholderMap[$anchor].'__'.$type;
+        }
+
+        if (is_array($item)) {
+            foreach ($item as $key => &$value) {
+                $value = $this->replaceItemWithPlaceholder($value, $itemPathKey.'.'.$key, $refs, $placeholderMap);
+            }
         }
 
         return $item;

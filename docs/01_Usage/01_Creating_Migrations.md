@@ -74,6 +74,14 @@ default is `int`.
 immediately, instead of waiting until all entities have been transformed.
 The effect this can have depends on the destination driver in use.
 
+### extends
+*(optional)* The name of a migration that this logically extends.  This is
+uncommon, but may be useful if migrated data references itself and requires
+multiple passes to process.  When a migration extends a different migration,
+it will share mapper data with the parent migration.  *Note that the parent
+migration is not automatically added as a dependency!*  For this to succeed,
+the source and destination properties must match.
+
 Configuration
 -------------
 At the beginning of the migration process, the `configureSource()` and
@@ -161,3 +169,9 @@ stub generation process.
 
 If a stub is created, any created entities will be flushed to the database
 immediately.
+
+**NOTE:** An alternative to the stubbing process is to write a
+separate migration that acts as a second pass.  Use the [extends](#page_extends)
+property in the annotation to declare a migration as an extension.  For this to
+succeed, the source and destination properties must match.  Depending on the
+data, this may have a less severe performance impact.

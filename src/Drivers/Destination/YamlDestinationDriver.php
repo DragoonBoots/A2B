@@ -263,14 +263,14 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($data as $key => $value) {
             $valuePath = clone $path;
             $valuePath->add($key);
-            $anchor = implode('.', $valuePath->toArray());
+            $anchorKey = implode('.', $valuePath->toArray());
 
             // Should an anchor be built for this path?
             $include = $this->options['refs']['include'] ?? ['`.+`'];
             $exclude = $this->options['refs']['exclude'] ?? [];
             $buildAnchor = false;
             foreach ($include as $includePattern) {
-                $buildAnchor = (preg_match($includePattern, $anchor) === 1);
+                $buildAnchor = (preg_match($includePattern, $anchorKey) === 1);
                 if ($buildAnchor) {
                     break;
                 }
@@ -281,7 +281,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
                 continue;
             }
             foreach ($exclude as $excludePattern) {
-                $buildAnchor = (preg_match($excludePattern, $anchor) === 0);
+                $buildAnchor = (preg_match($excludePattern, $anchorKey) === 0);
                 if (!$buildAnchor) {
                     break;
                 }
@@ -294,10 +294,10 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             // path matches (this means these values are likely similar
             // contextually.
             $useAnchor = false;
-            foreach ($anchors as $checkAnchor => $checkValue) {
-                $anchorPath = new ArrayCollection(explode('.', $checkAnchor));
+            foreach ($anchors as $checkAnchorKey => $checkValue) {
+                $anchorPath = new ArrayCollection(explode('.', $checkAnchorKey));
                 if ($checkValue === $value && (is_array($value) || $anchorPath->last() === $valuePath->last())) {
-                    $useAnchor = $checkAnchor;
+                    $useAnchor = $checkAnchorKey;
                     break;
                 }
             }
@@ -305,7 +305,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             if ($useAnchor !== false) {
                 $useAnchors[$useAnchor] = $value;
             } else {
-                $anchors[$anchor] = $value;
+                $anchors[$anchorKey] = $value;
                 if (is_array($value)) {
                     $this->compileAnchors($value, $useAnchors, $anchors, $valuePath);
                 }

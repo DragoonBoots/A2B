@@ -4,6 +4,7 @@
 namespace DragoonBoots\A2B\Drivers\Destination\Yaml;
 
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Yaml\Dumper;
 
 class YamlDumper extends Dumper
@@ -69,7 +70,10 @@ class YamlDumper extends Dumper
      * @param string     $refKey
      * @param array|null $path
      * @param array|null $placeholderMap
+     *   Maps keys to their placeholders so the anchor/alias can be inserted
+     *   after dumping.
      * @param array|null $replacements
+     *   Maps placeholders with their actual values.
      *
      * @return array
      * @throws \Exception
@@ -92,13 +96,19 @@ class YamlDumper extends Dumper
             $itemPathKey = implode('.', $itemPath);
 
             if (isset($refs[$itemPathKey])) {
+                // This is the first instance of this value; this item is an
+                // anchor.  Add the placeholder to the placeholder map and
+                // store the replacement value so it can be re-inserted lated.
                 $placeholderMap[$itemPathKey] = $refKey.'__'.sha1($itemPathKey);
                 $replacements[$placeholderMap[$itemPathKey]] = $item;
             } else {
+                // This may be an alias; the check happens in replaceItemWithPlaceholder
                 $item = $this->replaceItemWithPlaceholder($item, $itemPathKey, $refs, $placeholderMap);
             }
 
             if (is_array($item)) {
+                // Recursively check the item for other values that need
+                // placeholder replacement.
                 $this->createReferencePlaceholders($item, $refs, $refKey, $itemPath, $placeholderMap, $replacements);
                 if (isset($refs[$itemPathKey])) {
                     // This is an array with an entry in the replacements table,
@@ -110,7 +120,8 @@ class YamlDumper extends Dumper
             }
 
             if (isset($refs[$itemPathKey])) {
-                // Only replace with the anchor placeholder after scanning children.
+                // Only replace the value with the anchor placeholder after
+                // scanning children.
                 $item = $placeholderMap[$itemPathKey].'__ANCHOR';
             }
         }
@@ -121,26 +132,38 @@ class YamlDumper extends Dumper
     /**
      * @param            $item
      * @param string     $itemPathKey
-     * @param array      $refs
+     * @param array      $anchors
      * @param array|null $placeholderMap
      *
      * @return mixed|string
      */
-    protected function replaceItemWithPlaceholder($item, string $itemPathKey, array $refs, ?array &$placeholderMap)
+    protected function replaceItemWithPlaceholder($item, string $itemPathKey, array $anchors, ?array &$placeholderMap)
     {
-        $anchor = array_search($item, $refs, true);
-        if (strpos($anchor, $itemPathKey) === 0) {
+        $itemPath = new ArrayCollection(explode('.', $itemPathKey));
+        // Use the anchor if this is an array or the final key in the key
+        // path matches (this means these values are likely similar
+        // contextually.
+        $useAnchor = false;
+        foreach ($anchors as $checkAnchorKey => $checkValue) {
+            $anchorPath = new ArrayCollection(explode('.', $checkAnchorKey));
+            if ($checkValue === $item && (is_array($item) || $anchorPath->last() === $itemPath->last())) {
+                $useAnchor = $checkAnchorKey;
+                break;
+            }
+        }
+
+        if (strpos($useAnchor, $itemPathKey) === 0) {
             $type = 'ANCHOR';
         } else {
             $type = 'ALIAS';
         }
-        if ($anchor !== false && isset($placeholderMap[$anchor])) {
-            $item = $placeholderMap[$anchor].'__'.$type;
+        if ($useAnchor !== false && isset($placeholderMap[$useAnchor])) {
+            $item = $placeholderMap[$useAnchor].'__'.$type;
         }
 
         if (is_array($item)) {
             foreach ($item as $key => &$value) {
-                $value = $this->replaceItemWithPlaceholder($value, $itemPathKey.'.'.$key, $refs, $placeholderMap);
+                $value = $this->replaceItemWithPlaceholder($value, $itemPathKey.'.'.$key, $anchors, $placeholderMap);
             }
         }
 

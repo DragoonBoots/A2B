@@ -4,6 +4,7 @@
 namespace DragoonBoots\A2B\Annotations;
 
 use Doctrine\Common\Annotations\Annotation;
+use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 
 /**
  * Annotation for data migrations.
@@ -107,6 +108,14 @@ class DataMigration
     protected $flush = false;
 
     /**
+     * This migration extends a different one (e.g. a second pass over the same
+     * data set).
+     *
+     * @var string|null
+     */
+    protected $extends;
+
+    /**
      * DataMigration constructor.
      *
      * @param array $values
@@ -122,6 +131,7 @@ class DataMigration
         $this->sourceIds = $values['sourceIds'] ?? [];
         $this->destinationIds = $values['destinationIds'] ?? [];
         $this->flush = $values['flush'] ?? false;
+        $this->extends = $values['extends'] ?? null;
 
         // Normalize dependency list to remove leading backslash
         foreach ($values['depends'] ?? [] as $dependency) {
@@ -285,5 +295,13 @@ class DataMigration
     public function getFlush(): bool
     {
         return $this->flush;
+    }
+
+    /**
+     * @return string|DataMigrationInterface|null
+     */
+    public function getExtends()
+    {
+        return $this->extends;
     }
 }

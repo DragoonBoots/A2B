@@ -160,11 +160,16 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     {
         $this->freeMemoryIfNeeded();
 
-        $flush = $this->migration->getDefinition()->getFlush();
+        $migrationDefinition = $this->migration->getDefinition();
+        $flush = $migrationDefinition->getFlush();
         $sourceIds = $this->getSourceIds($sourceRow);
 
+        $mapperMigrationKey = get_class($this->migration);
+        if (!is_null($migrationDefinition->getExtends())) {
+            $mapperMigrationKey = get_class($migrationDefinition->getExtends());
+        }
         try {
-            $destIds = $this->mapper->getDestIdsFromSourceIds(get_class($this->migration), $sourceIds);
+            $destIds = $this->mapper->getDestIdsFromSourceIds($mapperMigrationKey, $sourceIds);
             $entity = $this->destinationDriver->read($destIds);
             if (is_null($entity)) {
                 $entity = $this->migration->defaultResult();
@@ -198,7 +203,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             $this->outputFormatter->message("Error encountered writing data for source ids:\n".var_export($sourceIds, true));
             throw $e;
         }
-        $this->mapper->addMapping(get_class($this->migration), $sourceIds, $destIds);
+        $this->mapper->addMapping($mapperMigrationKey, $sourceIds, $destIds);
         $this->rowCounter++;
         $this->outputFormatter->writeProgress($this->rowCounter, $sourceIds, $destIds);
 

@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
+use DragoonBoots\A2B\Exception\MigrationException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 use League\Uri\Parser;
 use MJS\TopSort\Implementations\FixedArraySort;
@@ -214,13 +215,40 @@ class DataMigrationManager implements DataMigrationManagerInterface
         return $this->groups;
     }
 
+    /**
+     * @param string $migrationName
+     *
+     * @return DataMigrationInterface|mixed
+     * @throws MigrationException
+     * @throws NonexistentMigrationException
+     * @throws \ReflectionException
+     */
     public function getMigration(string $migrationName)
     {
         if (!$this->migrations->containsKey($migrationName)) {
             throw new NonexistentMigrationException($migrationName);
         }
 
-        return $this->migrations[$migrationName];
+        $migration = $this->migrations[$migrationName];
+        $definition = $migration->getDefinition();
+        if (!is_null($definition->getExtends()) && !is_a($definition->getExtends(), DataMigrationInterface::class)) {
+            // Inject the migration into the definition.  This is done here
+            // to better guarantee the referenced migration is known by the
+            // manager already.
+            $extendsMigration = $this->getMigration($definition->getExtends());
+            $extendsMigrationDefinition = $extendsMigration->getDefinition();
+            $isCompatibleMigrationExtension = $definition->getSource() === $extendsMigrationDefinition->getSource()
+                && $definition->getSourceIds() == $extendsMigrationDefinition->getSourceIds()
+                && $definition->getDestination() === $extendsMigrationDefinition->getDestination()
+                && $definition->getDestinationIds() == $extendsMigrationDefinition->getDestinationIds();
+            if ($isCompatibleMigrationExtension) {
+                $this->injectProperty($definition, 'extends', $extendsMigration);
+            } else {
+                throw new MigrationException(sprintf('"%s" cannot extend "%s" because their definitions do not match.', get_class($migration), get_class($extendsMigration)));
+            }
+        }
+
+        return $migration;
     }
 
     public function getMigrationsInGroup(string $groupName)

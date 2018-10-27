@@ -130,6 +130,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         }
 
         // Cleanup
+        $this->freeMemoryIfNeeded(0.5);
         unset(
             $this->migration,
             $this->sourceIds,
@@ -137,7 +138,6 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             $this->destinationIds,
             $this->destinationDriver
         );
-        $this->freeMemoryIfNeeded(0.5);
 
         return $orphans;
     }
@@ -210,14 +210,14 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      *
      * @param float $memoryPercentageUsed
      *   When memory usage reaches this percentage of available memory, attempt
-     *   to clean up.  Defaults to 0.7 (70%)
+     *   to clean up.  Defaults to 0.8 (80%)
      *
      * @throws \Exception
      *   Thrown when memory cannot be freed.
      *
      * @codeCoverageIgnore
      */
-    protected function freeMemoryIfNeeded(float $memoryPercentageUsed = 0.7): void
+    protected function freeMemoryIfNeeded(float $memoryPercentageUsed = 0.8): void
     {
         $memoryPreLimit = (int)($this->memoryLimit * $memoryPercentageUsed);
         if (memory_get_usage() >= $memoryPreLimit) {

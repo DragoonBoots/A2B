@@ -45,6 +45,13 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
     private $repo;
 
     /**
+     * A count of the entities persisted in this pass.
+     *
+     * @var int
+     */
+    private $persistedCount = 0;
+
+    /**
      * DoctrineDestinationDriver constructor.
      *
      * @param Parser                    $uriParser
@@ -75,9 +82,10 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
             throw new BadUriException($definition->getDestination());
         }
 
-        // Reset to the default entity manager.
+        // Reset to defaults
         $this->em = $this->defaultEm;
         $this->repo = null;
+        $this->persistedCount = 0;
     }
 
     /**
@@ -142,6 +150,12 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver implements Des
     public function write($data)
     {
         $this->em->persist($data);
+        $this->persistedCount++;
+        if ($this->persistedCount % 100 == 0) {
+            // Avoids out-of-memory errors when persisting a large number of
+            // entities at once.
+            $this->em->flush();
+        }
 
         $id = [];
         foreach ($this->destIds as $destId) {

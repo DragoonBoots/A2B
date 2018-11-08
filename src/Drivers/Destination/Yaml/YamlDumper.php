@@ -146,6 +146,7 @@ class YamlDumper extends Dumper
         $useAnchor = false;
         foreach ($anchors as $checkAnchorKey => $checkValue) {
             $anchorPath = new ArrayCollection(explode('.', $checkAnchorKey));
+            $this->resolvePlaceholder($item, $placeholderMap, $anchors);
             if ($checkValue === $item && (is_array($item) || $anchorPath->last() === $itemPath->last())) {
                 $useAnchor = $checkAnchorKey;
                 break;
@@ -168,6 +169,40 @@ class YamlDumper extends Dumper
         }
 
         return $item;
+    }
+
+    /**
+     * Recursively replace placeholders with their values
+     *
+     * @param $item
+     * @param $placeholderMap
+     * @param $anchors
+     */
+    protected function resolvePlaceholder(&$item, $placeholderMap, $anchors)
+    {
+        // Return early if this is not a placeholder
+        if ((is_string($item) && strpos($item, 'REF__') === false)
+            || (!is_string($item) && !is_array($item))) {
+            return;
+        }
+
+        if (!is_array($item)) {
+            $anchorPath = array_search(
+                str_replace(
+                    [
+                        '__ANCHOR',
+                        '__ALIAS',
+                    ], '', $item
+                ), $placeholderMap
+            );
+            if ($anchorPath !== false) {
+                $item = $anchors[$anchorPath];
+            }
+        } else {
+            foreach ($item as &$itemRow) {
+                $this->resolvePlaceholder($itemRow, $placeholderMap, $anchors);
+            }
+        }
     }
 
 }

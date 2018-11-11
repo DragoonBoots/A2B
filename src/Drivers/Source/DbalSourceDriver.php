@@ -5,8 +5,8 @@ namespace DragoonBoots\A2B\Drivers\Source;
 
 
 use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\Driver\Statement;
 use DragoonBoots\A2B\Annotations\DataMigration;
@@ -85,6 +85,10 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     {
         $source = $definition->getSource();
         $this->count = null;
+
+        if (isset($this->connection)) {
+            $this->connection->close();
+        }
 
         try {
             $this->connection = $this->connectionFactory->createConnection(['url' => $source]);

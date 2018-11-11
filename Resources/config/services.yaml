@@ -137,6 +137,15 @@ services:
       $em: '@doctrine.orm.default_entity_manager'
       $propertyAccess: '@property_accessor'
 
+  a2b.destination.dbal:
+    parent: a2b.destination.abstract_destination_driver
+    class: DragoonBoots\A2B\Drivers\Destination\DbalDestinationDriver
+    public: false
+    tags:
+      - a2b.driver.destination
+    arguments:
+      $connectionFactory: '@doctrine.dbal.connection_factory'
+
   a2b.source.abstract_source_driver:
     class: DragoonBoots\A2B\Drivers\AbstractSourceDriver
     abstract: true

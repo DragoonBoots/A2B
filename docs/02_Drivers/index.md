@@ -60,17 +60,5 @@ Destination
             <td><code>doctrine</code></td>
             <td><a href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/index.html">Doctrine ORM</a> entities</td>
         </tr>
-        <tr>
-            <td><a href="Destination/DbalDestinationDriver">DbalDestinationDriver</a></td>
-            <td>
-                <code>db2</code>
-                <code>mssql</code>
-                <code>mysql</code>
-                <code>pgsql</code>
-                <code>sqlite</code>
-                and <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/configuration.html#connecting-using-a-url">others</a>
-            </td>
-            <td>Anything supported by the <a href="https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/introduction.html#introduction">Doctrine DBAL</a>
-        </tr>
     </tbody>
 </table>

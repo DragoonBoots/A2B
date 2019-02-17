@@ -4,8 +4,8 @@ namespace DragoonBoots\A2B\Tests\Drivers;
 
 
 use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\PDOSqlite;
 use Doctrine\DBAL\Driver\Statement;
 use DragoonBoots\A2B\Annotations\DataMigration;

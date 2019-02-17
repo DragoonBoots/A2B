@@ -127,16 +127,6 @@ services:
       $yamlDumper: '@a2b.yaml.dumper'
       $finderFactory: '@a2b.factory.finder'
 
-  a2b.destination.doctrine:
-    parent: a2b.destination.abstract_destination_driver
-    class: DragoonBoots\A2B\Drivers\Destination\DoctrineDestinationDriver
-    public: false
-    tags:
-      - a2b.driver.destination
-    arguments:
-      $em: '@doctrine.orm.default_entity_manager'
-      $propertyAccess: '@property_accessor'
-
   a2b.destination.dbal:
     parent: a2b.destination.abstract_destination_driver
     class: DragoonBoots\A2B\Drivers\Destination\DbalDestinationDriver

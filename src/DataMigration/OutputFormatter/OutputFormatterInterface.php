@@ -44,9 +44,10 @@ interface OutputFormatterInterface
      * @param int   $count
      *   The number of rows migrated
      * @param array $sourceIds
-     * @param array $destIds
+     * @param array|null $destIds
+     *   An array of destination ids, or null if the entity was not migrated.
      */
-    public function writeProgress(int $count, array $sourceIds, array $destIds);
+    public function writeProgress(int $count, array $sourceIds, ?array $destIds);
 
     /**
      * Finish a migration

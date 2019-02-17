@@ -126,11 +126,15 @@ TXT;
     /**
      * {@inheritdoc}
      */
-    public function writeProgress(int $count, array $sourceIds, array $destIds)
+    public function writeProgress(int $count, array $sourceIds, ?array $destIds)
     {
         $this->migrationProgressBar->setProgress($count);
         $sourceIdString = $this->formatIds($sourceIds);
-        $destIdString = $this->formatIds($destIds);
+        if (!is_null($destIds)) {
+            $destIdString = $this->formatIds($destIds);
+        } else {
+            $destIdString = 'SKIPPED';
+        }
         $idString = sprintf(
             '%s => %s',
             $sourceIdString,
@@ -196,6 +200,7 @@ TXT;
         }
 
         $this->migrationProgressBar->setMessage($result);
+        $this->migrationProgressBar->display();
     }
 
     /**

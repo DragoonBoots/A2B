@@ -117,7 +117,10 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         $existingIds = $this->destinationDriver->getExistingIds();
         $newIds = [];
         foreach ($sourceDriver->getIterator() as $row) {
-            $newIds[] = $this->executeRow($row);
+            $newId = $this->executeRow($row);
+            if (!is_null($newId)) {
+                $newIds[] = $newId;
+            }
         }
         $this->outputFormatter->finish();
 
@@ -145,8 +148,9 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     /**
      * @param array $sourceRow
      *
-     * @return array
-     *   The set of ids that identify this row in the destination.
+     * @return array|null
+     *   The set of ids that identify this row in the destination, or NULL if
+     *   the row is skipped.
      *
      * @throws NoIdSetException
      *   Thrown when there is no value set for an id in this row.
@@ -156,7 +160,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      * @throws \Exception
      * @throws \Throwable
      */
-    protected function executeRow(array $sourceRow): array
+    protected function executeRow(array $sourceRow): ?array
     {
         $this->freeMemoryIfNeeded();
 
@@ -182,28 +186,35 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         }
         $entity = $this->migration->transform($sourceRow, $entity);
 
-        try {
-            // Write stubs first
-            $stubs = $this->mapper->getAndPurgeStubs();
-            foreach ($stubs as $serializedKey => $stub) {
-                list('migrationId' => $stubMigrationId, 'sourceIds' => $stubSourceIds) = unserialize($serializedKey);
-                $stubDestIds = $this->destinationDriver->write($stub);
-                $this->mapper->addMapping($stubMigrationId, $stubSourceIds, $stubDestIds, DataMigrationMapper::STATUS_STUB);
-            }
-            if (!empty($stubs)) {
-                // Flush the written stubs so they may be retrieved later.
-                $flush = true;
-            }
+        if (!is_null($entity)) {
+            try {
+                // Write stubs first
+                $stubs = $this->mapper->getAndPurgeStubs();
+                foreach ($stubs as $serializedKey => $stub) {
+                    list('migrationId' => $stubMigrationId, 'sourceIds' => $stubSourceIds) = unserialize($serializedKey);
+                    $stubDestIds = $this->destinationDriver->write($stub);
+                    $this->mapper->addMapping($stubMigrationId, $stubSourceIds, $stubDestIds, DataMigrationMapper::STATUS_STUB);
+                }
+                if (!empty($stubs)) {
+                    // Flush the written stubs so they may be retrieved later.
+                    $flush = true;
+                }
 
-            $destIds = $this->destinationDriver->write($entity);
-            if ($flush) {
-                $this->destinationDriver->flush();
+                $destIds = $this->destinationDriver->write($entity);
+                if ($flush) {
+                    $this->destinationDriver->flush();
+                }
+            } catch (\Throwable $e) {
+                $this->outputFormatter->message("Error encountered writing data for source ids:\n".var_export($sourceIds, true));
+                throw $e;
             }
-        } catch (\Throwable $e) {
-            $this->outputFormatter->message("Error encountered writing data for source ids:\n".var_export($sourceIds, true));
-            throw $e;
+            $this->mapper->addMapping($mapperMigrationKey, $sourceIds, $destIds);
+        } else {
+            // Purge stubs
+            $this->mapper->getAndPurgeStubs();
+            $destIds = null;
         }
-        $this->mapper->addMapping($mapperMigrationKey, $sourceIds, $destIds);
+
         $this->rowCounter++;
         $this->outputFormatter->writeProgress($this->rowCounter, $sourceIds, $destIds);
 

@@ -202,6 +202,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             $useAnchors = null;
         }
         $yaml = $this->dumpYaml($data, $useAnchors);
+        // Ensure file always has a newline at the end.
+        $yaml = rtrim($yaml)."\n";
 
         $path = $this->buildFilePathFromIds($destIds, $this->destUri['path']);
 

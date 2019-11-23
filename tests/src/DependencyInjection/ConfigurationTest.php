@@ -37,7 +37,7 @@ class ConfigurationTest extends A2BKernelTestCase
         );
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         self::bootKernel();
     }

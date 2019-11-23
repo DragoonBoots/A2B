@@ -469,7 +469,7 @@ YAML
         ];
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         vfsStreamWrapper::register();
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('data'));

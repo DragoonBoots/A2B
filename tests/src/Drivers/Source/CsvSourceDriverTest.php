@@ -118,7 +118,7 @@ class CsvSourceDriverTest extends TestCase
         $this->assertEquals($expected, $this->driver->count());
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         vfsStreamWrapper::register();
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('data'));

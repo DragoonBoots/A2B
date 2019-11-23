@@ -51,7 +51,7 @@ class A2BExtensionTest extends A2BKernelTestCase
         return $ret;
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::bootKernel();
     }

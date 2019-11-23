@@ -50,7 +50,7 @@ class DataMigrationMapperTest extends TestCase
      */
     protected $mapper;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->connection = new Connection(['memory' => true], new PDOSqlite\Driver());
         $this->connection->connect();

@@ -56,7 +56,7 @@ class DataMigrationMapperTest extends TestCase
         $this->connection->connect();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->connection->close();
         unset($this->connection);

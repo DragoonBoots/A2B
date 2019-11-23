@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 class A2BKernelTestCase extends KernelTestCase
 {
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         self::tearDownTest();
     }

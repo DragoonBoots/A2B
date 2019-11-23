@@ -532,7 +532,7 @@ class MigrateCommandTest extends TestCase
             ]
         );
 
-        $this->assertContains(MigrateCommand::ERROR_NO_PRUNE_PRESERVE, $tester->getDisplay());
+        $this->assertStringContainsString(MigrateCommand::ERROR_NO_PRUNE_PRESERVE, $tester->getDisplay());
     }
 
     public function testNoDependencyResolution()

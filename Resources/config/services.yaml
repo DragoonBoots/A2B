@@ -11,7 +11,6 @@ services:
     lazy: true
     arguments:
       - '@annotation_reader'
-      - '@a2b.league.uri.parser'
       - '@a2b.driver_manager'
       - '@parameter_bag'
   DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface: '@a2b.data_migration_manager'
@@ -141,15 +140,11 @@ services:
     class: DragoonBoots\A2B\Drivers\AbstractSourceDriver
     abstract: true
     public: false
-    arguments:
-      $uriParser: '@a2b.league.uri.parser'
 
   a2b.destination.abstract_destination_driver:
     class: DragoonBoots\A2B\Drivers\AbstractDestinationDriver
     abstract: true
     public: false
-    arguments:
-      - '@a2b.league.uri.parser'
 
   a2b.migration.abstract_migration:
     class: DragoonBoots\A2B\DataMigration\AbstractDataMigration
@@ -167,7 +162,6 @@ services:
       - '@a2b.driver_manager'
       - '@a2b.executor'
       - '@a2b.mapper'
-      - '@a2b.league.uri.parser'
       - '@a2b.symfony.dumper.cli'
       - '@a2b.symfony.dumper.cloner'
     tags:
@@ -191,9 +185,6 @@ services:
   # Vendors
   a2b.doctrine.inflector:
     class: Doctrine\Common\Inflector\Inflector
-    lazy: true
-  a2b.league.uri.parser:
-    class: League\Uri\Parser
     lazy: true
   a2b.symfony.dumper.cli:
     class: Symfony\Component\VarDumper\Dumper\CliDumper

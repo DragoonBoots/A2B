@@ -24,7 +24,7 @@ use DragoonBoots\A2B\Drivers\SourceDriverInterface;
  *     group="Test",
  *     source="sqlite:///%kernel.project_dir%/resources/sourcedb.sqlite",
  *     sourceDriver="DragoonBoots\A2B\Drivers\Source\DbalSourceDriver",
- *     destination="csv:///%kernel.project_dir%/resources/data/data.csv",
+ *     destination="/%kernel.project_dir%/resources/data/data.csv",
  *     destinationDriver="DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver",
  *     sourceIds={@IdField(name="id")},
  *     destinationIds={@IdField(name="identifier", type="string")},
@@ -46,18 +46,16 @@ Migrations may be separated into logical groups.  When running migrations,
 groups may be used to run only a subset.
 
 ### source/destination
-Set the source/destination for this migration.  This is a special URL that
-drivers parse when setting up the migration. See the
-[list of drivers](02_Drivers) for details on valid values.
+Set the source/destination for this migration.  This is used differently
+depending on the selected driver.  See the [list of drivers](02_Drivers)
+for details on valid values.
 
 Common values may be defined in configuration to avoid repeating the same URL.
 See [Configuration](03_Configuration.md#page_Sources-and-Destinations) for
 details.
 
 ### sourceDriver/destinationDriver
-*(optional)* If more than one driver implements a given URL scheme, specify the
-FQCN of the desired driver here.  If this is omitted, the correct driver will
-be guessed based on the URL.
+Specify the FQCN of the desired driver here.
 
 ### sourceIds/destinationIds
 A list of `@IdField` annotations specifying ids.  This is used to map source

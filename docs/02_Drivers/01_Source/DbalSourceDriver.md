@@ -4,13 +4,11 @@ The `DbalSourceDriver` supports using anything supported by the
 [Doctrine DBAL](https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/introduction.html#introduction)
 as a source.
 
-Supported URLs
---------------
-See [Doctrine's website](https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/configuration.html#connecting-using-a-url)
-for a list of supported URL formats.
-
 Usage
 -----
+Use a valid Doctrine DBAL source URL for `source`.  See [Doctrine's website](https://www.doctrine-project.org/projects/doctrine-dbal/en/current/reference/configuration.html#connecting-using-a-url)
+for a list of supported URL formats.
+
 In the migration's `configureSource`, two steps are required.  For the main
 source data set, call `setStatement` with the query.  For fetching the count,
 call `setCountStatement` with a query; the first field returned is used as the

@@ -11,7 +11,7 @@ id defined, subdirectories will be created, as in the example below:
  *     name="Example Yaml Migration",
  *     source="sqlite:///%kernel.project_dir%/resources/source.sqlite",
  *     sourceIds={@IdField(name="id")},
- *     destination="yaml:///%kernel.project_dir%/resources/data/example",
+ *     destination="/%kernel.project_dir%/resources/data/example",
  *     destinationIds={@IdField(name="group", type="string"), @IdField(name="identifier", type="string")}
  * )
  */
@@ -55,16 +55,13 @@ resources/
 The [Symfony Coding Standards](https://symfony.com/doc/current/contributing/code/standards.html)
 specify 4 spaces for each level of indentation.  However, this tends to muck up
 YAML files with nested lists and maps.  As such, all generated YAML files use
-2 spaces for each level of indentation.
-
-Supported URLs
---------------
-URLs should be in the format `yaml://OUTPUT_PATH`.  If the destination
-directory does not exist, it will be created.  All subdirectories and YAML
-files will be created under OUTPUT_PATH.
+2 spaces for each level of indentation. 
 
 Usage
 -----
+If the destination directory does not exist, it will be created.  All
+subdirectories and YAML files will be created under OUTPUT_PATH.
+
 Some options and flags may be set to configure the YAML dumper.
 
 ### Array inlining

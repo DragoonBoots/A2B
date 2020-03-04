@@ -13,10 +13,12 @@ In `config/packages/a2b.yaml`, define static sources and destinations:
 a2b:
   sources:
     - name: old_db
-      uri: "sqlite:///srv/data/db.sqlite"
+      uri: 'sqlite:///srv/data/db.sqlite'
+      driver: 'DragoonBoots\A2B\Drivers\Source\DbalSourceDriver'
   destinations:
     - name: new_db
-      uri: "mysql://username:password@localhost:3306/data?charset=UTF-8"
+      uri: 'App\Entity\User'
+      driver: 'DragoonBoots\A2B\Drivers\Destination\DoctrineDestinationDriver'
 ```  
 
 These can then be used in place of a URI in the migration definition:

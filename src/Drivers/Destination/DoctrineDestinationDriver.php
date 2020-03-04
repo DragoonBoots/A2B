@@ -8,13 +8,12 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Exception\BadUriException;
-use League\Uri\Parser;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 /**
  * Doctrine ORM entity Destination driver
  *
- * @Driver(schemes="doctrine", supportsStubs=true)
+ * @Driver(supportsStubs=true)
  */
 class DoctrineDestinationDriver extends AbstractDestinationDriver
 {
@@ -53,13 +52,12 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
     /**
      * DoctrineDestinationDriver constructor.
      *
-     * @param Parser                    $uriParser
      * @param EntityManagerInterface    $em
      * @param PropertyAccessorInterface $propertyAccess
      */
-    public function __construct(Parser $uriParser, EntityManagerInterface $em, PropertyAccessorInterface $propertyAccess)
+    public function __construct(EntityManagerInterface $em, PropertyAccessorInterface $propertyAccess)
     {
-        parent::__construct($uriParser);
+        parent::__construct();
 
         $this->defaultEm = $em;
         $this->propertyAccess = $propertyAccess;
@@ -72,12 +70,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
     {
         parent::configure($definition);
 
-        // Replace forward slashes with back slashes in FQCN.
-        $dest = $this->destUri['path'];
-        $dest = str_replace('/', '\\', $dest);
-        $this->destUri['path'] = $dest;
-
-        if (!class_exists($dest)) {
+        if (!class_exists($this->migrationDefinition->getDestination())) {
             throw new BadUriException($definition->getDestination());
         }
 
@@ -95,7 +88,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
         $ids = [];
         foreach ($this->getRepo()->findAll() as $entity) {
             $id = [];
-            foreach ($this->destIds as $destId) {
+            foreach ($this->ids as $destId) {
                 $idName = $destId->getName();
                 $id[$idName] = $this->resolveIdType($destId, $this->propertyAccess->getValue($entity, $idName));
             }
@@ -114,7 +107,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
     public function getRepo()
     {
         if (!isset($this->repo)) {
-            $entityType = $this->destUri['path'];
+            $entityType = $this->migrationDefinition->getDestination();
             $this->repo = $this->em->getRepository($entityType);
         }
 
@@ -157,7 +150,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
         }
 
         $id = [];
-        foreach ($this->destIds as $destId) {
+        foreach ($this->ids as $destId) {
             $idName = $destId->getName();
             $id[$idName] = $this->resolveIdType($destId, $this->propertyAccess->getValue($data, $idName));
         }

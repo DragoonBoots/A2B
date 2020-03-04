@@ -30,18 +30,6 @@ interface DriverManagerInterface
     public function getSourceDriver(string $driverName): SourceDriverInterface;
 
     /**
-     * @param string $scheme
-     *
-     * @return SourceDriverInterface
-     *
-     * @throws NoDriverForSchemeException
-     *   Thrown when no driver implements the given scheme.
-     * @throws UnclearDriverException
-     *   Thrown when more than one driver implements the given scheme.
-     */
-    public function getSourceDriverForScheme(string $scheme): SourceDriverInterface;
-
-    /**
      * @return Collection|DestinationDriverInterface[]
      */
     public function getDestinationDrivers(): Collection;
@@ -54,16 +42,4 @@ interface DriverManagerInterface
      * @throws NonexistentDriverException
      */
     public function getDestinationDriver(string $driverName): DestinationDriverInterface;
-
-    /**
-     * @param string $scheme
-     *
-     * @return DestinationDriverInterface
-     *
-     * @throws NoDriverForSchemeException
-     *   Thrown when no driver implements the given scheme.
-     * @throws UnclearDriverException
-     *   Thrown when more than one driver implements the given scheme.
-     */
-    public function getDestinationDriverForScheme(string $scheme): DestinationDriverInterface;
 }

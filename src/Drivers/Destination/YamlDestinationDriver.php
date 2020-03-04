@@ -14,7 +14,6 @@ use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\YamlDriverTrait;
 use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Factory\FinderFactory;
-use League\Uri\Parser;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser as YamlParser;
 use Symfony\Component\Yaml\Yaml;
@@ -22,7 +21,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Destination driver for yaml files
  *
- * @Driver({"yaml", "yml"})
+ * @Driver()
  */
 class YamlDestinationDriver extends AbstractDestinationDriver implements DestinationDriverInterface
 {
@@ -67,14 +66,13 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * YamlDestinationDriver constructor.
      *
-     * @param Parser        $uriParser
      * @param YamlParser    $yamlParser
      * @param YamlDumper    $yamlDumper
      * @param FinderFactory $finderFactory
      */
-    public function __construct(Parser $uriParser, YamlParser $yamlParser, YamlDumper $yamlDumper, FinderFactory $finderFactory)
+    public function __construct(YamlParser $yamlParser, YamlDumper $yamlDumper, FinderFactory $finderFactory)
     {
-        parent::__construct($uriParser);
+        parent::__construct();
 
         $this->yamlParser = $yamlParser;
         $this->yamlDumper = $yamlDumper;
@@ -95,12 +93,12 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         parent::configure($definition);
         $this->options = self::DEFAULT_OPTIONS;
 
-        if (!is_dir($this->destUri['path'])) {
-            mkdir($this->destUri['path'], 0755, true);
+        if (!is_dir($this->migrationDefinition->getDestination())) {
+            mkdir($this->migrationDefinition->getDestination(), 0755, true);
         }
         $this->finder = $this->finderFactory->get()
             ->files()
-            ->in($this->destUri['path'])
+            ->in($this->migrationDefinition->getDestination())
             ->name('`.+\.ya?ml$`')
             ->followLinks()
             ->ignoreDotFiles(true);
@@ -113,7 +111,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     {
         $ids = [];
         foreach ($this->finder->getIterator() as $fileInfo) {
-            $ids[] = $this->buildIdsFromFilePath($fileInfo, $this->destIds);
+            $ids[] = $this->buildIdsFromFilePath($fileInfo, $this->ids);
         }
 
         return $ids;
@@ -147,7 +145,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($destIdSet as $destIds) {
             $matched = 0;
             foreach (['yaml', 'yml'] as $ext) {
-                $searchPath = $this->buildFilePathFromIds($destIds, $this->destUri['path'], $ext);
+                $destDir = $this->migrationDefinition->getDestination();
+                $searchPath = $this->buildFilePathFromIds($destIds, $destDir, $ext);
                 if (file_exists($searchPath)) {
                     $matched++;
                     $entityFiles[] = new \SplFileInfo($searchPath);
@@ -174,7 +173,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         $entities = [];
         foreach ($entityFiles as $fileInfo) {
             $entity = $this->yamlParser->parse(file_get_contents($fileInfo->getPathname()));
-            $destIds = $this->buildIdsFromFilePath($fileInfo, $this->destIds);
+            $destIds = $this->buildIdsFromFilePath($fileInfo, $this->ids);
             $entity = $this->addIdsToEntity($destIds, $entity);
             $entities[] = $entity;
         }
@@ -188,7 +187,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     public function write($data)
     {
         $destIds = [];
-        foreach ($this->destIds as $idField) {
+        foreach ($this->ids as $idField) {
             $destIds[$idField->getName()] = $this->resolveIdType($idField, $data[$idField->getName()]);
 
             // Remove the id from the data, as it will be represented in the
@@ -205,7 +204,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         // Ensure file always has a newline at the end.
         $yaml = rtrim($yaml)."\n";
 
-        $path = $this->buildFilePathFromIds($destIds, $this->destUri['path']);
+        $path = $this->buildFilePathFromIds($destIds, $this->migrationDefinition->getDestination());
 
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path), 0755, true);

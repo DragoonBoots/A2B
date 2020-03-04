@@ -9,14 +9,13 @@ use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
-use League\Uri\Parser;
 use Symfony\Component\VarDumper\Cloner\ClonerInterface;
 use Symfony\Component\VarDumper\Dumper\AbstractDumper;
 
 /**
  * Destination driver to print result to a stream.
  *
- * @Driver("debug")
+ * @Driver()
  */
 class DebugDestinationDriver extends AbstractDestinationDriver implements DestinationDriverInterface
 {
@@ -34,13 +33,12 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     /**
      * DebugDestinationDriver constructor.
      *
-     * @param Parser          $uriParser
      * @param AbstractDumper  $dumper
      * @param ClonerInterface $cloner
      */
-    public function __construct(Parser $uriParser, AbstractDumper $dumper, ClonerInterface $cloner)
+    public function __construct(AbstractDumper $dumper, ClonerInterface $cloner)
     {
-        parent::__construct($uriParser);
+        parent::__construct();
 
         $this->dumper = $dumper;
         $this->cloner = $cloner;
@@ -53,7 +51,7 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     {
         parent::configure($definition);
 
-        switch ($this->destUri['path']) {
+        switch ($this->migrationDefinition->getDestination()) {
             case 'stdout':
                 $this->dumper->setOutput(STDOUT);
 

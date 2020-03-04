@@ -14,27 +14,11 @@ use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractSourceDriver;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
-use League\Uri\Parser;
 
 /**
  * Doctrine DBAL source driver.
  *
- * @Driver({
- *     "db2",
- *     "ibm_db2",
- *     "mssql",
- *     "pdo_sqlsrv",
- *     "mysql",
- *     "mysql2",
- *     "pdo_mysql",
- *     "pgsql",
- *     "postgres",
- *     "postgresql",
- *     "pdo_pgsql",
- *     "sqlite",
- *     "sqlite3",
- *     "pdo_sqlite"
- * })
+ * @Driver()
  */
 class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInterface
 {
@@ -68,12 +52,11 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     /**
      * DbalSourceDriver constructor.
      *
-     * @param Parser            $uriParser
      * @param ConnectionFactory $connectionFactory
      */
-    public function __construct(Parser $uriParser, ConnectionFactory $connectionFactory)
+    public function __construct(ConnectionFactory $connectionFactory)
     {
-        parent::__construct($uriParser);
+        parent::__construct();
 
         $this->connectionFactory = $connectionFactory;
     }

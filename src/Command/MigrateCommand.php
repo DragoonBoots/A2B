@@ -9,7 +9,6 @@ use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
 use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
-use League\Uri\Parser;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +20,18 @@ use Symfony\Component\VarDumper\Dumper\AbstractDumper;
 
 class MigrateCommand extends Command
 {
+
+    /**
+     * MigrateCommand constructor.
+     *
+     * @param DataMigrationManagerInterface  $dataMigrationManager
+     * @param DriverManagerInterface         $driverManager
+     * @param DataMigrationExecutorInterface $executor
+     * @param DataMigrationMapperInterface   $mapper
+     * @param AbstractDumper                 $varDumper
+     * @param ClonerInterface                $varCloner
+     */
+    const ERROR_NO_PRUNE_PRESERVE = 'You cannot use both "--prune" and "--preserve" together.';
 
     /**
      * {@inheritdoc}
@@ -48,11 +59,6 @@ class MigrateCommand extends Command
     protected $mapper;
 
     /**
-     * @var Parser
-     */
-    protected $uriParser;
-
-    /**
      * @var AbstractDumper
      */
     protected $varDumper;
@@ -67,25 +73,11 @@ class MigrateCommand extends Command
      */
     protected $io;
 
-    /**
-     * MigrateCommand constructor.
-     *
-     * @param DataMigrationManagerInterface  $dataMigrationManager
-     * @param DriverManagerInterface         $driverManager
-     * @param DataMigrationExecutorInterface $executor
-     * @param DataMigrationMapperInterface   $mapper
-     * @param Parser                         $uriParser
-     * @param AbstractDumper                 $varDumper
-     * @param ClonerInterface                $varCloner
-     */
-    const ERROR_NO_PRUNE_PRESERVE = 'You cannot use both "--prune" and "--preserve" together.';
-
     public function __construct(
         DataMigrationManagerInterface $dataMigrationManager,
         DriverManagerInterface $driverManager,
         DataMigrationExecutorInterface $executor,
         DataMigrationMapperInterface $mapper,
-        Parser $uriParser,
         AbstractDumper $varDumper,
         ClonerInterface $varCloner
     ) {
@@ -95,7 +87,6 @@ class MigrateCommand extends Command
         $this->driverManager = $driverManager;
         $this->executor = $executor;
         $this->mapper = $mapper;
-        $this->uriParser = $uriParser;
         $this->varDumper = $varDumper;
         $this->varCloner = $varCloner;
     }
@@ -189,7 +180,7 @@ class MigrateCommand extends Command
             $definition = $migration->getDefinition();
 
             if ($input->getOption('simulate')) {
-                $this->injectProperty($definition, 'destination', 'debug:stderr');
+                $this->injectProperty($definition, 'destination', 'stderr');
                 $this->injectProperty($definition, 'destinationDriver', DebugDestinationDriver::class);
             }
 
@@ -212,25 +203,6 @@ class MigrateCommand extends Command
             }
             $destinationDriver->flush();
         }
-    }
-
-    /**
-     * Inject a value into an object property with reflection.
-     *
-     * @param object $object
-     * @param string $propertyName
-     * @param mixed  $value
-     *
-     * @throws \ReflectionException
-     */
-    private function injectProperty(object $object, string $propertyName, $value)
-    {
-        $refl = new \ReflectionClass($object);
-        $property = $refl->getProperty($propertyName);
-        $accessible = $property->isPublic();
-        $property->setAccessible(true);
-        $property->setValue($object, $value);
-        $property->setAccessible($accessible);
     }
 
     /**
@@ -260,5 +232,24 @@ class MigrateCommand extends Command
         }
 
         return $migrations;
+    }
+
+    /**
+     * Inject a value into an object property with reflection.
+     *
+     * @param object $object
+     * @param string $propertyName
+     * @param mixed  $value
+     *
+     * @throws \ReflectionException
+     */
+    private function injectProperty(object $object, string $propertyName, $value)
+    {
+        $refl = new \ReflectionClass($object);
+        $property = $refl->getProperty($propertyName);
+        $accessible = $property->isPublic();
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
+        $property->setAccessible($accessible);
     }
 }

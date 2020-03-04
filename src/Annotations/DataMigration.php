@@ -36,8 +36,7 @@ class DataMigration
      * The data source uri
      *
      * Valid values are:
-     * - Files should be in the form "file://$PATH", where the path is relative
-     *   to the project directory.
+     * - An absolute path, or a path is relative to the project directory.
      * - Database sources should be specified as a Doctrine DBAL URL
      *   (https://www.doctrine-project.org/projects/doctrine-dbal/en/2.7/reference/configuration.html#connecting-using-a-url)
      * - Doctrine ORM entities should be in the form "entity://$FQCN".
@@ -50,11 +49,8 @@ class DataMigration
     /**
      * The FQCN for the desired source driver.
      *
-     * This will usually be determined automatically based on the source uri.
-     * You may want to specify a driver manually if more than one driver
-     * implements a scheme.
-     *
      * @var string
+     * @Annotation\Required
      */
     protected $sourceDriver;
 
@@ -70,6 +66,7 @@ class DataMigration
      * The FQCN for the desired destination driver.
      *
      * @var string
+     * @Annotation\Required
      */
     protected $destinationDriver;
 
@@ -190,7 +187,7 @@ class DataMigration
      *
      * @codeCoverageIgnore
      */
-    public function getSourceDriver(): ?string
+    public function getSourceDriver(): string
     {
         return $this->sourceDriver;
     }
@@ -240,7 +237,7 @@ class DataMigration
      *
      * @codeCoverageIgnore
      */
-    public function getDestinationDriver(): ?string
+    public function getDestinationDriver(): string
     {
         return $this->destinationDriver;
     }

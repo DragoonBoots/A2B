@@ -5,14 +5,13 @@ namespace DragoonBoots\A2B\Drivers;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
-use DragoonBoots\A2B\Annotations\IdField;
-use League\Uri\Parser;
 
 /**
  * Base class for destination drivers.
  */
-abstract class AbstractDestinationDriver implements DestinationDriverInterface
+abstract class AbstractDestinationDriver extends AbstractDriver implements DestinationDriverInterface
 {
+
     use IdTypeConversionTrait;
 
     /**
@@ -21,45 +20,25 @@ abstract class AbstractDestinationDriver implements DestinationDriverInterface
     protected $definition;
 
     /**
-     * @var Parser
-     */
-    protected $uriParser;
-
-    /**
      * @var DataMigration
      */
     protected $migrationDefinition;
 
     /**
-     * @var array
-     *
-     * @see \League\Uri\Parser::parse()
-     */
-    protected $destUri;
-
-    /**
-     * @var IdField[]
-     */
-    protected $destIds;
-
-    /**
      * AbstractSourceDriver constructor.
-     *
-     * @param Parser $uriParser
      */
-    public function __construct(Parser $uriParser)
+    public function __construct()
     {
-        $this->uriParser = $uriParser;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function configure(DataMigration $definition)
     {
-        $this->migrationDefinition = $definition;
-        $this->destUri = $this->uriParser->parse($definition->getDestination());
-        $this->destIds = $definition->getDestinationIds();
+        parent::configure($definition);
+
+        $this->ids = $definition->getDestinationIds();
     }
 
     /**

@@ -18,7 +18,7 @@ use League\Csv\Writer as CsvWriter;
 /**
  * CSV Destination driver
  *
- * @Driver("csv")
+ * @Driver()
  */
 class CsvDestinationDriver extends AbstractDestinationDriver implements DestinationDriverInterface
 {
@@ -60,11 +60,11 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         parent::configure($definition);
 
         // Ensure the destination exists.
-        if (!is_dir(dirname($this->destUri['path']))) {
-            mkdir(dirname($this->destUri['path']), 0755, true);
+        if (!is_dir(dirname($this->migrationDefinition->getDestination()))) {
+            mkdir(dirname($this->migrationDefinition->getDestination()), 0755, true);
         }
 
-        $this->reader = CsvReader::createFromPath($this->destUri['path'], 'c+');
+        $this->reader = CsvReader::createFromPath($this->migrationDefinition->getDestination(), 'c+');
 
         // The file is new if it is entirely empty or only includes a header.
         $this->newFile = $this->reader->count() <= 1;
@@ -87,7 +87,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         $ids = [];
         foreach ($this->reader->getIterator() as $row) {
             $id = [];
-            foreach ($this->destIds as $destId) {
+            foreach ($this->ids as $destId) {
                 $id[$destId->getName()] = $row[$destId->getName()];
             }
             $ids[] = $id;
@@ -110,7 +110,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
         $this->writer->insertOne($data);
 
         $destIds = [];
-        foreach ($this->destIds as $destId) {
+        foreach ($this->ids as $destId) {
             if (!isset($data[$destId->getName()])) {
                 throw new NoIdSetException($destId->getName(), $data);
             }
@@ -196,7 +196,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
     public function flush()
     {
         $tempFile = stream_get_meta_data($this->tempFile)['uri'];
-        copy($tempFile, $this->destUri['path']);
+        copy($tempFile, $this->migrationDefinition->getDestination());
         unlink($tempFile);
     }
 }

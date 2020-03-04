@@ -13,15 +13,6 @@ use Doctrine\Common\Annotations\Annotation;
  */
 class Driver
 {
-
-    /**
-     * A list of source/destination url schemes this driver can handle.
-     *
-     * @var string[]
-     * @Annotation\Required
-     */
-    protected $schemes;
-
     /**
      * Does this driver support stubs?
      *
@@ -39,20 +30,7 @@ class Driver
      */
     public function __construct(array $values = [])
     {
-        $schemes = $values['value'] ?? $values['schemes'] ?? [];
-        if (!is_array($schemes)) {
-            $schemes = [$schemes];
-        }
-        $this->schemes = $schemes;
         $this->supportsStubs = $values['supportsStubs'] ?? false;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getSchemes(): array
-    {
-        return $this->schemes;
     }
 
     /**

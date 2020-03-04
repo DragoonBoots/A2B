@@ -14,7 +14,7 @@ use League\Csv\Reader as CsvReader;
 /**
  * CSV file source driver.
  *
- * @Driver("csv")
+ * @Driver()
  */
 class CsvSourceDriver extends AbstractSourceDriver implements SourceDriverInterface
 {
@@ -40,11 +40,11 @@ class CsvSourceDriver extends AbstractSourceDriver implements SourceDriverInterf
         parent::configure($definition);
 
         // Ensure the destination exists.
-        if (!is_file($this->sourceUri['path'])) {
+        if (!is_file($this->migrationDefinition->getDestination())) {
             throw new BadUriException($definition->getSource());
         }
 
-        $this->reader = CsvReader::createFromPath($this->sourceUri['path'], 'r');
+        $this->reader = CsvReader::createFromPath($this->migrationDefinition->getDestination(), 'r');
 
         // Don't try reading an empty file.
         $emptyFile = $this->reader->count() <= 1;

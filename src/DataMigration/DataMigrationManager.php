@@ -11,7 +11,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\MigrationException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
-use League\Uri\Parser;
 use MJS\TopSort\Implementations\FixedArraySort;
 use MJS\TopSort\TopSortInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -23,11 +22,6 @@ class DataMigrationManager implements DataMigrationManagerInterface
      * @var Reader
      */
     protected $annotationReader;
-
-    /**
-     * @var Parser
-     */
-    protected $uriParser;
 
     /**
      * @var DriverManagerInterface
@@ -63,19 +57,15 @@ class DataMigrationManager implements DataMigrationManagerInterface
      * DataMigrationManager constructor.
      *
      * @param Reader                 $annotationReader
-     * @param Parser                 $uriParser
      * @param DriverManagerInterface $driverManager
      * @param ParameterBagInterface  $parameterBag
      */
     public function __construct(
         Reader $annotationReader,
-        Parser $uriParser,
         DriverManagerInterface $driverManager,
         ParameterBagInterface $parameterBag
-    )
-    {
+    ) {
         $this->annotationReader = $annotationReader;
-        $this->uriParser = $uriParser;
         $this->driverManager = $driverManager;
         $this->parameterBag = $parameterBag;
 
@@ -86,10 +76,11 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * Add a source key
      *
-     * @internal
-     *
      * @param string $name
      * @param string $uri
+     *
+     * @internal
+     *
      */
     public function addSource(string $name, string $uri)
     {
@@ -101,10 +92,11 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * Add a destination key
      *
-     * @internal
-     *
      * @param string $name
      * @param string $uri
+     *
+     * @internal
+     *
      */
     public function addDestination(string $name, string $uri)
     {
@@ -116,13 +108,13 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * Add a new migration
      *
-     * @internal
-     *
      * @param DataMigrationInterface $migration
      *
      * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
      * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
      * @throws \ReflectionException
+     * @internal
+     *
      */
     public function addMigration(DataMigrationInterface $migration)
     {
@@ -134,15 +126,11 @@ class DataMigrationManager implements DataMigrationManagerInterface
         }
 
         if (is_null($definition->getSourceDriver())) {
-            $source = $definition->getSource();
-            $sourceUri = $this->uriParser->parse($source);
-            $sourceDriver = $this->driverManager->getSourceDriverForScheme($sourceUri['scheme']);
+            $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
             $definition->setSourceDriver(get_class($sourceDriver));
         }
         if (is_null($definition->getDestinationDriver())) {
-            $destination = $definition->getDestination();
-            $destinationUri = $this->uriParser->parse($destination);
-            $destinationDriver = $this->driverManager->getDestinationDriverForScheme($destinationUri['scheme']);
+            $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
             $definition->setDestinationDriver(get_class($destinationDriver));
         }
 

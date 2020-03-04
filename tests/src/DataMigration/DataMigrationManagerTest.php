@@ -22,10 +22,10 @@ class DataMigrationManagerTest extends TestCase
 {
 
     /**
-     * @param DataMigration      $definition
+     * @param DataMigration $definition
      * @param DataMigration|null $resolvedDefinition
-     * @param string[]           $sourceKeys
-     * @param string[]           $destKeys
+     * @param array[] $sourceKeys
+     * @param array[] $destKeys
      *
      * @throws NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
@@ -76,11 +76,11 @@ class DataMigrationManagerTest extends TestCase
             ->willReturnArgument(0);
 
         $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
-        foreach ($sourceKeys as $key => $value) {
-            $dataMigrationManager->addSource($key, $value);
+        foreach ($sourceKeys as $key => $info) {
+            $dataMigrationManager->addSource($key, $info['uri'], $info['driver']);
         }
-        foreach ($destKeys as $key => $value) {
-            $dataMigrationManager->addDestination($key, $value);
+        foreach ($destKeys as $key => $info) {
+            $dataMigrationManager->addDestination($key, $info['uri'], $info['driver']);
         }
 
         // Do the test
@@ -109,9 +109,7 @@ class DataMigrationManagerTest extends TestCase
                 new DataMigration(
                     [
                         'source' => 'test_source_alias',
-                        'sourceDriver' => 'source_driver',
                         'destination' => 'test_destination_alias',
-                        'destinationDriver' => 'dest_driver',
                     ]
                 ),
                 // Resolved definition
@@ -124,9 +122,19 @@ class DataMigrationManagerTest extends TestCase
                     ]
                 ),
                 // Source aliases
-                ['test_source_alias' => 'test_source'],
+                [
+                    'test_source_alias' => [
+                        'uri' => 'test_source',
+                        'driver' => 'source_driver',
+                    ],
+                ],
                 // Destination aliases
-                ['test_destination_alias' => 'test_destination'],
+                [
+                    'test_destination_alias' => [
+                        'uri' => 'test_destination',
+                        'driver' => 'dest_driver',
+                    ],
+                ],
             ],
         ];
     }

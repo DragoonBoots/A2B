@@ -187,7 +187,7 @@ class DataMigration
      *
      * @codeCoverageIgnore
      */
-    public function getSourceDriver(): string
+    public function getSourceDriver(): ?string
     {
         return $this->sourceDriver;
     }
@@ -237,7 +237,7 @@ class DataMigration
      *
      * @codeCoverageIgnore
      */
-    public function getDestinationDriver(): string
+    public function getDestinationDriver(): ?string
     {
         return $this->destinationDriver;
     }

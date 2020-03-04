@@ -28,11 +28,21 @@ class ConfigurationTest extends A2BKernelTestCase
         $destinationsProperty = $refl->getProperty('destinations');
         $destinationsProperty->setAccessible(true);
         $this->assertEquals(
-            ['test_source' => 'test://source'],
+            [
+                'test_source' => [
+                    'uri' => 'source_test',
+                    'driver' => 'source_driver',
+                ],
+            ],
             $sourcesProperty->getValue($migrationManager)
         );
         $this->assertEquals(
-            ['test_destination' => 'test://dest'],
+            [
+                'test_destination' => [
+                    'uri' => 'dest_test',
+                    'driver' => 'dest_driver',
+                ],
+            ],
             $destinationsProperty->getValue($migrationManager)
         );
     }
@@ -58,13 +68,15 @@ class ConfigurationTestKernel extends A2BTestKernel
             'sources' => [
                 [
                     'name' => 'test_source',
-                    'uri' => 'test://source',
+                    'uri' => 'source_test',
+                    'driver' => 'source_driver',
                 ],
             ],
             'destinations' => [
                 [
                     'name' => 'test_destination',
-                    'uri' => 'test://dest',
+                    'uri' => 'dest_test',
+                    'driver' => 'dest_driver',
                 ],
             ],
         ];

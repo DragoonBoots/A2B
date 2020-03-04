@@ -36,6 +36,7 @@ class A2BExtension extends ConfigurableExtension implements CompilerPassInterfac
                 'addSource', [
                     $source,
                     $info['uri'],
+                    $info['driver'],
                 ]
             );
         }
@@ -44,6 +45,7 @@ class A2BExtension extends ConfigurableExtension implements CompilerPassInterfac
                 'addDestination', [
                     $source,
                     $info['uri'],
+                    $info['driver'],
                 ]
             );
         }

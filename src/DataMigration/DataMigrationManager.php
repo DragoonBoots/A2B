@@ -78,14 +78,14 @@ class DataMigrationManager implements DataMigrationManagerInterface
      *
      * @param string $name
      * @param string $uri
+     * @param string $driver
      *
      * @internal
-     *
      */
-    public function addSource(string $name, string $uri)
+    public function addSource(string $name, string $uri, string $driver)
     {
         if (!isset($this->sources[$name])) {
-            $this->sources[$name] = $uri;
+            $this->sources[$name] = ['uri' => $uri, 'driver' => $driver];
         }
     }
 
@@ -94,14 +94,14 @@ class DataMigrationManager implements DataMigrationManagerInterface
      *
      * @param string $name
      * @param string $uri
+     * @param string $driver
      *
      * @internal
-     *
      */
-    public function addDestination(string $name, string $uri)
+    public function addDestination(string $name, string $uri, string $driver)
     {
         if (!isset($this->destinations[$name])) {
-            $this->destinations[$name] = $uri;
+            $this->destinations[$name] = ['uri' => $uri, 'driver' => $driver];
         }
     }
 
@@ -121,6 +121,7 @@ class DataMigrationManager implements DataMigrationManagerInterface
         $reflClass = new \ReflectionClass($migration);
         /** @var DataMigration $definition */
         $definition = $this->annotationReader->getClassAnnotation($reflClass, DataMigration::class);
+        // Lookup the source/destination key if applicable
         foreach (['source', 'destination'] as $propertyName) {
             $this->resolveDefinitionProperty($definition, $propertyName);
         }
@@ -151,24 +152,32 @@ class DataMigrationManager implements DataMigrationManagerInterface
      */
     private function resolveDefinitionProperty(DataMigration $definition, string $propertyName)
     {
-        $getters = [
+        $valueGetters = [
             'source' => [$definition, 'getSource'],
             'destination' => [$definition, 'getDestination'],
+        ];
+        $driverGetters = [
+            'source' => [$definition, 'getSourceDriver'],
+            'destination' => [$definition, 'getDestinationDriver'],
         ];
         $keyMaps = [
             'source' => $this->sources,
             'destination' => $this->destinations,
         ];
 
-        $value = call_user_func($getters[$propertyName]);
+        $value = call_user_func($valueGetters[$propertyName]);
+        $driver = call_user_func($driverGetters[$propertyName]);
         $keyMap = $keyMaps[$propertyName];
 
         if (isset($keyMap[$value])) {
-            $value = $keyMap[$value];
+            $key = $value;
+            $value = $keyMap[$key]['uri'];
+            $driver = $keyMap[$key]['driver'];
         }
         $value = $this->parameterBag->resolveValue($value);
 
         $this->injectProperty($definition, $propertyName, $value);
+        $this->injectProperty($definition, $propertyName.'Driver', $driver);
     }
 
     /**

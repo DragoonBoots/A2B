@@ -8,7 +8,6 @@ use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use DragoonBoots\A2B\Tests\Drivers\FinderTestTrait;
-use League\Uri\Parser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
@@ -24,11 +23,6 @@ class YamlDestinationDriverTest extends TestCase
 {
 
     use FinderTestTrait;
-
-    /**
-     * @var Parser|MockObject
-     */
-    protected $uriParser;
 
     /**
      * @var YamlDumper
@@ -55,7 +49,7 @@ class YamlDestinationDriverTest extends TestCase
         $path = vfsStream::url('data/new_dir');
         $definition = new DataMigration(
             [
-                'destination' => 'yaml://'.$path,
+                'destination' => $path,
                 'destinationIds' => [
                     new IdField(['name' => 'group', 'type' => 'string']),
                     new IdField(['name' => 'identifier', 'type' => 'string']),
@@ -63,11 +57,7 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['scheme' => 'yaml', 'path' => $path]);
-
-        $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
+        $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $refl = new \ReflectionClass($driver);
         $driver->configure($definition);
 
@@ -102,7 +92,7 @@ class YamlDestinationDriverTest extends TestCase
         $path = vfsStream::url('data/existing_dir');
         $definition = new DataMigration(
             [
-                'destination' => 'yaml://'.$path,
+                'destination' => $path,
                 'destinationIds' => [
                     new IdField(['name' => 'group', 'type' => 'string']),
                     new IdField(['name' => 'identifier', 'type' => 'string']),
@@ -110,17 +100,13 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['scheme' => 'yaml', 'path' => $path]);
-
         $fileInfo = new SplFileInfo(vfsStream::url('data/existing_dir/test/existing_file.yaml'), 'test', 'test/existing_file.yaml');
         $this->finder->method('count')
             ->willReturn(1);
         $this->finder->method('getIterator')
             ->willReturn(new \ArrayIterator([$fileInfo]));
 
-        $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
+        $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
         $foundEntity = $driver->read($destIds);
         $this->assertEquals($expectedEntity, $foundEntity);
@@ -132,7 +118,7 @@ class YamlDestinationDriverTest extends TestCase
         $path = vfsStream::url('data/nonexistent_dir');
         $definition = new DataMigration(
             [
-                'destination' => 'yaml://'.$path,
+                'destination' => $path,
                 'destinationIds' => [
                     new IdField(['name' => 'group', 'type' => 'string']),
                     new IdField(['name' => 'identifier', 'type' => 'string']),
@@ -140,15 +126,12 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['scheme' => 'yaml', 'path' => $path]);
         $this->finder->method('count')
             ->willReturn(0);
         $this->finder->expects($this->never())
             ->method('getIterator');
 
-        $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
+        $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
         $foundEntity = $driver->read($destIds);
         $this->assertNull($foundEntity);
@@ -160,7 +143,7 @@ class YamlDestinationDriverTest extends TestCase
         $path = vfsStream::url('data/existing_dir');
         $definition = new DataMigration(
             [
-                'destination' => 'yaml://'.$path,
+                'destination' => $path,
                 'destinationIds' => [
                     new IdField(['name' => 'group', 'type' => 'string']),
                     new IdField(['name' => 'identifier', 'type' => 'string']),
@@ -168,11 +151,7 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['scheme' => 'yaml', 'path' => $path]);
-
-        $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
+        $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
         $this->expectException(\RangeException::class);
         $driver->read($destIds);
@@ -215,17 +194,13 @@ class YamlDestinationDriverTest extends TestCase
         $path = vfsStream::url('data/existing_dir');
         $definition = new DataMigration(
             [
-                'destination' => 'yaml://'.$path,
+                'destination' => $path,
                 'destinationIds' => [
                     new IdField(['name' => 'group', 'type' => 'string']),
                     new IdField(['name' => 'identifier', 'type' => 'string']),
                 ],
             ]
         );
-
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['scheme' => 'yaml', 'path' => $path]);
 
         $fileInfo = [
             new SplFileInfo(vfsStream::url('data/existing_dir/test/existing_file.yaml'), 'test', 'test/existing_file.yaml'),
@@ -236,7 +211,7 @@ class YamlDestinationDriverTest extends TestCase
         $this->finder->method('getIterator')
             ->willReturn(new \ArrayIterator($fileInfo));
 
-        $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
+        $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
         $foundEntities = $driver->readMultiple($destIdSet);
         $this->assertEquals($expectedEntities, $foundEntities);
@@ -248,7 +223,7 @@ class YamlDestinationDriverTest extends TestCase
         $path = vfsStream::url('data/existing_dir');
         $definition = new DataMigration(
             [
-                'destination' => 'yaml://'.$path,
+                'destination' => $path,
                 'destinationIds' => [
                     new IdField(['name' => 'group', 'type' => 'string']),
                     new IdField(['name' => 'identifier', 'type' => 'string']),
@@ -256,17 +231,13 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['scheme' => 'yaml', 'path' => $path]);
-
         $fileInfo = new SplFileInfo(vfsStream::url('data/existing_dir/test/existing_file.yaml'), 'test', 'test/existing_file.yaml');
         $this->finder->method('count')
             ->willReturn(1);
         $this->finder->method('getIterator')
             ->willReturn(new \ArrayIterator([$fileInfo]));
 
-        $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
+        $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
         $foundIds = $driver->getExistingIds();
         $this->assertEquals($destIdSet, $foundIds);
@@ -314,7 +285,7 @@ class YamlDestinationDriverTest extends TestCase
         $path = vfsStream::url('data/existing_dir');
         $definition = new DataMigration(
             [
-                'destination' => 'yaml://'.$path,
+                'destination' => $path,
                 'destinationIds' => [
                     new IdField(['name' => 'group', 'type' => 'string']),
                     new IdField(['name' => 'identifier', 'type' => 'string']),
@@ -322,11 +293,7 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['scheme' => 'yaml', 'path' => $path]);
-
-        $driver = new YamlDestinationDriver($this->uriParser, $this->yamlParser, $this->yamlDumper, $this->finderFactory);
+        $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
         $driver->setOption('refs', $useRefs);
         $newIds = $driver->write($newEntity);
@@ -474,8 +441,6 @@ YAML
         vfsStreamWrapper::register();
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('data'));
         vfsStream::copyFromFileSystem(TEST_RESOURCES_ROOT.'/Drivers/Destination/YamlDestinationDriverTest');
-
-        $this->uriParser = $this->createMock(Parser::class);
 
         $this->yamlDumper = new YamlDumper(2);
 

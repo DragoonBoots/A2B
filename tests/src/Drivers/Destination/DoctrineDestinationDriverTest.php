@@ -8,7 +8,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Destination\DoctrineDestinationDriver;
 use DragoonBoots\A2B\Exception\BadUriException;
-use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -16,11 +15,6 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class DoctrineDestinationDriverTest extends TestCase
 {
-
-    /**
-     * @var Parser|MockObject
-     */
-    protected $uriParser;
 
     /**
      * @var EntityManagerInterface|MockObject
@@ -56,32 +50,25 @@ class DoctrineDestinationDriverTest extends TestCase
         $this->assertSame($this->em, $this->driver->getEm());
     }
 
-    protected function setupDriver(string $destination = '/DragoonBoots/A2B/Tests/Drivers/Destination/TestEntity')
+    protected function setupDriver(string $destination = TestEntity::class)
     {
-        $destinationUrl = 'doctrine://'.$destination;
         $this->definition = new DataMigration(
             [
-                'destination' => $destinationUrl,
+                'destination' => $destination,
                 'destinationIds' => [new IdField(['name' => 'id'])],
             ]
         );
-
-        $this->uriParser = $this->createMock(Parser::class);
-        $this->uriParser->expects($this->once())
-            ->method('parse')
-            ->with($destinationUrl)
-            ->willReturn(['path' => $destination]);
 
         $this->repo = $this->createMock(ObjectRepository::class);
 
         $this->em = $this->createMock(EntityManagerInterface::class);
         $this->em->method('getRepository')
-            ->with('\\'.TestEntity::class)
+            ->with(TestEntity::class)
             ->willReturn($this->repo);
 
         $this->propertyAccess = PropertyAccess::createPropertyAccessor();
 
-        $this->driver = new DoctrineDestinationDriver($this->uriParser, $this->em, $this->propertyAccess);
+        $this->driver = new DoctrineDestinationDriver($this->em, $this->propertyAccess);
     }
 
     public function testConfigureBad()
@@ -120,7 +107,7 @@ class DoctrineDestinationDriverTest extends TestCase
 
         $this->em->expects($this->once())
             ->method('getRepository')
-            ->with('\\'.TestEntity::class)
+            ->with(TestEntity::class)
             ->willReturn($this->repo);
 
         $this->assertSame($this->repo, $this->driver->getRepo());
@@ -199,82 +186,12 @@ class DoctrineDestinationDriverTest extends TestCase
         $newRepo = $this->createMock(ObjectRepository::class);
         $newEm->expects($this->once())
             ->method('getRepository')
-            ->with('\\'.TestEntity::class)
+            ->with(TestEntity::class)
             ->willReturn($newRepo);
 
         $this->driver->setEm($newEm);
         $this->assertSame($newEm, $this->driver->getEm());
         $this->assertSame($newRepo, $this->driver->getRepo());
-    }
-}
-
-class TestEntity
-{
-
-    protected $id;
-
-    protected $field1;
-
-    protected $field2;
-
-    /**
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param mixed $id
-     *
-     * @return self
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getField1()
-    {
-        return $this->field1;
-    }
-
-    /**
-     * @param mixed $field1
-     *
-     * @return self
-     */
-    public function setField1($field1)
-    {
-        $this->field1 = $field1;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getField2()
-    {
-        return $this->field2;
-    }
-
-    /**
-     * @param mixed $field2
-     *
-     * @return self
-     */
-    public function setField2($field2)
-    {
-        $this->field2 = $field2;
-
-        return $this;
     }
 
 }

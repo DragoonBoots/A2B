@@ -4,7 +4,6 @@ namespace DragoonBoots\A2B\Tests\DataMigration;
 
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
-use DragoonBoots\A2B\DataMigration\AbstractDataMigration;
 use DragoonBoots\A2B\DataMigration\DataMigrationExecutor;
 use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
@@ -21,34 +20,9 @@ use PHPUnit\Framework\TestCase;
 class DataMigrationExecutorTest extends TestCase
 {
 
-    protected $orphanKeepDecision;
-
-    protected $orphanRemoveDecision;
-
-    protected $orphanAskDecision;
-
-    /**
-     * DataMigrationExecutorTest constructor.
-     *
-     * @param null|string $name
-     * @param array       $data
-     * @param string      $dataName
-     *
-     * @throws \ReflectionException
-     */
-    public function __construct(?string $name = null, array $data = [], string $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-
-        // Use reflection to get the values of the internal constants.
-        $refl = new \ReflectionClass(DataMigrationExecutor::class);
-        $this->orphanKeepDecision = $refl->getConstant('ORPHAN_KEEP');
-        $this->orphanRemoveDecision = $refl->getConstant('ORPHAN_REMOVE');
-        $this->orphanAskDecision = $refl->getConstant('ORPHAN_ASK');
-    }
-
     public function testExecute()
     {
+        // Setup test data
         $testSourceData = [
             [
                 'id' => 1,
@@ -321,7 +295,7 @@ class DataMigrationExecutorTest extends TestCase
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
         $outputFormatter->expects($this->once())
             ->method('ask')
-            ->willReturn($this->orphanKeepDecision);
+            ->willReturn('y');
         $executor->setOutputFormatter($outputFormatter);
 
         $orphansParams = [];
@@ -357,7 +331,7 @@ class DataMigrationExecutorTest extends TestCase
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
         $outputFormatter->expects($this->once())
             ->method('ask')
-            ->willReturn($this->orphanRemoveDecision);
+            ->willReturn('ORHPAN_REMOVE');
         $executor->setOutputFormatter($outputFormatter);
 
         $orphansParams = [];
@@ -415,7 +389,7 @@ class DataMigrationExecutorTest extends TestCase
         $outputFormatter = $this->createMock(OutputFormatterInterface::class);
         $outputFormatter->expects($this->exactly(2))
             ->method('ask')
-            ->willReturnOnConsecutiveCalls($this->orphanAskDecision, $decision);
+            ->willReturnOnConsecutiveCalls('c', $decision);
         $executor->setOutputFormatter($outputFormatter);
 
         $orphansParams = [];
@@ -436,13 +410,13 @@ class DataMigrationExecutorTest extends TestCase
         return [
             'keep' => [
                 // Decision
-                $this->orphanKeepDecision,
+                'y',
                 // Written
                 true,
             ],
             'remove' => [
                 // Decision
-                $this->orphanRemoveDecision,
+                'n',
                 // Written
                 false,
             ],

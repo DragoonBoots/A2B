@@ -60,12 +60,12 @@ class YamlSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     {
         parent::configure($definition);
 
-        if (!is_dir($this->migrationDefinition->getDestination())) {
+        if (!is_dir($this->migrationDefinition->getSource())) {
             throw new BadUriException($definition->getSource());
         }
         $this->finder = $this->finderFactory->get()
             ->files()
-            ->in($this->migrationDefinition->getDestination())
+            ->in($this->migrationDefinition->getSource())
             ->name('`.+\.ya?ml$`')
             ->followLinks()
             ->ignoreDotFiles(true);

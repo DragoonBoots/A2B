@@ -6,7 +6,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Source\CsvSourceDriver;
 use DragoonBoots\A2B\Exception\BadUriException;
-use League\Uri\Parser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamWrapper;
@@ -29,6 +28,8 @@ class CsvSourceDriverTest extends TestCase
     {
         $this->setupDriver();
         $this->driver->configure($this->definition);
+        // Dummy assertion to catch exceptions
+        $this->assertTrue(true);
     }
 
     /**
@@ -37,10 +38,9 @@ class CsvSourceDriverTest extends TestCase
     protected function setupDriver(?string $url = null)
     {
         $url = $url ?? vfsStream::url('data/source.csv');
-        $sourceUri = 'csv://'.$url;
         $this->definition = new DataMigration(
             [
-                'source' => $sourceUri,
+                'source' => $url,
                 'sourceIds' => [
                     new IdField(
                         [
@@ -52,12 +52,7 @@ class CsvSourceDriverTest extends TestCase
             ]
         );
 
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->expects($this->once())
-            ->method('parse')
-            ->with($sourceUri)
-            ->willReturn(['path' => $url]);
-        $this->driver = new CsvSourceDriver($uriParser);
+        $this->driver = new CsvSourceDriver();
     }
 
     /**

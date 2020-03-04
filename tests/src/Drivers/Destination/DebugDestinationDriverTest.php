@@ -6,7 +6,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
-use League\Uri\Parser;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\VarDumper\Cloner\ClonerInterface;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
@@ -21,10 +20,9 @@ class DebugDestinationDriverTest extends TestCase
 
     public function testRead()
     {
-        $uriParser = $this->createMock(Parser::class);
         $dumper = $this->createMock(AbstractDumper::class);
         $cloner = $this->createMock(ClonerInterface::class);
-        $driver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
+        $driver = new DebugDestinationDriver($dumper, $cloner);
 
         // The debug destination never has a current entity.
         $this->assertNull($driver->read(['id' => 1]));
@@ -32,10 +30,9 @@ class DebugDestinationDriverTest extends TestCase
 
     public function testReadMultiple()
     {
-        $uriParser = $this->createMock(Parser::class);
         $dumper = $this->createMock(AbstractDumper::class);
         $cloner = $this->createMock(ClonerInterface::class);
-        $driver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
+        $driver = new DebugDestinationDriver($dumper, $cloner);
 
         $this->assertEquals(
             [],
@@ -50,16 +47,11 @@ class DebugDestinationDriverTest extends TestCase
 
     /**
      * @param string $destination
-     * @param string $path
      *
      * @dataProvider pathDataProvider
      */
-    public function testWrite(string $destination, string $path)
+    public function testWrite(string $destination)
     {
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->method('parse')
-            ->with($destination)
-            ->willReturn(['path' => $path]);
         $data = [
             'field0' => 'DebugDestinationDriver',
             'field1' => 'Test',
@@ -68,7 +60,7 @@ class DebugDestinationDriverTest extends TestCase
         $definition = new DataMigration(
             ['destination' => $destination]
         );
-        $driver = new DebugDestinationDriver($uriParser, new CliDumper(), new VarCloner());
+        $driver = new DebugDestinationDriver(new CliDumper(), new VarCloner());
         $driver->configure($definition);
 
         $driver->write($data);
@@ -79,12 +71,10 @@ class DebugDestinationDriverTest extends TestCase
     {
         return [
             'stdout' => [
-                'debug:stdout',
                 'stdout',
                 STDOUT,
             ],
             'stderr' => [
-                'debug:stderr',
                 'stderr',
                 STDERR,
             ],
@@ -93,45 +83,28 @@ class DebugDestinationDriverTest extends TestCase
 
     /**
      * @param string   $destination
-     * @param string   $path
      *
      * @param resource $stream
      *
      * @dataProvider pathDataProvider
      */
-    public function testConfigure(string $destination, string $path, $stream)
+    public function testConfigure(string $destination, $stream)
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($destination, $path, $stream, $driver, $definition);
+        $this->setupDriver($destination, $stream, $driver, $definition);
 
         $driver->configure($definition);
     }
 
-    public function testGetExistingIds()
-    {
-        $parser = $this->createMock(Parser::class);
-        $dumper = $this->createMock(AbstractDumper::class);
-        $cloner = $this->createMock(ClonerInterface::class);
-        $driver = new DebugDestinationDriver($parser, $dumper, $cloner);
-
-        $this->assertEquals([], $driver->getExistingIds());
-    }
-
-
     /**
      * @param string                          $destination
-     * @param string                          $path
      * @param resource                        $stream
      * @param DestinationDriverInterface|null $driver
      * @param DataMigration|null              $definition
      */
-    protected function setupDriver(string $destination, string $path, $stream, ?DestinationDriverInterface &$driver = null, ?DataMigration &$definition = null): void
+    protected function setupDriver(string $destination, $stream, ?DestinationDriverInterface &$driver = null, ?DataMigration &$definition = null): void
     {
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->method('parse')
-            ->with($destination)
-            ->willReturn(['path' => $path]);
         $dumper = $this->createMock(AbstractDumper::class);
         $dumper->expects($stream ? $this->once() : $this->never())
             ->method('setOutput')
@@ -140,14 +113,23 @@ class DebugDestinationDriverTest extends TestCase
         $definition = new DataMigration(
             ['destination' => $destination]
         );
-        $driver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
+        $driver = new DebugDestinationDriver($dumper, $cloner);
+    }
+
+    public function testGetExistingIds()
+    {
+        $dumper = $this->createMock(AbstractDumper::class);
+        $cloner = $this->createMock(ClonerInterface::class);
+        $driver = new DebugDestinationDriver($dumper, $cloner);
+
+        $this->assertEquals([], $driver->getExistingIds());
     }
 
     public function testConfigureBad()
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver('debug:badstream', 'badstream', null, $driver, $definition);
+        $this->setupDriver('badstream', null, $driver, $definition);
 
         $this->expectException(BadUriException::class);
         $driver->configure($definition);
@@ -155,10 +137,9 @@ class DebugDestinationDriverTest extends TestCase
 
     public function testFlush()
     {
-        $uriParser = $this->createMock(Parser::class);
         $dumper = $this->createMock(AbstractDumper::class);
         $cloner = $this->createMock(ClonerInterface::class);
-        $preFlushDriver = new DebugDestinationDriver($uriParser, $dumper, $cloner);
+        $preFlushDriver = new DebugDestinationDriver($dumper, $cloner);
 
         // Smoke test the flush operation; it should do nothing in this driver.
         $postFlushDriver = clone $preFlushDriver;

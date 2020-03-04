@@ -8,7 +8,6 @@ use DragoonBoots\A2B\Drivers\Source\YamlSourceDriver;
 use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use DragoonBoots\A2B\Tests\Drivers\FinderTestTrait;
-use League\Uri\Parser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamWrapper;
@@ -48,21 +47,16 @@ class YamlSourceDriverTest extends TestCase
      */
     protected $yamlParser;
 
-    /**
-     * @var Parser|MockObject
-     */
-    protected $uriParser;
-
     public function testConfigure()
     {
         $this->setupDriver();
         $this->driver->configure($this->definition);
     }
 
-    protected function setupDriver(Parser $uriParser = null, FinderFactory $finderFactory = null)
+    protected function setupDriver(FinderFactory $finderFactory = null)
     {
         $url = vfsStream::url('data');
-        $sourceUri = 'yaml://'.$url;
+        $sourceUri = $url;
         $this->definition = new DataMigration(
             [
                 'source' => $sourceUri,
@@ -82,15 +76,6 @@ class YamlSourceDriverTest extends TestCase
                 ],
             ]
         );
-
-        if (!isset($uriParser)) {
-            $uriParser = $this->createMock(Parser::class);
-            $uriParser->expects($this->once())
-                ->method('parse')
-                ->with($sourceUri)
-                ->willReturn(['path' => $url]);
-        }
-        $this->uriParser = $uriParser;
 
         $this->yamlParser = new YamlParser();
 
@@ -114,24 +99,18 @@ class YamlSourceDriverTest extends TestCase
         }
         $this->finderFactory = $finderFactory;
 
-        $this->driver = new YamlSourceDriver($this->uriParser, $this->yamlParser, $this->finderFactory);
+        $this->driver = new YamlSourceDriver($this->yamlParser, $this->finderFactory);
     }
 
     public function testConfigureBad()
     {
         $badPath = 'nonexistent/directory';
-        $badUri = 'yaml://'.$badPath;
-
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->expects($this->once())
-            ->method('parse')
-            ->with($badUri)
-            ->willReturn(['path' => $badPath]);
+        $badUri = $badPath;
 
         $finderFactory = $this->createMock(FinderFactory::class);
         $finderFactory->expects($this->never())
             ->method('get');
-        $this->setupDriver($uriParser, $finderFactory);
+        $this->setupDriver($finderFactory);
         $this->definition->setSource($badUri);
 
         $this->expectException(BadUriException::class);

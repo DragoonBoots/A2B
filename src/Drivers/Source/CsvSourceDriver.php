@@ -39,12 +39,12 @@ class CsvSourceDriver extends AbstractSourceDriver implements SourceDriverInterf
     {
         parent::configure($definition);
 
-        // Ensure the destination exists.
-        if (!is_file($this->migrationDefinition->getDestination())) {
+        // Ensure the source exists.
+        if (!is_file($this->migrationDefinition->getSource())) {
             throw new BadUriException($definition->getSource());
         }
 
-        $this->reader = CsvReader::createFromPath($this->migrationDefinition->getDestination(), 'r');
+        $this->reader = CsvReader::createFromPath($this->migrationDefinition->getSource(), 'r');
 
         // Don't try reading an empty file.
         $emptyFile = $this->reader->count() <= 1;

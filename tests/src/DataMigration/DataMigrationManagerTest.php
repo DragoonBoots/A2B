@@ -14,7 +14,6 @@ use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\MigrationException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
-use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -25,8 +24,8 @@ class DataMigrationManagerTest extends TestCase
     /**
      * @param DataMigration      $definition
      * @param DataMigration|null $resolvedDefinition
-     * @param string[]           $sources
-     * @param string[]           $destinations
+     * @param string[]           $sourceKeys
+     * @param string[]           $destKeys
      *
      * @throws NonexistentMigrationException
      * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
@@ -34,27 +33,11 @@ class DataMigrationManagerTest extends TestCase
      * @throws \ReflectionException
      * @dataProvider addMigrationDataProvider
      */
-    public function testAddMigration(DataMigration $definition, DataMigration $resolvedDefinition = null, array $sources = [], array $destinations = [])
+    public function testAddMigration(DataMigration $definition, DataMigration $resolvedDefinition = null, array $sourceKeys = [], array $destKeys = [])
     {
         if (is_null($resolvedDefinition)) {
             $resolvedDefinition = clone $definition;
         }
-
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->expects($this->exactly(2))
-            ->method('parse')
-            ->willReturnMap(
-                [
-                    [
-                        $resolvedDefinition->getSource(),
-                        ['scheme' => 'testSource'],
-                    ],
-                    [
-                        $resolvedDefinition->getDestination(),
-                        ['scheme' => 'testDestination'],
-                    ],
-                ]
-            );
 
         $sourceDriver = $this->createMock(SourceDriverInterface::class);
         $resolvedDefinition->setSourceDriver(get_class($sourceDriver));
@@ -62,12 +45,12 @@ class DataMigrationManagerTest extends TestCase
         $resolvedDefinition->setDestinationDriver(get_class($destinationDriver));
         $driverManager = $this->createMock(DriverManagerInterface::class);
         $driverManager->expects($this->once())
-            ->method('getSourceDriverForScheme')
-            ->with('testSource')
+            ->method('getSourceDriver')
+            ->with('source_driver')
             ->willReturn($sourceDriver);
         $driverManager->expects($this->once())
-            ->method('getDestinationDriverForScheme')
-            ->with('testDestination')
+            ->method('getDestinationDriver')
+            ->with('dest_driver')
             ->willReturn($destinationDriver);
 
         /** @var DataMigrationInterface|MockObject $migration */
@@ -92,13 +75,15 @@ class DataMigrationManagerTest extends TestCase
             ->method('resolveValue')
             ->willReturnArgument(0);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
-        foreach ($sources as $key => $value) {
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
+        foreach ($sourceKeys as $key => $value) {
             $dataMigrationManager->addSource($key, $value);
         }
-        foreach ($destinations as $key => $value) {
+        foreach ($destKeys as $key => $value) {
             $dataMigrationManager->addDestination($key, $value);
         }
+
+        // Do the test
         $dataMigrationManager->addMigration($migration);
         $this->assertEquals(new ArrayCollection(['TestMigration' => $migration]), $dataMigrationManager->getMigrations());
         $this->assertSame($migration, $dataMigrationManager->getMigration(get_class($migration)));
@@ -112,26 +97,36 @@ class DataMigrationManagerTest extends TestCase
             'standard' => [
                 new DataMigration(
                     [
-                        'source' => 'testSource://test',
-                        'destination' => 'testDestination://test',
+                        'source' => 'test_source',
+                        'sourceDriver' => 'source_driver',
+                        'destination' => 'test_destination',
+                        'destinationDriver' => 'dest_driver',
                     ]
                 ),
             ],
-            'with keys' => [
+            'with aliases' => [
+                // Migration definition
+                new DataMigration(
+                    [
+                        'source' => 'test_source_alias',
+                        'sourceDriver' => 'source_driver',
+                        'destination' => 'test_destination_alias',
+                        'destinationDriver' => 'dest_driver',
+                    ]
+                ),
+                // Resolved definition
                 new DataMigration(
                     [
                         'source' => 'test_source',
+                        'sourceDriver' => 'source_driver',
                         'destination' => 'test_destination',
+                        'destinationDriver' => 'dest_driver',
                     ]
                 ),
-                new DataMigration(
-                    [
-                        'source' => 'testSource://test',
-                        'destination' => 'testDestination://test',
-                    ]
-                ),
-                ['test_source' => 'testSource://test'],
-                ['test_destination' => 'testDestination://test'],
+                // Source aliases
+                ['test_source_alias' => 'test_source'],
+                // Destination aliases
+                ['test_destination_alias' => 'test_destination'],
             ],
         ];
     }
@@ -152,9 +147,11 @@ class DataMigrationManagerTest extends TestCase
     {
         $definition = new DataMigration(
             [
-                'source' => 'testSource://test',
+                'source' => 'test_source',
+                'sourceDriver' => 'source_driver',
                 'sourceIds' => [new IdField(['name' => 'id'])],
-                'destination' => 'testDestination://test',
+                'destination' => 'test_destination',
+                'destinationDriver' => 'dest_driver',
                 'destinationIds' => [new IdField(['name' => 'id'])],
             ]
         );
@@ -188,40 +185,21 @@ class DataMigrationManagerTest extends TestCase
                 }
             );
 
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->method('parse')
-            ->willReturnMap(
-                [
-                    [
-                        $definition->getSource(),
-                        ['scheme' => 'testSource'],
-                    ],
-                    [
-                        $definition->getDestination(),
-                        ['scheme' => 'testDestination'],
-                    ],
-                ]
-            );
-
         $sourceDriver = $this->createMock(SourceDriverInterface::class);
-        $definition->setSourceDriver(get_class($sourceDriver));
-        $extendsDefinition->setSourceDriver(get_class($sourceDriver));
         $destinationDriver = $this->createMock(DestinationDriverInterface::class);
-        $definition->setDestinationDriver(get_class($destinationDriver));
-        $extendsDefinition->setDestinationDriver(get_class($destinationDriver));
         $driverManager = $this->createMock(DriverManagerInterface::class);
-        $driverManager->method('getSourceDriverForScheme')
-            ->with('testSource')
+        $driverManager->method('getSourceDriver')
+            ->with('source_driver')
             ->willReturn($sourceDriver);
-        $driverManager->method('getDestinationDriverForScheme')
-            ->with('testDestination')
+        $driverManager->method('getDestinationDriver')
+            ->with('dest_driver')
             ->willReturn($destinationDriver);
 
         $parameterBag = $this->createMock(ParameterBagInterface::class);
         $parameterBag->method('resolveValue')
             ->willReturnArgument(0);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
 
         foreach ([$migration, $extendsMigration] as $item) {
             $dataMigrationManager->addMigration($item);
@@ -244,9 +222,11 @@ class DataMigrationManagerTest extends TestCase
             'good' => [
                 new DataMigration(
                     [
-                        'source' => 'testSource://test',
+                        'source' => 'test_source',
+                        'sourceDriver' => 'source_driver',
                         'sourceIds' => [new IdField(['name' => 'id'])],
-                        'destination' => 'testDestination://test',
+                        'destination' => 'test_destination',
+                        'destinationDriver' => 'dest_driver',
                         'destinationIds' => [new IdField(['name' => 'id'])],
                         'extends' => 'TestMigration',
                     ]
@@ -256,8 +236,10 @@ class DataMigrationManagerTest extends TestCase
                 new DataMigration(
                     [
                         'source' => 'testSource://other',
+                        'sourceDriver' => 'source_driver',
                         'sourceIds' => [new IdField(['name' => 'id'])],
                         'destination' => 'testDestination://test',
+                        'destinationDriver' => 'dest_driver',
                         'destinationIds' => [new IdField(['name' => 'id'])],
                         'extends' => 'TestMigration',
                     ]
@@ -268,8 +250,10 @@ class DataMigrationManagerTest extends TestCase
                 new DataMigration(
                     [
                         'source' => 'testSource://test',
+                        'sourceDriver' => 'source_driver',
                         'sourceIds' => [new IdField(['name' => 'id'])],
                         'destination' => 'testDestination://other',
+                        'destinationDriver' => 'dest_driver',
                         'destinationIds' => [new IdField(['name' => 'id'])],
                         'extends' => 'TestMigration',
                     ]
@@ -280,6 +264,7 @@ class DataMigrationManagerTest extends TestCase
                 new DataMigration(
                     [
                         'source' => 'testSource://test',
+                        'sourceDriver' => 'source_driver',
                         'sourceIds' => [
                             new IdField(
                                 [
@@ -289,6 +274,7 @@ class DataMigrationManagerTest extends TestCase
                             ),
                         ],
                         'destination' => 'testDestination://test',
+                        'destinationDriver' => 'dest_driver',
                         'destinationIds' => [new IdField(['name' => 'id'])],
                         'extends' => 'TestMigration',
                     ]
@@ -299,8 +285,10 @@ class DataMigrationManagerTest extends TestCase
                 new DataMigration(
                     [
                         'source' => 'testSource://test',
+                        'sourceDriver' => 'source_driver',
                         'sourceIds' => [new IdField(['name' => 'id'])],
                         'destination' => 'testDestination://test',
+                        'destinationDriver' => 'dest_driver',
                         'destinationIds' => [
                             new IdField(
                                 [
@@ -320,14 +308,13 @@ class DataMigrationManagerTest extends TestCase
     public function testGetMigrationBad()
     {
         $annotationReader = $this->createMock(Reader::class);
-        $uriParser = $this->createMock(Parser::class);
         $driverManager = $this->createMock(DriverManagerInterface::class);
 
         $parameterBag = $this->createMock(ParameterBagInterface::class);
         $parameterBag->method('resolveValue')
             ->willReturnArgument(0);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
         $this->expectException(NonexistentMigrationException::class);
         $dataMigrationManager->getMigration('NonexistantMigration');
     }
@@ -361,14 +348,13 @@ class DataMigrationManagerTest extends TestCase
                     return $definitions[$reflectionClass->getName()] ?? null;
                 }
             );
-        $uriParser = $this->createMock(Parser::class);
         $driverManager = $this->createMock(DriverManagerInterface::class);
 
         $parameterBag = $this->createMock(ParameterBagInterface::class);
         $parameterBag->method('resolveValue')
             ->willReturnArgument(0);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
 
         // Inject the migrations
         $refl = new \ReflectionClass($dataMigrationManager);
@@ -400,14 +386,13 @@ class DataMigrationManagerTest extends TestCase
                     return $definitions[$reflectionClass->getName()] ?? null;
                 }
             );
-        $uriParser = $this->createMock(Parser::class);
         $driverManager = $this->createMock(DriverManagerInterface::class);
 
         $parameterBag = $this->createMock(ParameterBagInterface::class);
         $parameterBag->method('resolveValue')
             ->willReturnArgument(0);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
 
         // Inject the migrations
         $refl = new \ReflectionClass($dataMigrationManager);

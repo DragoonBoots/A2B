@@ -14,7 +14,6 @@ use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
-use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -45,11 +44,6 @@ class MigrateCommandTest extends TestCase
      * @var DataMigrationMapperInterface|MockObject
      */
     protected $mapper;
-
-    /**
-     * @var Parser|MockObject
-     */
-    protected $uriParser;
 
     /**
      * @var ParameterBagInterface|MockObject
@@ -145,36 +139,6 @@ class MigrateCommandTest extends TestCase
         $mapper = $this->createMock(DataMigrationMapperInterface::class);
         $this->mapper = $mapper;
 
-        $uriParser = $this->createMock(Parser::class);
-        $dataPath = urlencode(serialize($data));
-        $uriParser->method('parse')
-            ->willReturnMap(
-                [
-                    [
-                        'inline://'.$dataPath,
-                        [
-                            'scheme' => 'inline',
-                            'path' => $dataPath,
-                        ],
-                    ],
-                    [
-                        'test:stdout',
-                        [
-                            'scheme' => 'test',
-                            'path' => 'stdout',
-                        ],
-                    ],
-                    [
-                        'debug:stderr',
-                        [
-                            'scheme' => 'debug',
-                            'path' => 'stdout',
-                        ],
-                    ],
-                ]
-            );
-        $this->uriParser = $uriParser;
-
         $varDumper = $this->createMock(AbstractDumper::class);
         $this->varDumper = $varDumper;
 
@@ -186,7 +150,6 @@ class MigrateCommandTest extends TestCase
             $this->driverManager,
             $this->executor,
             $this->mapper,
-            $this->uriParser,
             $this->varDumper,
             $this->varCloner
         );
@@ -205,7 +168,7 @@ class MigrateCommandTest extends TestCase
         $definition1 = new DataMigration(
             [
                 'name' => 'Test Migration 1',
-                'source' => 'inline://'.urlencode(serialize($data)),
+                'source' => urlencode(serialize($data)),
                 'sourceDriver' => 'InlineSourceDriver',
                 'sourceIds' => [
                     new IdField(
@@ -214,7 +177,7 @@ class MigrateCommandTest extends TestCase
                         ]
                     ),
                 ],
-                'destination' => 'test:stdout',
+                'destination' => 'stdout',
                 'destinationDriver' => 'TestDestinationDriver',
                 'destinationIds' => [
                     new IdField(
@@ -233,7 +196,7 @@ class MigrateCommandTest extends TestCase
                 [
                     'name' => 'Test Migration 2',
                     'group' => 'special',
-                    'source' => 'inline://'.urlencode(serialize($data)),
+                    'source' => urlencode(serialize($data)),
                     'sourceDriver' => 'InlineSourceDriver',
                     'sourceIds' => [
                         new IdField(
@@ -242,7 +205,7 @@ class MigrateCommandTest extends TestCase
                             ]
                         ),
                     ],
-                    'destination' => 'test:stdout',
+                    'destination' => 'stdout',
                     'destinationDriver' => 'TestDestinationDriver',
                     'destinationIds' => [
                         new IdField(
@@ -357,8 +320,8 @@ class MigrateCommandTest extends TestCase
 
     /**
      * @param array   $input
-     * @param Matcher $askAboutOrphansCount
-     * @param Matcher $writeOrphansCount
+     * @param InvokedRecorder $askAboutOrphansCount
+     * @param InvokedRecorder $writeOrphansCount
      *
      * @dataProvider orphanOptionDataProvider
      */
@@ -511,7 +474,6 @@ class MigrateCommandTest extends TestCase
         $executor->expects($this->never())
             ->method('execute');
         $mapper = $this->createMock(DataMigrationMapperInterface::class);
-        $uriParser = $this->createMock(Parser::class);
         $varDumper = $this->createMock(AbstractDumper::class);
         $varCloner = $this->createMock(ClonerInterface::class);
         $command = new MigrateCommand(
@@ -519,7 +481,6 @@ class MigrateCommandTest extends TestCase
             $driverManager,
             $executor,
             $mapper,
-            $uriParser,
             $varDumper,
             $varCloner
         );

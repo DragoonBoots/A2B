@@ -7,7 +7,6 @@ use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Exception\NoIdSetException;
-use League\Uri\Parser;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
@@ -29,38 +28,34 @@ class CsvDestinationDriverTest extends TestCase
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($path, $destination, $driver, $definition);
+        $this->setupDriver($destination, $driver, $definition);
         $driver->configure($definition);
 
         $this->assertEquals($currentEntity, $driver->read($destIds));
     }
 
     /**
-     * @param string                          $path
      * @param string                          $destination
      * @param DestinationDriverInterface|null $driver
      * @param DataMigration|null              $definition
      */
-    protected function setupDriver(string $path, string $destination, ?DestinationDriverInterface &$driver = null, ?DataMigration &$definition = null): void
+    protected function setupDriver(string $destination, ?DestinationDriverInterface &$driver = null, ?DataMigration &$definition = null): void
     {
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->expects($this->once())
-            ->method('parse')
-            ->willReturn(['path' => $path]);
-        $definition = new DataMigration([
-            'destination' => $destination,
-            'destinationIds' => [new IdField(['name' => 'id'])]
-        ]);
-        $driver = new CsvDestinationDriver($uriParser);
+        $definition = new DataMigration(
+            [
+                'destination' => $destination,
+                'destinationIds' => [new IdField(['name' => 'id'])],
+            ]
+        );
+        $driver = new CsvDestinationDriver();
     }
 
     public function testReadBad()
     {
         $path = vfsStream::url('data/existing_dir/malformed_file.csv');
-        $destination = 'csv://'.$path;
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($path, $destination, $driver, $definition);
+        $this->setupDriver($path, $driver, $definition);
         $driver->configure($definition);
 
         $this->expectException(\RangeException::class);
@@ -79,7 +74,7 @@ class CsvDestinationDriverTest extends TestCase
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($path, $destination, $driver, $definition);
+        $this->setupDriver($destination, $driver, $definition);
         $driver->configure($definition);
 
         $this->assertEquals($entities, $driver->readMultiple($destIdSet));
@@ -95,9 +90,11 @@ class CsvDestinationDriverTest extends TestCase
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($path, $destination, $driver, $definition);
+        $this->setupDriver($destination, $driver, $definition);
 
         $driver->configure($definition);
+        // Dummy assertion for no exceptions
+        $this->assertTrue(true);
     }
 
     /**
@@ -111,7 +108,7 @@ class CsvDestinationDriverTest extends TestCase
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($path, $destination, $driver, $definition);
+        $this->setupDriver($destination, $driver, $definition);
         $driver->configure($definition);
 
         $this->assertEquals($existingIds, $driver->getExistingIds());
@@ -149,7 +146,7 @@ class CsvDestinationDriverTest extends TestCase
         $newFilePath = vfsStream::url('data/new_dir/newfile.csv');
         $ret['new file'] = [
             // destination
-            'csv://'.$newFilePath,
+            $newFilePath,
             // path
             $newFilePath,
         ];
@@ -157,7 +154,7 @@ class CsvDestinationDriverTest extends TestCase
         $existingFilePath = vfsStream::url('data/existing_dir/existing_file.csv');
         $ret['existing file'] = [
             // destination
-            'csv://'.$existingFilePath,
+            $existingFilePath,
             // path
             $existingFilePath,
         ];
@@ -266,7 +263,7 @@ class CsvDestinationDriverTest extends TestCase
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($path, $destination, $driver, $definition);
+        $this->setupDriver($destination, $driver, $definition);
 
         $driver->configure($definition);
 
@@ -297,7 +294,7 @@ class CsvDestinationDriverTest extends TestCase
     {
         /** @var DestinationDriverInterface $driver */
         /** @var DataMigration $definition */
-        $this->setupDriver($path, $destination, $driver, $definition);
+        $this->setupDriver($destination, $driver, $definition);
 
         $driver->configure($definition);
 

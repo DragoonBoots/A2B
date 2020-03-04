@@ -17,7 +17,6 @@ use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
-use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -110,7 +109,8 @@ class DataMigrationMapperTest extends TestCase
         $this->definitions = [
             'TestMigration1' => new DataMigration(
                 [
-                    'source' => 'test://test',
+                    'source' => 'test_source',
+                    'sourceDriver' => 'source_driver',
                     'sourceIds' => [
                         new IdField(
                             [
@@ -119,13 +119,15 @@ class DataMigrationMapperTest extends TestCase
                             ]
                         ),
                     ],
-                    'destination' => 'test://test',
+                    'destination' => 'test_destination',
+                    'destinationDriver' => 'dest_driver',
                     'destinationIds' => [new IdField(['name' => 'id'])],
                 ]
             ),
             'TestMigration2' => new DataMigration(
                 [
-                    'source' => 'test://test',
+                    'source' => 'test_source',
+                    'sourceDriver' => 'source_driver',
                     'sourceIds' => [
                         new IdField(
                             [
@@ -134,7 +136,8 @@ class DataMigrationMapperTest extends TestCase
                             ]
                         ),
                     ],
-                    'destination' => 'test://test',
+                    'destination' => 'test_destination',
+                    'destinationDriver' => 'dest_driver',
                     'destinationIds' => [new IdField(['name' => 'id'])],
                 ]
             ),
@@ -154,13 +157,12 @@ class DataMigrationMapperTest extends TestCase
                     return $this->definitions[$reflectionClass->getName()];
                 }
             );
-        $uriParser = $this->createMock(Parser::class);
-        $uriParser->method('parse')
-            ->willReturn(['scheme' => 'test']);
         $driverManager = $this->createMock(DriverManagerInterface::class);
-        $driverManager->method('getSourceDriverForScheme')
+        $driverManager->method('getSourceDriver')
+            ->with('source_driver')
             ->willReturn($this->createMock(SourceDriverInterface::class));
-        $driverManager->method('getDestinationDriverForScheme')
+        $driverManager->method('getDestinationDriver')
+            ->with('dest_driver')
             ->willReturn($this->createMock(DestinationDriverInterface::class));
 
         $parameterBag = $this->createMock(ParameterBagInterface::class);
@@ -168,7 +170,7 @@ class DataMigrationMapperTest extends TestCase
             ->method('resolveValue')
             ->willReturnArgument(0);
 
-        $dataMigrationManager = new DataMigrationManager($annotationReader, $uriParser, $driverManager, $parameterBag);
+        $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
         foreach ($this->migrations as $migration) {
             $dataMigrationManager->addMigration($migration);
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace DragoonBoots\A2B\Tests\Drivers;
+namespace DragoonBoots\A2B\Tests\Drivers\Source;
 
 
 use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
@@ -12,7 +12,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Source\DbalSourceDriver;
 use DragoonBoots\A2B\Exception\BadUriException;
-use League\Uri\Parser;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -50,7 +49,6 @@ class DbalSourceDriverTest extends TestCase
         if (!isset($connection)) {
             $connection = $this->createMock(Connection::class);
         }
-        $uriParser = $this->createMock(Parser::class);
         $connectionFactory = $this->createMock(ConnectionFactory::class);
         $connectionFactory->expects($this->once())
             ->method('createConnection')
@@ -65,7 +63,7 @@ class DbalSourceDriverTest extends TestCase
                 }
             );
 
-        $driver = new DbalSourceDriver($uriParser, $connectionFactory);
+        $driver = new DbalSourceDriver($connectionFactory);
     }
 
     public function testConfigureBad()

@@ -125,14 +125,11 @@ class DataMigrationManager implements DataMigrationManagerInterface
             $this->resolveDefinitionProperty($definition, $propertyName);
         }
 
-        if (is_null($definition->getSourceDriver())) {
-            $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
-            $definition->setSourceDriver(get_class($sourceDriver));
-        }
-        if (is_null($definition->getDestinationDriver())) {
-            $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
-            $definition->setDestinationDriver(get_class($destinationDriver));
-        }
+        // Canonicalize the driver names
+        $sourceDriver = $this->driverManager->getSourceDriver($definition->getSourceDriver());
+        $definition->setSourceDriver(get_class($sourceDriver));
+        $destinationDriver = $this->driverManager->getDestinationDriver($definition->getDestinationDriver());
+        $definition->setDestinationDriver(get_class($destinationDriver));
 
         $migration->setDefinition($definition);
         $this->migrations[get_class($migration)] = $migration;

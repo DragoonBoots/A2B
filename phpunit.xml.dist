@@ -11,6 +11,7 @@
         <ini name="intl.error_level" value="0"/>
         <ini name="memory_limit" value="-1"/>
         <env name="KERNEL_CLASS" value="DragoonBoots\A2B\Tests\A2BTestKernel"/>
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled=1"/>
     </php>
     <testsuites>
         <testsuite name="Test suite">

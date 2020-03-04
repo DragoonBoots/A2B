@@ -164,7 +164,7 @@ class MigrateCommand extends Command
         if ($input->getOption('prune') && $input->getOption('preserve')) {
             $this->io->error(self::ERROR_NO_PRUNE_PRESERVE);
 
-            return;
+            return 1;
         }
 
         $migrations = $this->getMigrations($input->getOption('group'), $input->getArgument('migrations'));
@@ -203,6 +203,8 @@ class MigrateCommand extends Command
             }
             $destinationDriver->flush();
         }
+
+        return 0;
     }
 
     /**

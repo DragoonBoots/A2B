@@ -1,7 +1,7 @@
 # Run tests
 test:
   stage: test
-  image: php:7.2-alpine
+  image: php:7.3-alpine
   cache:
     paths:
       - vendor/

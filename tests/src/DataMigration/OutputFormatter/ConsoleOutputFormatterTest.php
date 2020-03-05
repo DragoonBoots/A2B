@@ -7,6 +7,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -60,14 +61,14 @@ class ConsoleOutputFormatterTest extends TestCase
      */
     protected function setupFormatter(&$formatter = null, &$migrationSection = null, &$summarySection = null)
     {
-        $summaryOutputFormatter = $this->createMock(OutputFormatterInterface::class);
+        $summaryOutputFormatter = new OutputFormatter();
         if (!isset($summarySection)) {
             $summarySection = $this->createMock(ConsoleSectionOutput::class);
         }
         $summarySection->method('getFormatter')
             ->willReturn($summaryOutputFormatter);
 
-        $migrationOutputFormatter = $this->createMock(OutputFormatterInterface::class);
+        $migrationOutputFormatter = new OutputFormatter();
         if (!isset($migrationSection)) {
             $migrationSection = $this->createMock(ConsoleSectionOutput::class);
         }

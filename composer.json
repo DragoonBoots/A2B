@@ -23,18 +23,18 @@
         "doctrine/doctrine-bundle": "^1.9|^2.0",
         "league/csv": "^9.1",
         "doctrine/inflector": "^1.3",
-        "symfony/yaml": "^4.1",
-        "symfony/framework-bundle": "^4.1",
-        "symfony/var-dumper": "^4.1",
-        "symfony/proxy-manager-bridge": "^4.1",
-        "symfony/console": "^4.1",
+        "symfony/yaml": "^4.1|^5.0",
+        "symfony/framework-bundle": "^4.1|^5.0",
+        "symfony/var-dumper": "^4.1|^5.0",
+        "symfony/proxy-manager-bridge": "^4.1|^5.0",
+        "symfony/console": "^4.1|^5.0",
         "marcj/topsort": "^1.1",
-        "symfony/finder": "^4.1",
+        "symfony/finder": "^4.1|^5.0",
         "doctrine/orm": "^2.6",
-        "symfony/property-access": "^4.1"
+        "symfony/property-access": "^4.1|^5.0"
     },
     "require-dev": {
-        "symfony/phpunit-bridge": "^4.1",
+        "symfony/phpunit-bridge": "^4.1|^5.0",
         "mikey179/vfsstream": "^1.6",
         "symfony/maker-bundle": "^1.5"
     },

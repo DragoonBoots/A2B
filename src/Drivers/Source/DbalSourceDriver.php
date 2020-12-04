@@ -127,7 +127,7 @@ class DbalSourceDriver extends AbstractSourceDriver implements SourceDriverInter
         }
 
         $statement->execute();
-        $this->count = (int)$statement->fetchColumn();
+        $this->count = (int)$statement->fetchOne();
     }
 
     /**

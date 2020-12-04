@@ -7,7 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\PDOSqlite;
-use Doctrine\DBAL\Driver\Statement;
+use Doctrine\DBAL\Statement;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Source\DbalSourceDriver;
@@ -130,7 +130,7 @@ class DbalSourceDriverTest extends TestCase
         $statement->expects($this->once())
             ->method('execute');
         $statement->expects($this->once())
-            ->method('fetchColumn')
+            ->method('fetchOne')
             ->willReturn((string)$count);
         $driver->setCountStatement($statement);
 
@@ -151,7 +151,7 @@ class DbalSourceDriverTest extends TestCase
         $statement->expects($this->once())
             ->method('execute');
         $statement->expects($this->once())
-            ->method('fetchColumn')
+            ->method('fetchOne')
             ->willReturn((string)$count);
         $connection->expects($this->once())
             ->method('prepare')

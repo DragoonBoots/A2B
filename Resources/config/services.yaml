@@ -44,7 +44,6 @@ services:
     lazy: true
     arguments:
       $connection: '@a2b.mapper.connection'
-      $inflector: '@a2b.doctrine.inflector'
       $dataMigrationManager: '@a2b.data_migration_manager'
       $stubber: '@a2b.stubber'
   DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface: '@a2b.mapper'
@@ -173,7 +172,6 @@ services:
     arguments:
       - '@a2b.data_migration_manager'
       - '@a2b.driver_manager'
-      - '@a2b.doctrine.inflector'
     tags:
       - 'maker.command'
 
@@ -183,9 +181,6 @@ services:
     lazy: true
 
   # Vendors
-  a2b.doctrine.inflector:
-    class: Doctrine\Common\Inflector\Inflector
-    lazy: true
   a2b.symfony.dumper.cli:
     class: Symfony\Component\VarDumper\Dumper\CliDumper
     lazy: true

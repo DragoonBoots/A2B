@@ -3,7 +3,7 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\Inflector;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\FetchMode;
@@ -11,6 +11,7 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\Inflector\InflectorFactory;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
@@ -68,20 +69,18 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      * DataMigrationMapper constructor.
      *
      * @param Connection                    $connection
-     * @param Inflector                     $inflector
      * @param DataMigrationManagerInterface $dataMigrationManager
      * @param StubberInterface              $stubber
      */
     public function __construct(
         Connection $connection,
-        Inflector $inflector,
         DataMigrationManagerInterface $dataMigrationManager,
         StubberInterface $stubber
     ) {
         $this->connection = $connection;
-        $this->inflector = $inflector;
         $this->dataMigrationManager = $dataMigrationManager;
         $this->stubber = $stubber;
+        $this->inflector = InflectorFactory::create()->build();
     }
 
     /**
@@ -168,7 +167,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     {
         static $tableNames = [];
         if (!isset($tableNames[$migrationId])) {
-            $tableNames[$migrationId] = $this->inflector::tableize(
+            $tableNames[$migrationId] = $this->inflector->tableize(
               str_replace(['/', '\\'], '_', $migrationId)
             );
         }
@@ -314,7 +313,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
 
         static $columnNames = [];
         if (!isset($columnNames[$type][$idField])) {
-            $columnNames[$type][$idField] = sprintf('%s_%s', $type, $this->inflector::tableize($idField));
+            $columnNames[$type][$idField] = sprintf('%s_%s', $type, $this->inflector->tableize($idField));
         }
 
         return $columnNames[$type][$idField];

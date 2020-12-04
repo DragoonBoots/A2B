@@ -3,7 +3,6 @@
 namespace DragoonBoots\A2B\Tests\DataMigration;
 
 use Doctrine\Common\Annotations\Reader;
-use Doctrine\Common\Inflector\Inflector;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDOSqlite;
 use DragoonBoots\A2B\Annotations\DataMigration;
@@ -149,7 +148,6 @@ class DataMigrationMapperTest extends TestCase
 
         // Test with a real inflector and migration manager as their output can
         // cause very real problems in the mapping database.
-        $inflector = new Inflector();
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
@@ -177,7 +175,7 @@ class DataMigrationMapperTest extends TestCase
 
         $this->stubber = $this->createMock(StubberInterface::class);
 
-        $this->mapper = new DataMigrationMapper($this->connection, $inflector, $dataMigrationManager, $this->stubber);
+        $this->mapper = new DataMigrationMapper($this->connection, $dataMigrationManager, $this->stubber);
     }
 
     public function testAddMappingSecondRun()

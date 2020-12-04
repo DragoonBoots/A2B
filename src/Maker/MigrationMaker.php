@@ -5,7 +5,8 @@ namespace DragoonBoots\A2B\Maker;
 
 
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use DragoonBoots\A2B\A2BBundle;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
@@ -53,13 +54,12 @@ class MigrationMaker extends AbstractMaker
      *
      * @param DataMigrationManagerInterface $migrationManager
      * @param DriverManagerInterface        $driverManager
-     * @param Inflector                     $inflector
      */
-    public function __construct(DataMigrationManagerInterface $migrationManager, DriverManagerInterface $driverManager, Inflector $inflector)
+    public function __construct(DataMigrationManagerInterface $migrationManager, DriverManagerInterface $driverManager)
     {
         $this->migrationManager = $migrationManager;
         $this->driverManager = $driverManager;
-        $this->inflector = $inflector;
+        $this->inflector = InflectorFactory::create()->build();
     }
 
     /**
@@ -95,7 +95,7 @@ class MigrationMaker extends AbstractMaker
 
         if (!$input->getOption('class')) {
             $name = $input->getArgument('name');
-            $class = $this->inflector::classify($name);
+            $class = $this->inflector->classify($name);
             $input->setOption('class', $class);
         }
     }

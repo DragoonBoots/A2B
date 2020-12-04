@@ -12,6 +12,7 @@ use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
 use org\bovigo\vfs\vfsStreamWrapper;
 use PHPUnit\Framework\TestCase;
+use RangeException;
 
 class CsvDestinationDriverTest extends TestCase
 {
@@ -19,8 +20,8 @@ class CsvDestinationDriverTest extends TestCase
     /**
      * @param string $destination
      * @param string $path
-     * @param array  $destIds
-     * @param mixed  $currentEntity
+     * @param array $destIds
+     * @param mixed $currentEntity
      *
      * @dataProvider csvDataProvider
      */
@@ -35,12 +36,15 @@ class CsvDestinationDriverTest extends TestCase
     }
 
     /**
-     * @param string                          $destination
+     * @param string $destination
      * @param DestinationDriverInterface|null $driver
-     * @param DataMigration|null              $definition
+     * @param DataMigration|null $definition
      */
-    protected function setupDriver(string $destination, ?DestinationDriverInterface &$driver = null, ?DataMigration &$definition = null): void
-    {
+    protected function setupDriver(
+        string $destination,
+        ?DestinationDriverInterface &$driver = null,
+        ?DataMigration &$definition = null
+    ): void {
         $definition = new DataMigration(
             [
                 'destination' => $destination,
@@ -58,14 +62,14 @@ class CsvDestinationDriverTest extends TestCase
         $this->setupDriver($path, $driver, $definition);
         $driver->configure($definition);
 
-        $this->expectException(\RangeException::class);
+        $this->expectException(RangeException::class);
         $driver->read(['id' => 1]);
     }
 
     /**
      * @param string $destination
      * @param string $path
-     * @param array  $destIdSet
+     * @param array $destIdSet
      * @param        $entities
      *
      * @dataProvider csvMultipleDataProvider
@@ -100,7 +104,7 @@ class CsvDestinationDriverTest extends TestCase
     /**
      * @param string $destination
      * @param string $path
-     * @param array  $existingIds
+     * @param array $existingIds
      *
      * @dataProvider csvIdsDataProvider
      */
@@ -120,14 +124,16 @@ class CsvDestinationDriverTest extends TestCase
         $ret = $this->csvSourceDataProvider();
 
         $ret['new file'] = array_merge(
-            $ret['new file'], [
+            $ret['new file'],
+            [
                 // existingIds
                 [],
             ]
         );
 
         $ret['existing file'] = array_merge(
-            $ret['existing file'], [
+            $ret['existing file'],
+            [
                 // existingIds
                 [
                     ['id' => 1],
@@ -168,7 +174,8 @@ class CsvDestinationDriverTest extends TestCase
         $ret = $this->csvSourceDataProvider();
 
         $ret['new file'] = array_merge(
-            $ret['new file'], [
+            $ret['new file'],
+            [
                 // destIds
                 ['id' => 1],
                 // currentEntity
@@ -177,7 +184,8 @@ class CsvDestinationDriverTest extends TestCase
         );
 
         $ret['existing file, new entity'] = array_merge(
-            $ret['existing file'], [
+            $ret['existing file'],
+            [
                 // destIds
                 ['id' => 3],
                 // currentEntity
@@ -186,7 +194,8 @@ class CsvDestinationDriverTest extends TestCase
         );
 
         $ret['existing file'] = array_merge(
-            $ret['existing file'], [
+            $ret['existing file'],
+            [
                 // destIds
                 ['id' => 1],
                 // currentEntity
@@ -209,7 +218,8 @@ class CsvDestinationDriverTest extends TestCase
         $ret = $this->csvSourceDataProvider();
 
         $ret['new file'] = array_merge(
-            $ret['new file'], [
+            $ret['new file'],
+            [
                 // destIdSet
                 [['id' => 1], ['id' => 2]],
                 // entities
@@ -218,7 +228,8 @@ class CsvDestinationDriverTest extends TestCase
         );
 
         $ret['existing file, new entity'] = array_merge(
-            $ret['existing file'], [
+            $ret['existing file'],
+            [
                 // destIdSet
                 [['id' => 3]],
                 // entities
@@ -227,7 +238,8 @@ class CsvDestinationDriverTest extends TestCase
         );
 
         $ret['existing file'] = array_merge(
-            $ret['existing file'], [
+            $ret['existing file'],
+            [
                 // destIdSet
                 [['id' => 1], ['id' => 2]],
                 // entities
@@ -254,7 +266,7 @@ class CsvDestinationDriverTest extends TestCase
     /**
      * @param string $destination
      * @param string $path
-     * @param array  $newRecord
+     * @param array $newRecord
      * @param string $finalData
      *
      * @dataProvider csvWriteDataProvider

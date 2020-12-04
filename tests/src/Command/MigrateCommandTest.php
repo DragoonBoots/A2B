@@ -319,14 +319,17 @@ class MigrateCommandTest extends TestCase
     }
 
     /**
-     * @param array   $input
+     * @param array $input
      * @param InvokedRecorder $askAboutOrphansCount
      * @param InvokedRecorder $writeOrphansCount
      *
      * @dataProvider orphanOptionDataProvider
      */
-    public function testExecuteWithOrphans(array $input, InvokedRecorder $askAboutOrphansCount, InvokedRecorder $writeOrphansCount)
-    {
+    public function testExecuteWithOrphans(
+        array $input,
+        InvokedRecorder $askAboutOrphansCount,
+        InvokedRecorder $writeOrphansCount
+    ) {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
             ->method('getSourceDriver')

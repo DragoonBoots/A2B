@@ -9,6 +9,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Exception\NonexistentDriverException;
+use ReflectionClass;
+use ReflectionException;
 
 class DriverManager implements DriverManagerInterface
 {
@@ -46,13 +48,13 @@ class DriverManager implements DriverManagerInterface
      *
      * @param SourceDriverInterface $sourceDriver
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @internal
      *
      */
     public function addSourceDriver(SourceDriverInterface $sourceDriver)
     {
-        $reflClass = new \ReflectionClass($sourceDriver);
+        $reflClass = new ReflectionClass($sourceDriver);
         /** @var Driver $definition */
         $definition = $this->annotationReader->getClassAnnotation($reflClass, Driver::class);
         $sourceDriver->setDefinition($definition);
@@ -64,13 +66,13 @@ class DriverManager implements DriverManagerInterface
      *
      * @param DestinationDriverInterface $destinationDriver
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @internal
      *
      */
     public function addDestinationDriver(DestinationDriverInterface $destinationDriver)
     {
-        $reflClass = new \ReflectionClass($destinationDriver);
+        $reflClass = new ReflectionClass($destinationDriver);
         /** @var Driver $definition */
         $definition = $this->annotationReader->getClassAnnotation($reflClass, Driver::class);
         $destinationDriver->setDefinition($definition);

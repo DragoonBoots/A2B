@@ -13,6 +13,7 @@ use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
+use RuntimeException;
 use Symfony\Bundle\MakerBundle\ConsoleStyle;
 use Symfony\Bundle\MakerBundle\DependencyBuilder;
 use Symfony\Bundle\MakerBundle\Generator;
@@ -53,7 +54,7 @@ class MigrationMaker extends AbstractMaker
      * MigrationMaker constructor.
      *
      * @param DataMigrationManagerInterface $migrationManager
-     * @param DriverManagerInterface        $driverManager
+     * @param DriverManagerInterface $driverManager
      */
     public function __construct(DataMigrationManagerInterface $migrationManager, DriverManagerInterface $driverManager)
     {
@@ -75,9 +76,23 @@ class MigrationMaker extends AbstractMaker
      */
     public function configureCommand(Command $command, InputConfiguration $inputConfig)
     {
-        $command->addArgument('name', InputArgument::REQUIRED, 'Human readable name of the migration (e.g. <fg=yellow>Sample Migration</>)');
-        $command->addOption('class', null, InputOption::VALUE_REQUIRED, 'Class name of the migration to create or update (e.g. <fg=yellow>SampleDataMigration</>');
-        $command->addOption('group', null, InputOption::VALUE_REQUIRED, '(Optional) The migration group this migration is part of');
+        $command->addArgument(
+            'name',
+            InputArgument::REQUIRED,
+            'Human readable name of the migration (e.g. <fg=yellow>Sample Migration</>)'
+        );
+        $command->addOption(
+            'class',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Class name of the migration to create or update (e.g. <fg=yellow>SampleDataMigration</>'
+        );
+        $command->addOption(
+            'group',
+            null,
+            InputOption::VALUE_REQUIRED,
+            '(Optional) The migration group this migration is part of'
+        );
     }
 
     /**
@@ -114,8 +129,8 @@ class MigrationMaker extends AbstractMaker
      * Called after normal code generation: allows you to do anything.
      *
      * @param InputInterface $input
-     * @param ConsoleStyle   $io
-     * @param Generator      $generator
+     * @param ConsoleStyle $io
+     * @param Generator $generator
      */
     public function generate(InputInterface $input, ConsoleStyle $io, Generator $generator)
     {
@@ -202,8 +217,8 @@ class MigrationMaker extends AbstractMaker
     }
 
     /**
-     * @param ConsoleStyle                                                  $io
-     * @param string                                                        $driverType
+     * @param ConsoleStyle $io
+     * @param string $driverType
      * @param iterable|SourceDriverInterface[]|DestinationDriverInterface[] $driverList
      *   A list of drivers to use for autocompletion.
      *
@@ -211,7 +226,10 @@ class MigrationMaker extends AbstractMaker
      */
     protected function askForDriver(ConsoleStyle $io, string $driverType, iterable $driverList)
     {
-        $q = new Question(sprintf('Enter %s driver (leave blank to avoid manually specifying the driver)', $driverType), '');
+        $q = new Question(
+            sprintf('Enter %s driver (leave blank to avoid manually specifying the driver)', $driverType),
+            ''
+        );
         $driverNames = [];
         foreach ($driverList as $driver) {
             $driverNames[] = get_class($driver);
@@ -243,7 +261,7 @@ class MigrationMaker extends AbstractMaker
 
     /**
      * @param ConsoleStyle $io
-     * @param string       $idType
+     * @param string $idType
      *
      * @return IdField[]
      */
@@ -260,11 +278,11 @@ class MigrationMaker extends AbstractMaker
                 function ($value) use ($idNames) {
                     if ($value) {
                         if (in_array($value, $idNames)) {
-                            throw new \RuntimeException('That id is already used.');
+                            throw new RuntimeException('That id is already used.');
                         }
                     } else {
                         if (empty($idNames)) {
-                            throw new \RuntimeException('You must define at least one id.');
+                            throw new RuntimeException('You must define at least one id.');
                         }
                     }
 
@@ -283,7 +301,7 @@ class MigrationMaker extends AbstractMaker
             $q->setValidator(
                 function ($value) use ($validIdTypes) {
                     if (!in_array($value, $validIdTypes)) {
-                        throw new \RuntimeException(sprintf('Valid id types are %s.', implode(', ', $validIdTypes)));
+                        throw new RuntimeException(sprintf('Valid id types are %s.', implode(', ', $validIdTypes)));
                     }
 
                     return $value;
@@ -360,7 +378,9 @@ class MigrationMaker extends AbstractMaker
                 function ($value) use ($dependencies) {
                     if ($value) {
                         if (in_array($value, $dependencies)) {
-                            throw new \RuntimeException(sprintf('The migration %s has already been declared a dependency.', $value));
+                            throw new RuntimeException(
+                                sprintf('The migration %s has already been declared a dependency.', $value)
+                            );
                         }
                     }
 

@@ -3,19 +3,20 @@
 
 namespace DragoonBoots\A2B\Exception;
 
+use Exception;
 use Throwable;
 
 /**
  * Thrown when a source/destination URI is not valid.
  */
-final class BadUriException extends \Exception
+final class BadUriException extends Exception
 {
 
     /**
      * BadUriException constructor.
      *
-     * @param string         $uri
-     * @param int            $code
+     * @param string $uri
+     * @param int $code
      * @param Throwable|null $previous
      */
     public function __construct(string $uri = '', int $code = 0, Throwable $previous = null)

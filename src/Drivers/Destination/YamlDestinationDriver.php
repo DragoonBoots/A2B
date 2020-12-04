@@ -14,6 +14,8 @@ use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\YamlDriverTrait;
 use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Factory\FinderFactory;
+use RangeException;
+use SplFileInfo;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser as YamlParser;
 use Symfony\Component\Yaml\Yaml;
@@ -66,8 +68,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * YamlDestinationDriver constructor.
      *
-     * @param YamlParser    $yamlParser
-     * @param YamlDumper    $yamlDumper
+     * @param YamlParser $yamlParser
+     * @param YamlDumper $yamlDumper
      * @param FinderFactory $finderFactory
      */
     public function __construct(YamlParser $yamlParser, YamlDumper $yamlDumper, FinderFactory $finderFactory)
@@ -137,7 +139,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * @param array $destIdSet
      *
-     * @return \SplFileInfo[]
+     * @return SplFileInfo[]
      */
     protected function findEntities(array $destIdSet): array
     {
@@ -149,14 +151,16 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
                 $searchPath = $this->buildFilePathFromIds($destIds, $destDir, $ext);
                 if (file_exists($searchPath)) {
                     $matched++;
-                    $entityFiles[] = new \SplFileInfo($searchPath);
+                    $entityFiles[] = new SplFileInfo($searchPath);
                 }
             }
             if ($matched > 1) {
                 // The filesystem would normally enforce uniqueness here, however,
                 // because both "yaml" and "yml" extensions are allowed, it's
                 // conceivable that a file could exist with both extensions.
-                throw new \RangeException(sprintf("More than one entity matched the ids:\n%s\n", var_export($destIds, true)));
+                throw new RangeException(
+                    sprintf("More than one entity matched the ids:\n%s\n", var_export($destIds, true))
+                );
             }
         }
 
@@ -217,9 +221,9 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * Dump the data into YAML format according to configured options.
      *
-     * @param array      $data
+     * @param array $data
      * @param array|null $useAnchors
-     * @param int        $depth
+     * @param int $depth
      *   The depth of this dump stage, for internal use.
      *
      * @return string
@@ -230,7 +234,13 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($this->options['flags'] as $flag) {
             $flagValue |= $flag;
         }
-        $yaml = $this->yamlDumper->dump($data, $this->options['inline'], $depth * self::INDENT_SPACES, $flagValue, $useAnchors);
+        $yaml = $this->yamlDumper->dump(
+            $data,
+            $this->options['inline'],
+            $depth * self::INDENT_SPACES,
+            $flagValue,
+            $useAnchors
+        );
 
         return $yaml;
     }
@@ -238,11 +248,11 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * Create a list of possible anchors to use.
      *
-     * @param array           $data
-     * @param array|null      $useAnchors
+     * @param array $data
+     * @param array|null $useAnchors
      *   An array, passed by reference, to store a a list of anchors that should
      *   be used.
-     * @param array|null      $anchors
+     * @param array|null $anchors
      *   An array, passed by reference, to store the possible anchors in.
      *   Anchors are named by separating their first path with a "."
      * @param Collection|null $path
@@ -250,8 +260,12 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      * @return array
      *   A map of anchor names and their values.
      */
-    protected function compileAnchors(array $data, ?array &$useAnchors = null, ?array &$anchors = null, ?Collection $path = null)
-    {
+    protected function compileAnchors(
+        array $data,
+        ?array &$useAnchors = null,
+        ?array &$anchors = null,
+        ?Collection $path = null
+    ) {
         if (!isset($anchors)) {
             $anchors = [];
         }
@@ -324,15 +338,15 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *   (multiline) arrays to the inline representation.  Reference generation
      *   is not available with inline arrays.
      * - refs: Automatically generate YAML anchors and references.  *This is a
-     *   slow process!*  See the [docs](https://dragoonboots.gitlab.io/a2b/Drivers/Destination/YamlDestinationDriver.html)
-     *   for further detail.
+     *   slow process!*  See the
+     * [docs](https://dragoonboots.gitlab.io/a2b/Drivers/Destination/YamlDestinationDriver.html) for further detail.
      * - flags: Special flags for the YAML dumper.  See
      *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
      *   for valid flags.  *This will overwrite all flags, including defaults.*
      *   Use setFlag() and unsetFlag() to control flags.
      *
      * @param string $option
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return self
      */

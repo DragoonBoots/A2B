@@ -2,6 +2,8 @@
 
 namespace DragoonBoots\A2B\Command;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Schema\SchemaException;
 use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
@@ -9,6 +11,17 @@ use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
 use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
+use DragoonBoots\A2B\Exception\BadUriException;
+use DragoonBoots\A2B\Exception\NoDestinationException;
+use DragoonBoots\A2B\Exception\NoDriverForSchemeException;
+use DragoonBoots\A2B\Exception\NoIdSetException;
+use DragoonBoots\A2B\Exception\NonexistentDriverException;
+use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+use DragoonBoots\A2B\Exception\UnclearDriverException;
+use MJS\TopSort\CircularDependencyException;
+use MJS\TopSort\ElementNotFoundException;
+use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,12 +37,12 @@ class MigrateCommand extends Command
     /**
      * MigrateCommand constructor.
      *
-     * @param DataMigrationManagerInterface  $dataMigrationManager
-     * @param DriverManagerInterface         $driverManager
+     * @param DataMigrationManagerInterface $dataMigrationManager
+     * @param DriverManagerInterface $driverManager
      * @param DataMigrationExecutorInterface $executor
-     * @param DataMigrationMapperInterface   $mapper
-     * @param AbstractDumper                 $varDumper
-     * @param ClonerInterface                $varCloner
+     * @param DataMigrationMapperInterface $mapper
+     * @param AbstractDumper $varDumper
+     * @param ClonerInterface $varCloner
      */
     const ERROR_NO_PRUNE_PRESERVE = 'You cannot use both "--prune" and "--preserve" together.';
 
@@ -125,7 +138,8 @@ class MigrateCommand extends Command
                 InputOption::VALUE_NONE,
                 'Ignore dependencies migrations require.'
             )->addArgument(
-                'migrations', InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                'migrations',
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
                 'A list of migration classes to run.  Do not specify any migrations to run all migrations.',
                 []
             );
@@ -142,21 +156,21 @@ class MigrateCommand extends Command
 
     /**
      * {@inheritdoc}
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Schema\SchemaException
-     * @throws \DragoonBoots\A2B\Exception\BadUriException
-     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
-     * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
-     * @throws \DragoonBoots\A2B\Exception\NoIdSetException
-     * @throws \DragoonBoots\A2B\Exception\NonexistentDriverException
-     * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
-     * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
-     * @throws \MJS\TopSort\CircularDependencyException
-     * @throws \MJS\TopSort\ElementNotFoundException
-     * @throws \ReflectionException
+     * @throws DBALException
+     * @throws SchemaException
+     * @throws BadUriException
+     * @throws NoDestinationException
+     * @throws NoDriverForSchemeException
+     * @throws NoIdSetException
+     * @throws NonexistentDriverException
+     * @throws NonexistentMigrationException
+     * @throws UnclearDriverException
+     * @throws CircularDependencyException
+     * @throws ElementNotFoundException
+     * @throws ReflectionException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -213,7 +227,7 @@ class MigrateCommand extends Command
      *
      * @return DataMigrationInterface[]
      *
-     * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
+     * @throws NonexistentMigrationException
      */
     protected function getMigrations(array $groups, array $migrationIds)
     {
@@ -241,13 +255,13 @@ class MigrateCommand extends Command
      *
      * @param object $object
      * @param string $propertyName
-     * @param mixed  $value
+     * @param mixed $value
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function injectProperty(object $object, string $propertyName, $value)
     {
-        $refl = new \ReflectionClass($object);
+        $refl = new ReflectionClass($object);
         $property = $refl->getProperty($propertyName);
         $accessible = $property->isPublic();
         $property->setAccessible(true);

@@ -52,7 +52,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
     /**
      * DoctrineDestinationDriver constructor.
      *
-     * @param EntityManagerInterface    $em
+     * @param EntityManagerInterface $em
      * @param PropertyAccessorInterface $propertyAccess
      */
     public function __construct(EntityManagerInterface $em, PropertyAccessorInterface $propertyAccess)

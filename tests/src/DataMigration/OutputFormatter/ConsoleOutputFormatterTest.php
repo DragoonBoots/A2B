@@ -56,8 +56,8 @@ class ConsoleOutputFormatterTest extends TestCase
 
     /**
      * @param ConsoleOutputFormatter $formatter
-     * @param ConsoleSectionOutput   $migrationSection
-     * @param ConsoleSectionOutput   $summarySection
+     * @param ConsoleSectionOutput $migrationSection
+     * @param ConsoleSectionOutput $summarySection
      */
     protected function setupFormatter(&$formatter = null, &$migrationSection = null, &$summarySection = null)
     {
@@ -183,7 +183,7 @@ class ConsoleOutputFormatterTest extends TestCase
      * @dataProvider questionDataProvider
      *
      * @param string $message
-     * @param array  $choices
+     * @param array $choices
      * @param string $default
      *
      * @throws \ReflectionException

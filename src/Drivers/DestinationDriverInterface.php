@@ -48,14 +48,14 @@ interface DestinationDriverInterface
     /**
      * Read multiple entities.
      *
-     * @see read()
-     *
      * @param array $destIdSet
      *   A list of key/value pairs.  An empty array will fetch all entities.
      *
      * @return array
      *   Returns the selected entities that exist.  This means if no entities
      *   were found, an empty array is returned.
+     * @see read()
+     *
      */
     public function readMultiple(array $destIdSet);
 
@@ -92,11 +92,11 @@ interface DestinationDriverInterface
     /**
      * Used by the manager to inject the definition
      *
-     * @internal
-     *
      * @param Driver $definition
      *
      * @return self
+     * @internal
+     *
      */
     public function setDefinition(Driver $definition);
 

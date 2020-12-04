@@ -34,7 +34,7 @@ services:
 
   a2b.mapper.connection:
     class: 'Doctrine\DBAL\Connection'
-    factory: ['@doctrine.dbal.connection_factory', 'createConnection']
+    factory: [ '@doctrine.dbal.connection_factory', 'createConnection' ]
     lazy: true
     arguments:
       - '%a2b.mapper.db%'

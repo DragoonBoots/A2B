@@ -9,6 +9,7 @@ use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractSourceDriver;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
+use League\Csv\Exception as CsvException;
 use League\Csv\Reader as CsvReader;
 
 /**
@@ -32,7 +33,7 @@ class CsvSourceDriver extends AbstractSourceDriver implements SourceDriverInterf
      *
      * @throws BadUriException
      *   Thrown when the given URI is not valid.
-     * @throws \League\Csv\Exception
+     * @throws CsvException
      *   Thrown when the CSV cannot be read.
      */
     public function configure(DataMigration $definition)

@@ -42,7 +42,7 @@ class YamlSourceDriver extends AbstractSourceDriver implements SourceDriverInter
     /**
      * YamlDestinationDriver constructor.
      *
-     * @param YamlParser    $yamlParser
+     * @param YamlParser $yamlParser
      * @param FinderFactory $finderFactory
      */
     public function __construct(YamlParser $yamlParser, FinderFactory $finderFactory)

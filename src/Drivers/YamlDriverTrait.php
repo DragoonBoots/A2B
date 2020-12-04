@@ -44,7 +44,7 @@ trait YamlDriverTrait
      *   3 id fields.
      *
      * @param SplFileInfo $fileInfo
-     * @param array       $ids
+     * @param array $ids
      *
      * @return array
      */
@@ -65,7 +65,7 @@ trait YamlDriverTrait
     /**
      * Build the file path an entity with the given ids will be stored at.
      *
-     * @param array  $ids
+     * @param array $ids
      * @param string $path
      * @param string $ext
      *   File extension to use.  Defaults to "yaml".

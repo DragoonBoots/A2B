@@ -10,6 +10,8 @@ use DragoonBoots\A2B\Drivers\DriverManager;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NonexistentDriverException;
+use Exception;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class DriverManagerTest extends TestCase
@@ -31,28 +33,37 @@ class DriverManagerTest extends TestCase
      *
      * All parameters will be filled.
      *
-     * @param DriverManagerInterface|null                           $driverManager
+     * @param DriverManagerInterface|null $driverManager
      * @param SourceDriverInterface|DestinationDriverInterface|null $driverStub
-     * @param string|null                                           $driverId
-     * @param Driver|null                                           $definition
+     * @param string|null $driverId
+     * @param Driver|null $definition
      */
-    protected function setupSourceDriver(&$driverManager = null, &$driverStub = null, &$driverId = null, &$definition = null): void
-    {
+    protected function setupSourceDriver(
+        &$driverManager = null,
+        &$driverStub = null,
+        &$driverId = null,
+        &$definition = null
+    ): void {
         $this->setupDriver(SourceDriverInterface::class, $driverManager, $driverStub, $driverId, $definition);
     }
 
     /**
-     * @param string                                                $driverInterface
+     * @param string $driverInterface
      *   Either SourceDriverInterface::class or DestinationDriverInterface::class.
-     * @param DriverManagerInterface|null                           $driverManager
+     * @param DriverManagerInterface|null $driverManager
      * @param SourceDriverInterface|DestinationDriverInterface|null $driverStub
-     * @param string|null                                           $driverId
-     * @param Driver|null                                           $definition
+     * @param string|null $driverId
+     * @param Driver|null $definition
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function setupDriver(string $driverInterface, &$driverManager = null, &$driverStub = null, &$driverId = null, &$definition = null): void
-    {
+    protected function setupDriver(
+        string $driverInterface,
+        &$driverManager = null,
+        &$driverStub = null,
+        &$driverId = null,
+        &$definition = null
+    ): void {
 
         $definition = new Driver();
         $driverManager = new DriverManager($this->getAnnotationReader($definition));
@@ -66,7 +77,7 @@ class DriverManagerTest extends TestCase
                 $addCallable = [$driverManager, 'addDestinationDriver'];
                 break;
             default:
-                throw new \Exception('Wrong driver interface used.');
+                throw new Exception('Wrong driver interface used.');
         }
         $driverStub = $this->getMockBuilder($driverInterface)
             ->setMockClassName($driverId)
@@ -86,7 +97,7 @@ class DriverManagerTest extends TestCase
      *   The driver annotation the reader will return.  If one is not passed, a
      *   default will be used.
      *
-     * @return \PHPUnit\Framework\MockObject\MockObject|Reader
+     * @return MockObject|Reader
      */
     protected function getAnnotationReader(?Driver $definition = null)
     {
@@ -145,8 +156,12 @@ class DriverManagerTest extends TestCase
      * @param $driverId
      * @param $definition
      */
-    protected function setupDestinationDriver(&$driverManager = null, &$driverStub = null, &$driverId = null, &$definition = null): void
-    {
+    protected function setupDestinationDriver(
+        &$driverManager = null,
+        &$driverStub = null,
+        &$driverId = null,
+        &$definition = null
+    ): void {
         $this->setupDriver(DestinationDriverInterface::class, $driverManager, $driverStub, $driverId, $definition);
     }
 

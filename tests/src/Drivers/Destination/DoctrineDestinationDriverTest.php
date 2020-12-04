@@ -2,8 +2,8 @@
 
 namespace DragoonBoots\A2B\Tests\Drivers\Destination;
 
-use Doctrine\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Destination\DoctrineDestinationDriver;
@@ -114,7 +114,7 @@ class DoctrineDestinationDriverTest extends TestCase
     }
 
     /**
-     * @param int         $id
+     * @param int $id
      * @param null|object $expected
      *
      * @dataProvider readDataProvider

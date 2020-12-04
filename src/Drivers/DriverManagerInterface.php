@@ -3,10 +3,7 @@
 namespace DragoonBoots\A2B\Drivers;
 
 use Doctrine\Common\Collections\Collection;
-use DragoonBoots\A2B\Annotations\Driver;
-use DragoonBoots\A2B\Exception\NoDriverForSchemeException;
 use DragoonBoots\A2B\Exception\NonexistentDriverException;
-use DragoonBoots\A2B\Exception\UnclearDriverException;
 
 
 /**

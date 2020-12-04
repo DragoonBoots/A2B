@@ -5,6 +5,7 @@ namespace DragoonBoots\A2B\Drivers\Destination\Yaml;
 
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Exception;
 use Symfony\Component\Yaml\Dumper;
 
 class YamlDumper extends Dumper
@@ -19,7 +20,7 @@ class YamlDumper extends Dumper
     {
         if (!is_null($refs)) {
             $refKey = 'REF__'.bin2hex(random_bytes(16));
-            list($replacements, $placeholderMap) = $this->createReferencePlaceholders($input, $refs, $refKey);
+            [$replacements, $placeholderMap] = $this->createReferencePlaceholders($input, $refs, $refKey);
 
             $yaml = parent::dump($input, $inline, $indent, $flags);
 
@@ -45,7 +46,9 @@ class YamlDumper extends Dumper
                         $yamlValue = rtrim(parent::dump($value, $inline, $replacementIndent, $flags));
                         $replacement = '&'.$anchor."\n".$yamlValue;
                     } else {
-                        $yamlValue = trim(parent::dump([$value], $inline, $replacementIndent - $this->indentation, $flags));
+                        $yamlValue = trim(
+                            parent::dump([$value], $inline, $replacementIndent - $this->indentation, $flags)
+                        );
                         $yamlValue = preg_replace('`^\s*- `', '', $yamlValue);
                         $replacement = '&'.$anchor.' '.$yamlValue;
                     }
@@ -65,9 +68,9 @@ class YamlDumper extends Dumper
     /**
      * Create a map of placeholders to use to insert references.
      *
-     * @param array      $input
-     * @param array      $refs
-     * @param string     $refKey
+     * @param array $input
+     * @param array $refs
+     * @param string $refKey
      * @param array|null $path
      * @param array|null $placeholderMap
      *   Maps keys to their placeholders so the anchor/alias can be inserted
@@ -76,10 +79,16 @@ class YamlDumper extends Dumper
      *   Maps placeholders with their actual values.
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function createReferencePlaceholders(array &$input, array $refs, string $refKey, ?array $path = null, ?array &$placeholderMap = null, ?array &$replacements = null)
-    {
+    protected function createReferencePlaceholders(
+        array &$input,
+        array $refs,
+        string $refKey,
+        ?array $path = null,
+        ?array &$placeholderMap = null,
+        ?array &$replacements = null
+    ) {
         if (!isset($path)) {
             $path = [];
         }
@@ -114,7 +123,12 @@ class YamlDumper extends Dumper
                     // This is an array with an entry in the replacements table,
                     // check that table for sub-entries that need placeholders.
                     foreach ($replacements[$placeholderMap[$itemPathKey]] as $replacementKey => &$replacementValue) {
-                        $replacementValue = $this->replaceItemWithPlaceholder($replacementValue, $itemPathKey.'.'.$replacementKey, $refs, $placeholderMap);
+                        $replacementValue = $this->replaceItemWithPlaceholder(
+                            $replacementValue,
+                            $itemPathKey.'.'.$replacementKey,
+                            $refs,
+                            $placeholderMap
+                        );
                     }
                 }
             }
@@ -131,8 +145,8 @@ class YamlDumper extends Dumper
 
     /**
      * @param            $item
-     * @param string     $itemPathKey
-     * @param array      $anchors
+     * @param string $itemPathKey
+     * @param array $anchors
      * @param array|null $placeholderMap
      *
      * @return mixed|string
@@ -192,8 +206,11 @@ class YamlDumper extends Dumper
                     [
                         '__ANCHOR',
                         '__ALIAS',
-                    ], '', $item
-                ), $placeholderMap
+                    ],
+                    '',
+                    $item
+                ),
+                $placeholderMap
             );
             if ($anchorPath !== false) {
                 $item = $anchors[$anchorPath];

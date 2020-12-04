@@ -33,7 +33,7 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     /**
      * DebugDestinationDriver constructor.
      *
-     * @param AbstractDumper  $dumper
+     * @param AbstractDumper $dumper
      * @param ClonerInterface $cloner
      */
     public function __construct(AbstractDumper $dumper, ClonerInterface $cloner)

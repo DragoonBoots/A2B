@@ -2,10 +2,13 @@
 
 namespace DragoonBoots\A2B\Tests\Drivers\Destination;
 
+use ArrayIterator;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver;
+use DragoonBoots\A2B\Exception\BadUriException;
+use DragoonBoots\A2B\Exception\NoDestinationException;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use DragoonBoots\A2B\Tests\Drivers\FinderTestTrait;
 use org\bovigo\vfs\vfsStream;
@@ -14,6 +17,8 @@ use org\bovigo\vfs\vfsStreamFile;
 use org\bovigo\vfs\vfsStreamWrapper;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RangeException;
+use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Parser as YamlParser;
@@ -58,7 +63,7 @@ class YamlDestinationDriverTest extends TestCase
         );
 
         $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
-        $refl = new \ReflectionClass($driver);
+        $refl = new ReflectionClass($driver);
         $driver->configure($definition);
 
         $this->assertDirectoryIsWritable($path);
@@ -100,11 +105,15 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $fileInfo = new SplFileInfo(vfsStream::url('data/existing_dir/test/existing_file.yaml'), 'test', 'test/existing_file.yaml');
+        $fileInfo = new SplFileInfo(
+            vfsStream::url('data/existing_dir/test/existing_file.yaml'),
+            'test',
+            'test/existing_file.yaml'
+        );
         $this->finder->method('count')
             ->willReturn(1);
         $this->finder->method('getIterator')
-            ->willReturn(new \ArrayIterator([$fileInfo]));
+            ->willReturn(new ArrayIterator([$fileInfo]));
 
         $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
@@ -153,7 +162,7 @@ class YamlDestinationDriverTest extends TestCase
 
         $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
-        $this->expectException(\RangeException::class);
+        $this->expectException(RangeException::class);
         $driver->read($destIds);
     }
 
@@ -203,13 +212,17 @@ class YamlDestinationDriverTest extends TestCase
         );
 
         $fileInfo = [
-            new SplFileInfo(vfsStream::url('data/existing_dir/test/existing_file.yaml'), 'test', 'test/existing_file.yaml'),
+            new SplFileInfo(
+                vfsStream::url('data/existing_dir/test/existing_file.yaml'),
+                'test',
+                'test/existing_file.yaml'
+            ),
             new SplFileInfo(vfsStream::url('data/existing_dir/test/other_file.yaml'), 'test', 'text/other_file.yaml'),
         ];
         $this->finder->method('count')
             ->willReturn(1);
         $this->finder->method('getIterator')
-            ->willReturn(new \ArrayIterator($fileInfo));
+            ->willReturn(new ArrayIterator($fileInfo));
 
         $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
@@ -231,11 +244,15 @@ class YamlDestinationDriverTest extends TestCase
             ]
         );
 
-        $fileInfo = new SplFileInfo(vfsStream::url('data/existing_dir/test/existing_file.yaml'), 'test', 'test/existing_file.yaml');
+        $fileInfo = new SplFileInfo(
+            vfsStream::url('data/existing_dir/test/existing_file.yaml'),
+            'test',
+            'test/existing_file.yaml'
+        );
         $this->finder->method('count')
             ->willReturn(1);
         $this->finder->method('getIterator')
-            ->willReturn(new \ArrayIterator([$fileInfo]));
+            ->willReturn(new ArrayIterator([$fileInfo]));
 
         $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
         $driver->configure($definition);
@@ -244,11 +261,11 @@ class YamlDestinationDriverTest extends TestCase
     }
 
     /**
-     * @param bool   $useRefs
+     * @param bool $useRefs
      * @param string $expected
      *
-     * @throws \DragoonBoots\A2B\Exception\BadUriException
-     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
+     * @throws BadUriException
+     * @throws NoDestinationException
      *
      * @dataProvider writeDataProvider
      */

@@ -82,7 +82,7 @@ class DebugDestinationDriverTest extends TestCase
     }
 
     /**
-     * @param string   $destination
+     * @param string $destination
      *
      * @param resource $stream
      *
@@ -98,13 +98,17 @@ class DebugDestinationDriverTest extends TestCase
     }
 
     /**
-     * @param string                          $destination
-     * @param resource                        $stream
+     * @param string $destination
+     * @param resource $stream
      * @param DestinationDriverInterface|null $driver
-     * @param DataMigration|null              $definition
+     * @param DataMigration|null $definition
      */
-    protected function setupDriver(string $destination, $stream, ?DestinationDriverInterface &$driver = null, ?DataMigration &$definition = null): void
-    {
+    protected function setupDriver(
+        string $destination,
+        $stream,
+        ?DestinationDriverInterface &$driver = null,
+        ?DataMigration &$definition = null
+    ): void {
         $dumper = $this->createMock(AbstractDumper::class);
         $dumper->expects($stream ? $this->once() : $this->never())
             ->method('setOutput')

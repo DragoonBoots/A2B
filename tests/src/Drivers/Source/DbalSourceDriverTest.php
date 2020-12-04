@@ -32,12 +32,15 @@ class DbalSourceDriverTest extends TestCase
     }
 
     /**
-     * @param DataMigration|null    $definition
-     * @param Connection|null       $connection
+     * @param DataMigration|null $definition
+     * @param Connection|null $connection
      * @param DbalSourceDriver|null $driver
      */
-    protected function setupDriver(?DataMigration &$definition = null, ?Connection &$connection = null, ?DbalSourceDriver &$driver = null): void
-    {
+    protected function setupDriver(
+        ?DataMigration &$definition = null,
+        ?Connection &$connection = null,
+        ?DbalSourceDriver &$driver = null
+    ): void {
         if (!isset($definition)) {
             $definition = new DataMigration(
                 [
@@ -185,7 +188,7 @@ class DbalSourceDriverTest extends TestCase
             ],
         ];
 
-        $connection = new \Doctrine\DBAL\Connection(
+        $connection = new Connection(
             ['path' => self::SOURCE_PATH],
             new PdoSqlite\Driver()
         );

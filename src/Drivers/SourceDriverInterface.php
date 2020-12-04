@@ -3,9 +3,11 @@
 
 namespace DragoonBoots\A2B\Drivers;
 
+use Countable;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Exception\BadUriException;
+use IteratorAggregate;
 
 /**
  * Source driver interface
@@ -13,7 +15,7 @@ use DragoonBoots\A2B\Exception\BadUriException;
  * Source drivers should implement this interface and be annotated with
  * DragoonBoots\A2B\Annotations\Driver.
  */
-interface SourceDriverInterface extends \IteratorAggregate, \Countable
+interface SourceDriverInterface extends IteratorAggregate, Countable
 {
 
     /**
@@ -46,11 +48,11 @@ interface SourceDriverInterface extends \IteratorAggregate, \Countable
     /**
      * Used by the manager to inject the definition
      *
-     * @internal
-     *
      * @param Driver $definition
      *
      * @return self
+     * @internal
+     *
      */
     public function setDefinition(Driver $definition);
 

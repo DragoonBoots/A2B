@@ -2,6 +2,8 @@
 test:
   stage: test
   image: php:7.3-alpine
+  variables:
+    XDEBUG_MODE: coverage
   cache:
     paths:
       - vendor/

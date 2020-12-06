@@ -27,7 +27,7 @@ pages:
   allow_failure: true
   image: sphinxdoc/sphinx
   script:
-    - sphinx-build -b html doc public
+    - sphinx-build -n -W --keep-going -b html doc public
   artifacts:
     paths:
       - public

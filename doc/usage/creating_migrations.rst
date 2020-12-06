@@ -10,6 +10,16 @@ All data migrations have some basic things in common:
 *  They must be annotated with
    ``DragoonBoots\A2B\Annotations\DataMigration``
 
+Maker
+-----
+
+If you have the `Symfony MakerBundle <https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html>`_
+installed, you may generate a basic data migration skeleton:
+
+.. code-block:: none
+
+   php bin/console make:a2b:migration <Migration Name>
+
 Definition
 ----------
 

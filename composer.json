@@ -54,7 +54,7 @@
   },
   "scripts": {
     "build-doc": [
-        "sphinx-build -b html doc doc/_build"
+        "sphinx-build -n -W --keep-going -b html doc doc/_build"
     ]
   }
 }

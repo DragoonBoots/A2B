@@ -4,7 +4,6 @@
 namespace DragoonBoots\A2B\Maker;
 
 
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use DragoonBoots\A2B\A2BBundle;
@@ -23,6 +22,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 
 /**
@@ -33,7 +33,7 @@ class MigrationMaker extends AbstractMaker
 
     protected const TEMPLATE = __DIR__.'/../../Resources/skeleton/migration.tpl.php';
 
-    protected const COMPOSER_PACKAGE = 'dragoonboots/a2b:dev-master';
+    protected const COMPOSER_PACKAGE = 'dragoonboots/a2b';
 
     /**
      * @var DataMigrationManagerInterface
@@ -181,30 +181,8 @@ class MigrationMaker extends AbstractMaker
     protected function askForUri(ConsoleStyle $io, string $uriType): string
     {
         $q = new Question(sprintf('Enter %s URI', $uriType));
-        $schemes = $this->getValidUriSchemes($this->driverManager->getSourceDrivers());
-        $q->setAutocompleterValues($schemes);
 
         return $io->askQuestion($q);
-    }
-
-    /**
-     * Get all valid URI schemes provided by the given set of drivers.
-     *
-     * @param Collection|SourceDriverInterface[]|DestinationDriverInterface[] $driverList
-     *
-     * @return array
-     */
-    protected function getValidUriSchemes(Collection $driverList): array
-    {
-        $schemes = [];
-        foreach ($driverList as $driver) {
-            $definition = $driver->getDefinition();
-            foreach ($definition->getSchemes() as $scheme) {
-                $schemes[$scheme] = $scheme;
-            }
-        }
-
-        return array_values($schemes);
     }
 
     /**
@@ -227,27 +205,19 @@ class MigrationMaker extends AbstractMaker
      */
     protected function askForDriver(ConsoleStyle $io, string $driverType, iterable $driverList): string
     {
-        $q = new Question(
-            sprintf('Enter %s driver (leave blank to avoid manually specifying the driver)', $driverType),
-            ''
-        );
         $driverNames = [];
         foreach ($driverList as $driver) {
             $driverNames[] = get_class($driver);
         }
-        $q->setAutocompleterValues($driverNames);
-        $q->setNormalizer(
-            function ($value) {
-                $value = trim($value);
-                if ($value) {
-                    $value = ltrim($value, '\\');
-                }
-
-                return $value;
-            }
+        $q = new ChoiceQuestion(
+            sprintf('Select %s driver', $driverType),
+            $driverNames
         );
+        do {
+            $driverName = $io->askQuestion($q);
+        } while ($driverName === null);
 
-        return $io->askQuestion($q);
+        return $driverName;
     }
 
     /**

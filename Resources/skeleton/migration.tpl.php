@@ -149,8 +149,6 @@ function format_annotation(string $annotation, $value, bool $root = false): stri
  */
 function format_id_fields(array $idFields): array
 {
-    global $noStringWrap;
-
     $idStrings = [];
     foreach ($idFields as $idField) {
         $idFieldValues['name'] = $idField->getName();
@@ -206,7 +204,7 @@ echo format_annotation('DataMigration', $fields, true);
 // @formatter:off
 ?>
  */
-class <?= $class_name ?> extends AbstractDataMigration implements DataMigrationInterface
+class <?= $class_name ?> extends AbstractDataMigration
 {
 
     /**

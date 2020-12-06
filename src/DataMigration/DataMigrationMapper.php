@@ -5,11 +5,11 @@ namespace DragoonBoots\A2B\DataMigration;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\TableNotFoundException;
-use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use DragoonBoots\A2B\Annotations\DataMigration;
@@ -69,9 +69,9 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * DataMigrationMapper constructor.
      *
-     * @param Connection                    $connection
+     * @param Connection $connection
      * @param DataMigrationManagerInterface $dataMigrationManager
-     * @param StubberInterface              $stubber
+     * @param StubberInterface $stubber
      */
     public function __construct(
         Connection $connection,
@@ -87,9 +87,12 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function addMapping(string $migrationId, array $sourceIds, array $destIds, int $status = self::STATUS_MIGRATED
-    )
-    {
+    public function addMapping(
+        string $migrationId,
+        array $sourceIds,
+        array $destIds,
+        int $status = self::STATUS_MIGRATED
+    ) {
         $migrationDefinition = $this->dataMigrationManager->getMigration($migrationId)
             ->getDefinition();
         $tableName = $this->getMappingTableName($migrationId);
@@ -170,7 +173,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         static $tableNames = [];
         if (!isset($tableNames[$migrationId])) {
             $tableNames[$migrationId] = $this->inflector->tableize(
-              str_replace(['/', '\\'], '_', $migrationId)
+                str_replace(['/', '\\'], '_', $migrationId)
             );
         }
 
@@ -178,7 +181,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     }
 
     /**
-     * @param string        $migrationId
+     * @param string $migrationId
      * @param DataMigration $migrationDefinition
      *
      * @throws SchemaException
@@ -198,9 +201,9 @@ class DataMigrationMapper implements DataMigrationMapperInterface
                 // Create the table.
                 $table = $toSchema->createTable($tableName);
                 $table->addOption('comment', sprintf('Data migration map for "%s"', $migrationId));
-                $table->addColumn('updated', Type::DATETIMETZ_IMMUTABLE);
+                $table->addColumn('updated', Types::DATETIMETZ_IMMUTABLE);
                 $table->addIndex(['updated'], sprintf('ix_%s_updated', $tableName));
-                $table->addColumn('status', Type::SMALLINT);
+                $table->addColumn('status', Types::SMALLINT);
                 $createPrimaryKey = true;
             } else {
                 throw $e;
@@ -249,18 +252,18 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         // Apply schema
         $sql = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
         foreach ($sql as $q) {
-            $this->connection->exec($q);
+            $this->connection->executeStatement($q);
         }
     }
 
     /**
      * Add a column to the mapping table.
      *
-     * @param Table   $table
+     * @param Table $table
      *   The table to add the column to, passed by reference.
      * @param IdField $idField
      *   The id field containing the column info.
-     * @param string  $type
+     * @param string $type
      *   One of 'source' or 'dest'.
      *
      * @throws SchemaException
@@ -268,15 +271,15 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     protected function conformMappingColumn(Table &$table, IdField $idField, string $type)
     {
         $comment = sprintf(
-          '%s field "%s"',
-          ucfirst($type),
+            '%s field "%s"',
+            ucfirst($type),
             $idField->getName()
         );
         $columnName = $this->getMappingColumnName($idField, $type);
         if ($idField->getType() == 'int') {
-            $colType = Type::INTEGER;
+            $colType = Types::INTEGER;
         } else {
-            $colType = Type::STRING;
+            $colType = Types::STRING;
         }
         try {
             $column = $table->getColumn($columnName);
@@ -284,8 +287,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
             // Create the column.
             if ($e->getCode() == SchemaException::COLUMN_DOESNT_EXIST) {
                 $column = $table->addColumn(
-                  $columnName,
-                  $colType
+                    $columnName,
+                    $colType
                 );
             } else {
                 throw $e;
@@ -299,7 +302,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * @param IdField|string $idField
      *   The id field containing the column info.
-     * @param string         $type
+     * @param string $type
      *   One of 'source' or 'dest'.
      *
      * @return string
@@ -320,11 +323,11 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     }
 
     /**
-     * @param Table     $table
+     * @param Table $table
      *   The table to add the column to, passed by reference.
      * @param IdField[] $idFields
      *   A list of id fields that should be part of this index.
-     * @param string    $type
+     * @param string $type
      *   One of 'source' or 'dest'.
      *
      * @throws SchemaException
@@ -355,8 +358,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
 
     /**
      * @param string $migrationId
-     * @param array  $sourceIds
-     * @param array  $destIds
+     * @param array $sourceIds
+     * @param array $destIds
      *
      * @return bool
      */
@@ -374,7 +377,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
             $columnName = $this->getMappingColumnName($destId, self::MAPPING_DEST);
             $q->andWhere($this->createKeyComparisonSql($q, $columnName, $value));
         }
-        $count = (int)($q->execute()->fetch(FetchMode::COLUMN));
+        $count = (int)($q->execute()->fetchOne());
 
         return $count > 0;
     }
@@ -383,8 +386,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      * Create a SQL comparison string that handles NULL values properly.
      *
      * @param QueryBuilder $q
-     * @param string       $column
-     * @param mixed|null   $value
+     * @param string $column
+     * @param mixed|null $value
      *
      * @return string
      */
@@ -399,7 +402,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
 
     /**
      * @param string $migrationId
-     * @param array  $sourceIds
+     * @param array $sourceIds
      *
      * @return array
      *
@@ -416,11 +419,11 @@ class DataMigrationMapper implements DataMigrationMapperInterface
 
     /**
      * @param           $migrationId
-     * @param array     $sourceIds
+     * @param array $sourceIds
      *   The querying ids, as a list of key/value items.
      * @param IdField[] $destIdFields
      *   The resulting id fields.
-     * @param string    $type
+     * @param string $type
      *   One of MAPPING_SOURCE or MAPPING_DEST.
      *
      * @return array
@@ -444,11 +447,11 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         foreach ($sourceIds as $sourceId => $value) {
             $columnName = $this->getMappingColumnName($sourceId, $this->flipMappingType($type));
             $q->andWhere(
-              sprintf(
-                '"%s" = %s',
-                $columnName,
-                $q->createNamedParameter($value)
-              )
+                sprintf(
+                    '"%s" = %s',
+                    $columnName,
+                    $q->createNamedParameter($value)
+                )
             );
         }
 
@@ -489,7 +492,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
 
     /**
      * @param string $migrationId
-     * @param array  $destIds
+     * @param array $destIds
      *
      * @return array
      *

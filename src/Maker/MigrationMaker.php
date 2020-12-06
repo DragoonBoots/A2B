@@ -167,17 +167,18 @@ class MigrationMaker extends AbstractMaker
      *
      * @return string
      */
-    protected function askForSource(ConsoleStyle $io)
+    protected function askForSource(ConsoleStyle $io): string
     {
         return $this->askForUri($io, 'source');
     }
 
     /**
      * @param ConsoleStyle $io
+     * @param string $uriType The user-presentable URI type
      *
      * @return string
      */
-    protected function askForUri(ConsoleStyle $io, string $uriType)
+    protected function askForUri(ConsoleStyle $io, string $uriType): string
     {
         $q = new Question(sprintf('Enter %s URI', $uriType));
         $schemes = $this->getValidUriSchemes($this->driverManager->getSourceDrivers());
@@ -193,7 +194,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return array
      */
-    protected function getValidUriSchemes(Collection $driverList)
+    protected function getValidUriSchemes(Collection $driverList): array
     {
         $schemes = [];
         foreach ($driverList as $driver) {
@@ -211,7 +212,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return string
      */
-    protected function askForSourceDriver(ConsoleStyle $io)
+    protected function askForSourceDriver(ConsoleStyle $io): string
     {
         return $this->askForDriver($io, 'source', $this->driverManager->getSourceDrivers());
     }
@@ -224,7 +225,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return string
      */
-    protected function askForDriver(ConsoleStyle $io, string $driverType, iterable $driverList)
+    protected function askForDriver(ConsoleStyle $io, string $driverType, iterable $driverList): string
     {
         $q = new Question(
             sprintf('Enter %s driver (leave blank to avoid manually specifying the driver)', $driverType),
@@ -254,7 +255,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return IdField[]
      */
-    protected function askForSourceIds(ConsoleStyle $io)
+    protected function askForSourceIds(ConsoleStyle $io): array
     {
         return $this->askForIds($io, 'source');
     }
@@ -265,7 +266,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return IdField[]
      */
-    protected function askForIds(ConsoleStyle $io, string $idType)
+    protected function askForIds(ConsoleStyle $io, string $idType): array
     {
         $ids = [];
         $idNames = [];
@@ -321,7 +322,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return string
      */
-    protected function askForDestination(ConsoleStyle $io)
+    protected function askForDestination(ConsoleStyle $io): string
     {
         return $this->askForUri($io, 'destination');
     }
@@ -331,7 +332,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return string
      */
-    protected function askForDestinationDriver(ConsoleStyle $io)
+    protected function askForDestinationDriver(ConsoleStyle $io): string
     {
         return $this->askForDriver($io, 'destination', $this->driverManager->getDestinationDrivers());
     }
@@ -341,7 +342,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return IdField[]
      */
-    protected function askForDestinationIds(ConsoleStyle $io)
+    protected function askForDestinationIds(ConsoleStyle $io): array
     {
         return $this->askForIds($io, 'destination');
     }
@@ -351,7 +352,7 @@ class MigrationMaker extends AbstractMaker
      *
      * @return string[]
      */
-    protected function askForDependencies(ConsoleStyle $io)
+    protected function askForDependencies(ConsoleStyle $io): array
     {
         $dependencyNames = [];
         foreach ($this->migrationManager->getMigrations() as $migration) {

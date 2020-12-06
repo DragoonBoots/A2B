@@ -2,7 +2,7 @@
 
 namespace DragoonBoots\A2B\Command;
 
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Schema\SchemaException;
 use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
@@ -13,11 +13,9 @@ use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Exception\NoDestinationException;
-use DragoonBoots\A2B\Exception\NoDriverForSchemeException;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 use DragoonBoots\A2B\Exception\NonexistentDriverException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
-use DragoonBoots\A2B\Exception\UnclearDriverException;
 use MJS\TopSort\CircularDependencyException;
 use MJS\TopSort\ElementNotFoundException;
 use ReflectionClass;
@@ -163,16 +161,14 @@ class MigrateCommand extends Command
      * @throws SchemaException
      * @throws BadUriException
      * @throws NoDestinationException
-     * @throws NoDriverForSchemeException
      * @throws NoIdSetException
      * @throws NonexistentDriverException
      * @throws NonexistentMigrationException
-     * @throws UnclearDriverException
      * @throws CircularDependencyException
      * @throws ElementNotFoundException
      * @throws ReflectionException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Validate options
         if ($input->getOption('prune') && $input->getOption('preserve')) {
@@ -229,7 +225,7 @@ class MigrateCommand extends Command
      *
      * @throws NonexistentMigrationException
      */
-    protected function getMigrations(array $groups, array $migrationIds)
+    protected function getMigrations(array $groups, array $migrationIds): array
     {
         $migrations = [];
         if (empty($migrationIds)) {

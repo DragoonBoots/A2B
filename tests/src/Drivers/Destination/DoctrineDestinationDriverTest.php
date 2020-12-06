@@ -132,7 +132,7 @@ class DoctrineDestinationDriverTest extends TestCase
         $this->assertEquals($expected, $this->driver->read(['id' => $id]));
     }
 
-    public function readDataProvider()
+    public function readDataProvider(): array
     {
         return [
             'exists' => [1, (new TestEntity())->setId(1)],

@@ -12,7 +12,6 @@ use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\YamlDriverTrait;
-use DragoonBoots\A2B\Exception\BadUriException;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use RangeException;
 use SplFileInfo;
@@ -86,9 +85,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * @param DataMigration $definition
      *   The migration definition.
-     *
-     * @throws BadUriException
-     *   Thrown when the given URI is not valid.
      */
     public function configure(DataMigration $definition)
     {
@@ -122,7 +118,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * {@inheritdoc}
      */
-    public function read(array $destIds)
+    public function read(array $destIds): ?array
     {
         $entityFiles = $this->findEntities([$destIds]);
         if (empty($entityFiles)) {
@@ -170,7 +166,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * {@inheritdoc}
      */
-    public function readMultiple(array $destIdSet)
+    public function readMultiple(array $destIdSet): array
     {
         $entityFiles = $this->findEntities($destIdSet);
 
@@ -188,7 +184,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     /**
      * {@inheritdoc}
      */
-    public function write($data)
+    public function write($data): ?array
     {
         $destIds = [];
         foreach ($this->ids as $idField) {
@@ -234,15 +230,14 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         foreach ($this->options['flags'] as $flag) {
             $flagValue |= $flag;
         }
-        $yaml = $this->yamlDumper->dump(
+
+        return $this->yamlDumper->dump(
             $data,
             $this->options['inline'],
             $depth * self::INDENT_SPACES,
             $flagValue,
             $useAnchors
         );
-
-        return $yaml;
     }
 
     /**
@@ -265,7 +260,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
         ?array &$useAnchors = null,
         ?array &$anchors = null,
         ?Collection $path = null
-    ) {
+    ): ?array {
         if (!isset($anchors)) {
             $anchors = [];
         }
@@ -350,7 +345,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * @return self
      */
-    public function setOption(string $option, $value)
+    public function setOption(string $option, $value): YamlDestinationDriver
     {
         $this->options[$option] = $value;
 
@@ -368,7 +363,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * @return self
      */
-    public function setFlag($flag)
+    public function setFlag($flag): YamlDestinationDriver
     {
         if (!in_array($flag, $this->options['flags'])) {
             $this->options['flags'][] = $flag;
@@ -388,7 +383,7 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      *
      * @return $this
      */
-    public function unsetFlag($flag)
+    public function unsetFlag($flag): YamlDestinationDriver
     {
         $key = array_search($flag, $this->options['flags']);
         if ($key !== false) {

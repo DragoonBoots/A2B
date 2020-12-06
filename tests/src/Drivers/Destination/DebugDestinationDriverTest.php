@@ -67,7 +67,7 @@ class DebugDestinationDriverTest extends TestCase
         $this->assertDumpEquals($data, $data);
     }
 
-    public function pathDataProvider()
+    public function pathDataProvider(): array
     {
         return [
             'stdout' => [

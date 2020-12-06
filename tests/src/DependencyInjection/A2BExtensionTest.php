@@ -6,7 +6,6 @@ use DragoonBoots\A2B\DataMigration\DataMigrationExecutorInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationManagerInterface;
 use DragoonBoots\A2B\DataMigration\DataMigrationMapperInterface;
 use DragoonBoots\A2B\DataMigration\MigrationReferenceStoreInterface;
-use DragoonBoots\A2B\DataMigration\StubberInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Tests\A2BKernelTestCase;
 use ProxyManager\Proxy\LazyLoadingInterface;
@@ -17,7 +16,7 @@ class A2BExtensionTest extends A2BKernelTestCase
     /**
      * @param string $serviceId
      * @param string $serviceClass
-     * @param bool   $isLazy
+     * @param bool $isLazy
      *
      * @dataProvider servicesDataProvider
      */
@@ -30,7 +29,7 @@ class A2BExtensionTest extends A2BKernelTestCase
         }
     }
 
-    public function servicesDataProvider()
+    public function servicesDataProvider(): array
     {
         // service id => service class/type hint
         $services = [

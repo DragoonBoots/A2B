@@ -2,9 +2,11 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
+use Doctrine\DBAL\Schema\SchemaException;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\OutputFormatterInterface;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
+use DragoonBoots\A2B\Exception\NoDestinationException;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 
 interface DataMigrationExecutorInterface
@@ -48,9 +50,8 @@ interface DataMigrationExecutorInterface
      * @param DataMigrationInterface     $migration
      * @param DestinationDriverInterface $destinationDriver
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Schema\SchemaException
-     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
+     * @throws SchemaException
+     * @throws NoDestinationException
      */
     public function writeOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver): void;
 }

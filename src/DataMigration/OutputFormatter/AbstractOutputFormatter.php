@@ -4,7 +4,7 @@
 namespace DragoonBoots\A2B\DataMigration\OutputFormatter;
 
 /**
- * Class AbstractOutputFormatter
+ * Base class for output formatters
  */
 abstract class AbstractOutputFormatter implements OutputFormatterInterface
 {
@@ -16,7 +16,7 @@ abstract class AbstractOutputFormatter implements OutputFormatterInterface
      */
     public function configure(array $options)
     {
-        return;
+        // Default to not requiring any configuration
     }
 
 }

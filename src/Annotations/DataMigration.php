@@ -73,7 +73,7 @@ class DataMigration
     /**
      * The source unique ids
      *
-     * @var \DragoonBoots\A2B\Annotations\IdField[]
+     * @var IdField[]
      * @Annotation\Required
      */
     protected $sourceIds;
@@ -81,7 +81,7 @@ class DataMigration
     /**
      * The destination unique ids
      *
-     * @var \DragoonBoots\A2B\Annotations\IdField[]
+     * @var IdField[]
      * @Annotation\Required
      */
     protected $destinationIds;

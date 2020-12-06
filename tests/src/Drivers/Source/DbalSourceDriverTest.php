@@ -5,8 +5,8 @@ namespace DragoonBoots\A2B\Tests\Drivers\Source;
 
 use Doctrine\Bundle\DoctrineBundle\ConnectionFactory;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\PDOSqlite;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Statement;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;

@@ -76,7 +76,7 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     /**
      * {@inheritdoc}
      */
-    public function write($data)
+    public function write($data): ?array
     {
         $this->dumper->dump($this->cloner->cloneVar($data));
 
@@ -94,7 +94,7 @@ class DebugDestinationDriver extends AbstractDestinationDriver implements Destin
     /**
      * {@inheritdoc}
      */
-    public function readMultiple(array $destIdSet)
+    public function readMultiple(array $destIdSet): array
     {
         return [];
     }

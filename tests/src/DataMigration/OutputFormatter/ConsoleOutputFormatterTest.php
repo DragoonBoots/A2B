@@ -7,8 +7,8 @@ use DragoonBoots\A2B\DataMigration\DataMigrationInterface;
 use DragoonBoots\A2B\DataMigration\OutputFormatter\ConsoleOutputFormatter;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use Symfony\Component\Console\Formatter\OutputFormatter;
-use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
@@ -118,7 +118,7 @@ class ConsoleOutputFormatterTest extends TestCase
         $destIds = ['identifier' => 'test'];
 
         // Use reflection to inject an observer progress bar.
-        $refl = new \ReflectionClass($formatter);
+        $refl = new ReflectionClass($formatter);
         $migrationProgressBar = $this->createMock(MockProgressBar::class);
         $migrationProgressBar->expects($this->once())
             ->method('setProgress')
@@ -140,7 +140,7 @@ class ConsoleOutputFormatterTest extends TestCase
         $formatter->configure(['total' => 1]);
 
         // Use reflection to inject an observer progress bar.
-        $refl = new \ReflectionClass($formatter);
+        $refl = new ReflectionClass($formatter);
         $migrationProgressBar = $this->createMock(MockProgressBar::class);
         $migrationProgressBar->expects($this->once())
             ->method('finish');
@@ -166,7 +166,7 @@ class ConsoleOutputFormatterTest extends TestCase
         $message = 'Test message';
 
         // Use reflection to inject an observer progress bar.
-        $refl = new \ReflectionClass($formatter);
+        $refl = new ReflectionClass($formatter);
         $migrationProgressBar = $this->createMock(MockProgressBar::class);
         $migrationProgressBar->expects($this->exactly(2))
             ->method('setMessage')
@@ -185,8 +185,6 @@ class ConsoleOutputFormatterTest extends TestCase
      * @param string $message
      * @param array $choices
      * @param string $default
-     *
-     * @throws \ReflectionException
      */
     public function testAsk(string $message, array $choices, string $default)
     {
@@ -210,7 +208,7 @@ class ConsoleOutputFormatterTest extends TestCase
         $formatter->start($migration, 1);
 
         // Use reflection to inject some observers.
-        $refl = new \ReflectionClass($formatter);
+        $refl = new ReflectionClass($formatter);
         $style = $this->createMock(SymfonyStyle::class);
         if (empty($choices)) {
             $q = new Question($message, $default);
@@ -235,7 +233,7 @@ class ConsoleOutputFormatterTest extends TestCase
         $formatter->ask($message, $choices, $default);
     }
 
-    public function questionDataProvider()
+    public function questionDataProvider(): array
     {
         return [
             'no choices' => [

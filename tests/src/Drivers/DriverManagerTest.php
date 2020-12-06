@@ -54,8 +54,6 @@ class DriverManagerTest extends TestCase
      * @param SourceDriverInterface|DestinationDriverInterface|null $driverStub
      * @param string|null $driverId
      * @param Driver|null $definition
-     *
-     * @throws Exception
      */
     protected function setupDriver(
         string $driverInterface,

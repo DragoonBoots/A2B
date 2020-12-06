@@ -2,8 +2,6 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
-use Doctrine\DBAL\Schema\SchemaException;
-use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 
@@ -17,45 +15,50 @@ interface DataMigrationMapperInterface
     /**
      * @param string $migrationId
      *   The class name of the migration being run.
-     * @param array  $sourceIds
-     * @param array  $destIds
-     * @param int    $status
+     * @param array $sourceIds
+     * @param array $destIds
+     * @param int $status
      *
      * @throws NonexistentMigrationException
      */
-    public function addMapping($migrationId, array $sourceIds, array $destIds, int $status = DataMigrationMapper::STATUS_MIGRATED);
+    public function addMapping(
+        string $migrationId,
+        array $sourceIds,
+        array $destIds,
+        int $status = DataMigrationMapper::STATUS_MIGRATED
+    );
 
     /**
      * @param string $migrationId
-     * @param array  $sourceIds
+     * @param array $sourceIds
      *
      * @return array
      *
      * @throws NonexistentMigrationException
      * @throws NoMappingForIdsException
      */
-    public function getDestIdsFromSourceIds(string $migrationId, array $sourceIds);
+    public function getDestIdsFromSourceIds(string $migrationId, array $sourceIds): array;
 
     /**
      * @param string $migrationId
-     * @param array  $destIds
+     * @param array $destIds
      *
      * @return array
      *
      * @throws NonexistentMigrationException
      * @throws NoMappingForIdsException
      */
-    public function getSourceIdsFromDestIds(string $migrationId, array $destIds);
+    public function getSourceIdsFromDestIds(string $migrationId, array $destIds): array;
 
     /**
      * Create a stub for an entity that does not yet exist.
      *
      * @param DataMigrationInterface $migration
-     * @param array                  $sourceIds
+     * @param array $sourceIds
      *
      * @return object
      */
-    public function createStub(DataMigrationInterface $migration, array $sourceIds);
+    public function createStub(DataMigrationInterface $migration, array $sourceIds): object;
 
     /**
      * Get the stubs that have been created and forget about them.

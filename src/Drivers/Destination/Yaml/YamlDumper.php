@@ -88,7 +88,7 @@ class YamlDumper extends Dumper
         ?array $path = null,
         ?array &$placeholderMap = null,
         ?array &$replacements = null
-    ) {
+    ): array {
         if (!isset($path)) {
             $path = [];
         }
@@ -151,8 +151,12 @@ class YamlDumper extends Dumper
      *
      * @return mixed|string
      */
-    protected function replaceItemWithPlaceholder($item, string $itemPathKey, array $anchors, ?array &$placeholderMap)
-    {
+    protected function replaceItemWithPlaceholder(
+        $item,
+        string $itemPathKey,
+        array $anchors,
+        ?array &$placeholderMap
+    ) {
         $itemPath = new ArrayCollection(explode('.', $itemPathKey));
         // Use the anchor if this is an array or the final key in the key
         // path matches (this means these values are likely similar

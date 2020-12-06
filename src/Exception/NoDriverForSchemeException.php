@@ -3,12 +3,13 @@
 
 namespace DragoonBoots\A2B\Exception;
 
+use Exception;
 use Throwable;
 
 /**
  * Thrown when a requested driver does not exist for the given scheme.
  */
-final class NoDriverForSchemeException extends \Exception
+final class NoDriverForSchemeException extends Exception
 {
 
     /**

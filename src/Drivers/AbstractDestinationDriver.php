@@ -44,7 +44,7 @@ abstract class AbstractDestinationDriver extends AbstractDriver implements Desti
     /**
      * {@inheritdoc}
      */
-    public function readMultiple(array $destIdSet)
+    public function readMultiple(array $destIdSet): array
     {
         $results = [];
         foreach ($destIdSet as $destId) {
@@ -63,7 +63,6 @@ abstract class AbstractDestinationDriver extends AbstractDriver implements Desti
     {
         // Do nothing, allowing drivers that don't have a buffer to avoid
         // implementing nothing.
-        return;
     }
 
     /**
@@ -81,7 +80,7 @@ abstract class AbstractDestinationDriver extends AbstractDriver implements Desti
      *
      * @codeCoverageIgnore
      */
-    public function setDefinition(Driver $definition): self
+    public function setDefinition(Driver $definition)
     {
         $this->definition = $definition;
 

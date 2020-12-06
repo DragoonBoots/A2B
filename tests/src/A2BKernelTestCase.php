@@ -21,7 +21,7 @@ class A2BKernelTestCase extends KernelTestCase
      *
      * @return bool
      */
-    private static function rmDirContents(string $path)
+    private static function rmDirContents(string $path): bool
     {
         $files = array_diff(scandir($path), ['.', '..']);
         foreach ($files as $file) {

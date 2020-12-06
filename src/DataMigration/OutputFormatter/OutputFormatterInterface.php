@@ -58,7 +58,7 @@ interface OutputFormatterInterface
      * Display a message to the user
      *
      * @param string $message
-     * @param string $type
+     * @param string|null $type
      *   One of the OutputFormatterInterface::MESSAGE_* constants.
      */
     public function message(string $message, ?string $type = self::MESSAGE_INFO);

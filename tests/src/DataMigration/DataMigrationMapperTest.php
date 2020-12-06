@@ -2,6 +2,7 @@
 
 namespace DragoonBoots\A2B\Tests\DataMigration;
 
+use DateTime;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDOSqlite;
@@ -18,6 +19,8 @@ use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use stdClass;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DataMigrationMapperTest extends TestCase
@@ -83,13 +86,13 @@ class DataMigrationMapperTest extends TestCase
 
         // Assert updated times.  To account for race conditions, allow up to 1
         // minute of leeway before failing.
-        $updated = new \DateTime($mapping['updated']);
-        $updatedDiff = $updated->diff(new \DateTime());
+        $updated = new DateTime($mapping['updated']);
+        $updatedDiff = $updated->diff(new DateTime());
         $this->assertEquals(0, $updatedDiff->i);
     }
 
     /**
-     * @throws \ReflectionException
+     * Setup the Migration mapper for testing
      */
     protected function setupMapper()
     {
@@ -151,7 +154,7 @@ class DataMigrationMapperTest extends TestCase
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
-                function (\ReflectionClass $reflectionClass, string $annotationName) {
+                function (ReflectionClass $reflectionClass, string $annotationName) {
                     return $this->definitions[$reflectionClass->getName()];
                 }
             );
@@ -201,8 +204,8 @@ class DataMigrationMapperTest extends TestCase
 
         // Assert updated times.  To account for race conditions, allow up to 1
         // minute of leeway before failing.
-        $firstUpdated = new \DateTime($mapping['updated']);
-        $updatedDiff = $firstUpdated->diff(new \DateTime());
+        $firstUpdated = new DateTime($mapping['updated']);
+        $updatedDiff = $firstUpdated->diff(new DateTime());
         $this->assertEquals(0, $updatedDiff->i);
 
         // Wait one second to ensure the updated time will roll over to a new
@@ -213,7 +216,7 @@ class DataMigrationMapperTest extends TestCase
             ->fetchAll();
         $this->assertCount(1, $mappings);
         $mapping = array_pop($mappings);
-        $secondUpdated = new \DateTime($mapping['updated']);
+        $secondUpdated = new DateTime($mapping['updated']);
         $this->assertGreaterThan($firstUpdated, $secondUpdated);
     }
 
@@ -229,7 +232,10 @@ class DataMigrationMapperTest extends TestCase
             'id' => 1,
         ];
         $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
-        $this->assertEquals($destIds, $this->mapper->getDestIdsFromSourceIds(get_class($this->migrations['TestMigration1']), $sourceIds));
+        $this->assertEquals(
+            $destIds,
+            $this->mapper->getDestIdsFromSourceIds(get_class($this->migrations['TestMigration1']), $sourceIds)
+        );
     }
 
     public function testGetDestIdsFromSourceIdsBad()
@@ -245,7 +251,10 @@ class DataMigrationMapperTest extends TestCase
         ];
         $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
         $this->expectException(NoMappingForIdsException::class);
-        $this->mapper->getDestIdsFromSourceIds(get_class($this->migrations['TestMigration1']), ['identifier' => 'nope']);
+        $this->mapper->getDestIdsFromSourceIds(
+            get_class($this->migrations['TestMigration1']),
+            ['identifier' => 'nope']
+        );
     }
 
     public function testGetSourceIdsFromDestIds()
@@ -260,7 +269,10 @@ class DataMigrationMapperTest extends TestCase
             'id' => 1,
         ];
         $this->mapper->addMapping(get_class($this->migrations['TestMigration1']), $sourceIds, $destIds);
-        $this->assertEquals($sourceIds, $this->mapper->getSourceIdsFromDestIds(get_class($this->migrations['TestMigration1']), $destIds));
+        $this->assertEquals(
+            $sourceIds,
+            $this->mapper->getSourceIdsFromDestIds(get_class($this->migrations['TestMigration1']), $destIds)
+        );
     }
 
     public function testGetSourceIdsFromDestIdsBad()
@@ -283,7 +295,7 @@ class DataMigrationMapperTest extends TestCase
     {
         $this->setupMapper();
 
-        $defaultResult = new \stdClass();
+        $defaultResult = new stdClass();
         $this->stubber->expects($this->once())
             ->method('createStub')
             ->willReturn($defaultResult);

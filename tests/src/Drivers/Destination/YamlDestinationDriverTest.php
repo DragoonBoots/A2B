@@ -7,8 +7,6 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver;
-use DragoonBoots\A2B\Exception\BadUriException;
-use DragoonBoots\A2B\Exception\NoDestinationException;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use DragoonBoots\A2B\Tests\Drivers\FinderTestTrait;
 use org\bovigo\vfs\vfsStream;
@@ -261,11 +259,8 @@ class YamlDestinationDriverTest extends TestCase
     }
 
     /**
-     * @param bool $useRefs
+     * @param mixed $useRefs
      * @param string $expected
-     *
-     * @throws BadUriException
-     * @throws NoDestinationException
      *
      * @dataProvider writeDataProvider
      */
@@ -334,7 +329,7 @@ class YamlDestinationDriverTest extends TestCase
         $this->assertEquals($newEntity, $parsedEntity);
     }
 
-    public function writeDataProvider()
+    public function writeDataProvider(): array
     {
         return [
             'no refs' => [

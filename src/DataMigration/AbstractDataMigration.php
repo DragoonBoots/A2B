@@ -75,7 +75,7 @@ abstract class AbstractDataMigration implements DataMigrationInterface
      *
      * @codeCoverageIgnore
      */
-    public function setDefinition(DataMigration $definition): self
+    public function setDefinition(DataMigration $definition)
     {
         $this->definition = $definition;
 
@@ -89,7 +89,7 @@ abstract class AbstractDataMigration implements DataMigrationInterface
      *
      * @return array
      */
-    protected function removeNulls(array $data)
+    protected function removeNulls(array $data): array
     {
         return array_filter(
             $data,
@@ -124,7 +124,7 @@ abstract class AbstractDataMigration implements DataMigrationInterface
      *
      * @return array
      */
-    protected function convertToInts(array $data, array $fields)
+    protected function convertToInts(array $data, array $fields): array
     {
         foreach ($fields as $field) {
             if (isset($data[$field])) {

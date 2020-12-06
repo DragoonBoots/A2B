@@ -3,7 +3,6 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
-use Doctrine\Inflector\Inflector;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\FetchMode;
@@ -11,11 +10,13 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+use UnexpectedValueException;
 
 class DataMigrationMapper implements DataMigrationMapperInterface
 {
@@ -86,7 +87,8 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function addMapping($migrationId, array $sourceIds, array $destIds, int $status = self::STATUS_MIGRATED)
+    public function addMapping(string $migrationId, array $sourceIds, array $destIds, int $status = self::STATUS_MIGRATED
+    )
     {
         $migrationDefinition = $this->dataMigrationManager->getMigration($migrationId)
             ->getDefinition();
@@ -132,7 +134,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function createStub(DataMigrationInterface $migration, array $sourceIds)
+    public function createStub(DataMigrationInterface $migration, array $sourceIds): object
     {
         ksort($sourceIds);
         $key = [
@@ -180,7 +182,6 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      * @param DataMigration $migrationDefinition
      *
      * @throws SchemaException
-     * @throws \Doctrine\DBAL\DBALException
      */
     protected function conformMappingTable(string $migrationId, DataMigration $migrationDefinition): void
     {
@@ -263,7 +264,6 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      *   One of 'source' or 'dest'.
      *
      * @throws SchemaException
-     * @throws \Doctrine\DBAL\DBALException
      */
     protected function conformMappingColumn(Table &$table, IdField $idField, string $type)
     {
@@ -388,7 +388,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      *
      * @return string
      */
-    private function createKeyComparisonSql(QueryBuilder $q, string $column, $value)
+    private function createKeyComparisonSql(QueryBuilder $q, string $column, $value): string
     {
         if (is_null($value)) {
             return sprintf('"%s" IS NULL', $column);
@@ -406,7 +406,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      * @throws NoMappingForIdsException
      * @throws NonexistentMigrationException
      */
-    public function getDestIdsFromSourceIds(string $migrationId, array $sourceIds)
+    public function getDestIdsFromSourceIds(string $migrationId, array $sourceIds): array
     {
         $definition = $this->dataMigrationManager->getMigration($migrationId)
             ->getDefinition();
@@ -453,7 +453,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
         }
 
         try {
-            $result = $q->execute()->fetch();
+            $result = $q->execute()->fetchAssociative();
         } catch (TableNotFoundException $e) {
             throw new NoMappingForIdsException($sourceIds, $migrationId, $e->getCode(), $e);
         }
@@ -476,14 +476,14 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      *
      * @return string
      */
-    protected function flipMappingType($direction)
+    protected function flipMappingType($direction): string
     {
         if ($direction == self::MAPPING_SOURCE) {
             return self::MAPPING_DEST;
         } elseif ($direction == self::MAPPING_DEST) {
             return self::MAPPING_SOURCE;
         } else {
-            throw new \UnexpectedValueException(sprintf('"%s" is not a valid mapping direction.', $direction));
+            throw new UnexpectedValueException(sprintf('"%s" is not a valid mapping direction.', $direction));
         }
     }
 
@@ -496,7 +496,7 @@ class DataMigrationMapper implements DataMigrationMapperInterface
      * @throws NoMappingForIdsException
      * @throws NonexistentMigrationException
      */
-    public function getSourceIdsFromDestIds(string $migrationId, array $destIds)
+    public function getSourceIdsFromDestIds(string $migrationId, array $destIds): array
     {
         $definition = $this->dataMigrationManager->getMigration($migrationId)
             ->getDefinition();

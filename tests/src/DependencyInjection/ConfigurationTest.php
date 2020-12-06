@@ -7,6 +7,7 @@ use DragoonBoots\A2B\Tests\A2BKernelTestCase;
 use DragoonBoots\A2B\Tests\A2BTestKernel;
 use ProxyManager\Proxy\LazyLoadingInterface;
 use ProxyManager\Proxy\ValueHolderInterface;
+use ReflectionClass;
 
 class ConfigurationTest extends A2BKernelTestCase
 {
@@ -22,7 +23,7 @@ class ConfigurationTest extends A2BKernelTestCase
         /** @var DataMigrationManager $migrationManager */
         $migrationManager = $migrationManager->getWrappedValueHolderValue();
 
-        $refl = new \ReflectionClass($migrationManager);
+        $refl = new ReflectionClass($migrationManager);
         $sourcesProperty = $refl->getProperty('sources');
         $sourcesProperty->setAccessible(true);
         $destinationsProperty = $refl->getProperty('destinations');

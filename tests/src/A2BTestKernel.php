@@ -82,7 +82,7 @@ class A2BTestKernel extends Kernel
                     'url' => 'sqlite:///:memory:',
                 ],
                 'orm' => null,
-            ]
+            ],
         ];
     }
 }

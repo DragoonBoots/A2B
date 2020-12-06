@@ -9,6 +9,7 @@ use DragoonBoots\A2B\DataMigration\Stubber;
 use DragoonBoots\A2B\DataMigration\StubberInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 class StubberTest extends TestCase
@@ -38,7 +39,7 @@ class StubberTest extends TestCase
     {
         $this->setupStubber();
 
-        $defaultResult = new \stdClass();
+        $defaultResult = new stdClass();
         /** @var DataMigrationInterface|MockObject $migration */
         $migration = $this->getMockBuilder(DataMigrationInterface::class)
             ->disableOriginalConstructor()

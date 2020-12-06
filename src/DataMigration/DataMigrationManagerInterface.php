@@ -4,7 +4,8 @@ namespace DragoonBoots\A2B\DataMigration;
 
 use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
-use MJS\TopSort\TopSortInterface;
+use MJS\TopSort\CircularDependencyException;
+use MJS\TopSort\ElementNotFoundException;
 
 
 /**
@@ -37,7 +38,7 @@ interface DataMigrationManagerInterface
      * @throws NonexistentMigrationException
      *   Thrown when the specified migration doesn't exist
      */
-    public function getMigration(string $migrationName);
+    public function getMigration(string $migrationName): DataMigrationInterface;
 
     /**
      * Get the migrations in a specific group
@@ -51,17 +52,17 @@ interface DataMigrationManagerInterface
     /**
      * Resolve migration dependencies into a proper run order.
      *
-     * @param DataMigrationInterface[]|\iterable $migrations
+     * @param DataMigrationInterface[]|iterable $migrations
      *   A list of migrations requested for execution.
-     * @param array                              $extrasAdded
+     * @param array|null $extrasAdded
      *   An array that will be filled with migration ids that are depended upon
      *   but not initially requested for running.
      *
      * @return DataMigrationInterface[]|Collection
      *   A collection of migrations to run in the proper order
      *
-     * @throws \MJS\TopSort\CircularDependencyException
-     * @throws \MJS\TopSort\ElementNotFoundException
+     * @throws CircularDependencyException
+     * @throws ElementNotFoundException
      * @throws NonexistentMigrationException
      */
     public function resolveDependencies(iterable $migrations, ?array &$extrasAdded = null): Collection;

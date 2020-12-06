@@ -153,7 +153,7 @@ TXT;
      *
      * @return string
      */
-    protected function formatIds(array $ids)
+    protected function formatIds(array $ids): string
     {
         $idStrings = [];
         foreach ($ids as $key => $value) {

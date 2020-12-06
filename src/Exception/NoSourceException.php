@@ -3,12 +3,13 @@
 
 namespace DragoonBoots\A2B\Exception;
 
+use Exception;
 use Throwable;
 
 /**
  * Thrown when no source was set on the source driver.
  */
-final class NoSourceException extends \Exception
+final class NoSourceException extends Exception
 {
 
     /**

@@ -362,7 +362,7 @@ class MigrateCommandTest extends TestCase
         $tester->execute($input);
     }
 
-    public function orphanOptionDataProvider()
+    public function orphanOptionDataProvider(): array
     {
         return [
             'default' => [

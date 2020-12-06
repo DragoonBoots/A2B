@@ -3,12 +3,13 @@
 
 namespace DragoonBoots\A2B\Exception;
 
+use Exception;
 use Throwable;
 
 /**
  * Thrown when more than one driver implements a given scheme.
  */
-final class UnclearDriverException extends \Exception
+final class UnclearDriverException extends Exception
 {
 
     /**

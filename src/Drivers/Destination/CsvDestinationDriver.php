@@ -8,14 +8,13 @@ use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
-use DragoonBoots\A2B\Exception\MigrationException;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 use League\Csv\CannotInsertRecord;
 use League\Csv\ColumnConsistency;
 use League\Csv\Exception as CsvException;
 use League\Csv\Reader as CsvReader;
-use League\Csv\ResultSet;
 use League\Csv\Statement;
+use League\Csv\TabularDataReader;
 use League\Csv\Writer as CsvWriter;
 use RangeException;
 
@@ -105,7 +104,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      * @throws CannotInsertRecord
      * @throws NoIdSetException
      */
-    public function write($data)
+    public function write($data): ?array
     {
         if (!$this->headerWritten) {
             $this->writer->insertOne(array_keys($data));
@@ -128,7 +127,7 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      * {@inheritdoc}
      * @throws CsvException
      */
-    public function read(array $destIds)
+    public function read(array $destIds): ?array
     {
         if (!$this->newFile) {
             $results = $this->findEntities([$destIds]);
@@ -152,9 +151,9 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
      *   An array of of dest id arrays.  Each dest id array is a set of
      *   key/value pairs.
      *
-     * @return ResultSet
+     * @return TabularDataReader
      */
-    protected function findEntities(array $destIdSet)
+    protected function findEntities(array $destIdSet): TabularDataReader
     {
         $constraint = (new Statement())->where(
             function ($record) use ($destIdSet) {
@@ -171,15 +170,14 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
                 return false;
             }
         );
-        $results = $constraint->process($this->reader);
 
-        return $results;
+        return $constraint->process($this->reader);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function readMultiple(array $destIdSet)
+    public function readMultiple(array $destIdSet): array
     {
         if ($this->newFile) {
             return [];
@@ -196,8 +194,6 @@ class CsvDestinationDriver extends AbstractDestinationDriver implements Destinat
 
     /**
      * {@inheritdoc}
-     * @throws MigrationException
-     *   Thrown when the destination file could not be written.
      */
     public function flush()
     {

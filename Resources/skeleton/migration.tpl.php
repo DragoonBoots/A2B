@@ -8,12 +8,14 @@
  * @var string                                  $group
  * @var string                                  $source
  * @var string                                  $source_driver
- * @var \DragoonBoots\A2B\Annotations\IdField[] $source_ids
+ * @var IdField[] $source_ids
  * @var string                                  $destination
  * @var string                                  $destination_driver
- * @var \DragoonBoots\A2B\Annotations\IdField[] $destination_ids
+ * @var IdField[] $destination_ids
  * @var string[]                                $dependencies
  */
+
+use DragoonBoots\A2B\Annotations\IdField;
 
 /**
  * The number of elements an array must have before it is forced to be multiple
@@ -30,7 +32,7 @@ $GLOBALS['noStringWrap'] = [];
  *
  * @return string
  */
-function format_string(string $string)
+function format_string(string $string): string
 {
     global $noStringWrap;
 
@@ -51,7 +53,7 @@ function format_string(string $string)
  *
  * @return string
  */
-function format_array(array $array)
+function format_array(array $array): string
 {
     global $noStringWrap;
 
@@ -73,7 +75,7 @@ function format_array(array $array)
  *
  * @return string
  */
-function format_field(string $key, $value)
+function format_field(string $key, $value): string
 {
     global $noStringWrap;
 
@@ -98,7 +100,7 @@ function format_field(string $key, $value)
  *
  * @return string
  */
-function format_annotation(string $annotation, $value, bool $root = false)
+function format_annotation(string $annotation, $value, bool $root = false): string
 {
     global $noStringWrap;
 
@@ -145,7 +147,7 @@ function format_annotation(string $annotation, $value, bool $root = false)
  *
  * @return string[]
  */
-function format_id_fields(array $idFields)
+function format_id_fields(array $idFields): array
 {
     global $noStringWrap;
 

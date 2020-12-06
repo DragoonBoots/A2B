@@ -6,7 +6,6 @@ namespace DragoonBoots\A2B\Tests\Drivers;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionMethod;
 use Symfony\Component\Finder\Finder;
 
@@ -24,7 +23,6 @@ trait FinderTestTrait
      *   A list of method names not to mock.
      *
      * @return MockObject
-     * @throws ReflectionException
      */
     protected function buildFinderMock(MockObject $finder, $finderMethodBlacklist = [])
     {

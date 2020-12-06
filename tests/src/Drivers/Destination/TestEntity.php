@@ -26,7 +26,7 @@ class TestEntity
      *
      * @return self
      */
-    public function setId($id)
+    public function setId($id): TestEntity
     {
         $this->id = $id;
 
@@ -46,7 +46,7 @@ class TestEntity
      *
      * @return self
      */
-    public function setField1($field1)
+    public function setField1($field1): TestEntity
     {
         $this->field1 = $field1;
 
@@ -66,7 +66,7 @@ class TestEntity
      *
      * @return self
      */
-    public function setField2($field2)
+    public function setField2($field2): TestEntity
     {
         $this->field2 = $field2;
 

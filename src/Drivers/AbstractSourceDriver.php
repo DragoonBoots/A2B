@@ -53,7 +53,7 @@ abstract class AbstractSourceDriver extends AbstractDriver implements SourceDriv
      *
      * @codeCoverageIgnore
      */
-    public function setDefinition(Driver $definition): self
+    public function setDefinition(Driver $definition)
     {
         $this->definition = $definition;
 

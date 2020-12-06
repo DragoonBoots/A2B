@@ -2,7 +2,7 @@
 
 namespace DragoonBoots\A2B\Drivers\Destination;
 
-use Doctrine\Common\Persistence\ObjectRepository;
+use Doctrine\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
@@ -139,7 +139,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
      *   An associative array with the destination keys.  If no keys can
      *   logically exist (e.g. output only), return null.
      */
-    public function write($data)
+    public function write($data): ?array
     {
         $this->em->persist($data);
         $this->persistedCount++;

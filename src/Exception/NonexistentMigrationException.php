@@ -3,12 +3,13 @@
 
 namespace DragoonBoots\A2B\Exception;
 
+use Exception;
 use Throwable;
 
 /**
  * Thrown when a requested migration does not exist.
  */
-final class NonexistentMigrationException extends \Exception
+final class NonexistentMigrationException extends Exception
 {
 
     /**

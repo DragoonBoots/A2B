@@ -10,10 +10,14 @@ use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\MigrationException;
+use DragoonBoots\A2B\Exception\NonexistentDriverException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 use MJS\TopSort\Implementations\FixedArraySort;
 use MJS\TopSort\TopSortInterface;
+use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use UnexpectedValueException;
 
 class DataMigrationManager implements DataMigrationManagerInterface
 {
@@ -56,9 +60,9 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * DataMigrationManager constructor.
      *
-     * @param Reader                 $annotationReader
+     * @param Reader $annotationReader
      * @param DriverManagerInterface $driverManager
-     * @param ParameterBagInterface  $parameterBag
+     * @param ParameterBagInterface $parameterBag
      */
     public function __construct(
         Reader $annotationReader,
@@ -110,15 +114,13 @@ class DataMigrationManager implements DataMigrationManagerInterface
      *
      * @param DataMigrationInterface $migration
      *
-     * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
-     * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
-     * @throws \ReflectionException
+     * @throws NonexistentDriverException
+     * @throws ReflectionException
      * @internal
-     *
      */
     public function addMigration(DataMigrationInterface $migration)
     {
-        $reflClass = new \ReflectionClass($migration);
+        $reflClass = new ReflectionClass($migration);
         /** @var DataMigration $definition */
         $definition = $this->annotationReader->getClassAnnotation($reflClass, DataMigration::class);
         // Lookup the source/destination key if applicable
@@ -146,9 +148,9 @@ class DataMigrationManager implements DataMigrationManagerInterface
      * - Resolve parameters contained within
      *
      * @param DataMigration $definition
-     * @param string        $propertyName
+     * @param string $propertyName
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function resolveDefinitionProperty(DataMigration $definition, string $propertyName)
     {
@@ -185,13 +187,13 @@ class DataMigrationManager implements DataMigrationManagerInterface
      *
      * @param object $object
      * @param string $propertyName
-     * @param mixed  $value
+     * @param mixed $value
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function injectProperty(object $object, string $propertyName, $value)
     {
-        $refl = new \ReflectionClass($object);
+        $refl = new ReflectionClass($object);
         $property = $refl->getProperty($propertyName);
         $accessible = $property->isPublic();
         $property->setAccessible(true);
@@ -215,9 +217,9 @@ class DataMigrationManager implements DataMigrationManagerInterface
      * @return DataMigrationInterface|mixed
      * @throws MigrationException
      * @throws NonexistentMigrationException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function getMigration(string $migrationName)
+    public function getMigration(string $migrationName): DataMigrationInterface
     {
         if (!$this->migrations->containsKey($migrationName)) {
             throw new NonexistentMigrationException($migrationName);
@@ -238,7 +240,13 @@ class DataMigrationManager implements DataMigrationManagerInterface
             if ($isCompatibleMigrationExtension) {
                 $this->injectProperty($definition, 'extends', $extendsMigration);
             } else {
-                throw new MigrationException(sprintf('"%s" cannot extend "%s" because their definitions do not match.', get_class($migration), get_class($extendsMigration)));
+                throw new MigrationException(
+                    sprintf(
+                        '"%s" cannot extend "%s" because their definitions do not match.',
+                        get_class($migration),
+                        get_class($extendsMigration)
+                    )
+                );
             }
         }
 
@@ -247,7 +255,7 @@ class DataMigrationManager implements DataMigrationManagerInterface
 
     public function getMigrationsInGroup(string $groupName)
     {
-        $migrations = $this->migrations->filter(
+        return $this->migrations->filter(
             function (DataMigrationInterface $migration) use ($groupName) {
                 $definition = $this->getMigration(get_class($migration))
                     ->getDefinition();
@@ -255,8 +263,6 @@ class DataMigrationManager implements DataMigrationManagerInterface
                 return $definition->getGroup() == $groupName;
             }
         );
-
-        return $migrations;
     }
 
     /**
@@ -294,11 +300,9 @@ class DataMigrationManager implements DataMigrationManagerInterface
     /**
      * Recursively build the dependency list.
      *
-     * @param iterable              $migrations
-     * @param array                 $extrasAdded
+     * @param iterable $migrations
+     * @param array $extrasAdded
      * @param TopSortInterface|null $sorter
-     *
-     * @throws NonexistentMigrationException
      */
     protected function buildDependencyList(iterable $migrations, array &$extrasAdded, TopSortInterface &$sorter)
     {
@@ -307,7 +311,7 @@ class DataMigrationManager implements DataMigrationManagerInterface
                 if (is_string($migration)) {
                     $migration = $this->getMigration($migration);
                 } else {
-                    throw new \UnexpectedValueException("$migration is not a DataMigration instance.");
+                    throw new UnexpectedValueException("$migration is not a DataMigration instance.");
                 }
             }
 

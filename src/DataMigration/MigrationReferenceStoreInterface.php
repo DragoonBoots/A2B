@@ -2,6 +2,10 @@
 
 namespace DragoonBoots\A2B\DataMigration;
 
+use DragoonBoots\A2B\Exception\NoMappingForIdsException;
+use DragoonBoots\A2B\Exception\NonexistentDriverException;
+use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+
 interface MigrationReferenceStoreInterface
 {
 
@@ -18,10 +22,10 @@ interface MigrationReferenceStoreInterface
      *
      * @return mixed
      *
-     * @throws \DragoonBoots\A2B\Exception\NoMappingForIdsException
+     * @throws NoMappingForIdsException
      *   Thrown when the specified ids do not exist
-     * @throws \DragoonBoots\A2B\Exception\NonexistentDriverException
-     * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
+     * @throws NonexistentDriverException
+     * @throws NonexistentMigrationException
      *   Thrown when the specified migration does not exist
      */
     public function get(string $migrationId, array $sourceIds, bool $stub = false);

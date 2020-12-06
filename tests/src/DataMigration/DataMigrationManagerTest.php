@@ -16,6 +16,7 @@ use DragoonBoots\A2B\Exception\MigrationException;
 use DragoonBoots\A2B\Exception\NonexistentMigrationException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DataMigrationManagerTest extends TestCase
@@ -27,14 +28,14 @@ class DataMigrationManagerTest extends TestCase
      * @param array[] $sourceKeys
      * @param array[] $destKeys
      *
-     * @throws NonexistentMigrationException
-     * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
-     * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
-     * @throws \ReflectionException
      * @dataProvider addMigrationDataProvider
      */
-    public function testAddMigration(DataMigration $definition, DataMigration $resolvedDefinition = null, array $sourceKeys = [], array $destKeys = [])
-    {
+    public function testAddMigration(
+        DataMigration $definition,
+        DataMigration $resolvedDefinition = null,
+        array $sourceKeys = [],
+        array $destKeys = []
+    ): array {
         if (is_null($resolvedDefinition)) {
             $resolvedDefinition = clone $definition;
         }
@@ -67,7 +68,7 @@ class DataMigrationManagerTest extends TestCase
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->expects($this->once())
             ->method('getClassAnnotation')
-            ->with(new \ReflectionClass($migration), DataMigration::class)
+            ->with(new ReflectionClass($migration), DataMigration::class)
             ->willReturn($definition);
 
         $parameterBag = $this->createMock(ParameterBagInterface::class);
@@ -85,13 +86,16 @@ class DataMigrationManagerTest extends TestCase
 
         // Do the test
         $dataMigrationManager->addMigration($migration);
-        $this->assertEquals(new ArrayCollection(['TestMigration' => $migration]), $dataMigrationManager->getMigrations());
+        $this->assertEquals(
+            new ArrayCollection(['TestMigration' => $migration]),
+            $dataMigrationManager->getMigrations()
+        );
         $this->assertSame($migration, $dataMigrationManager->getMigration(get_class($migration)));
 
         return [$migration, $dataMigrationManager];
     }
 
-    public function addMigrationDataProvider()
+    public function addMigrationDataProvider(): array
     {
         return [
             'standard' => [
@@ -143,13 +147,7 @@ class DataMigrationManagerTest extends TestCase
      * @dataProvider addMigrationExtendsDataProvider
      *
      * @param DataMigration $extendsDefinition
-     * @param string|null   $exception
-     *
-     * @throws MigrationException
-     * @throws NonexistentMigrationException
-     * @throws \DragoonBoots\A2B\Exception\NoDriverForSchemeException
-     * @throws \DragoonBoots\A2B\Exception\UnclearDriverException
-     * @throws \ReflectionException
+     * @param string|null $exception
      */
     public function testAddMigrationExtends(DataMigration $extendsDefinition, ?string $exception = null)
     {
@@ -179,7 +177,12 @@ class DataMigrationManagerTest extends TestCase
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
-                function (\ReflectionClass $refl, string $annotationName) use ($migration, $extendsMigration, $definition, $extendsDefinition) {
+                function (ReflectionClass $refl, string $annotationName) use (
+                    $migration,
+                    $extendsMigration,
+                    $definition,
+                    $extendsDefinition
+                ) {
                     if ($annotationName == DataMigration::class) {
                         switch ($refl->getName()) {
                             case get_class($migration):
@@ -217,14 +220,15 @@ class DataMigrationManagerTest extends TestCase
             $this->expectException($exception);
         }
         self::assertSame(
-            $migration, $dataMigrationManager->getMigration('TestExtendsMigration')
-            ->getDefinition()
-            ->getExtends()
+            $migration,
+            $dataMigrationManager->getMigration('TestExtendsMigration')
+                ->getDefinition()
+                ->getExtends()
         );
 
     }
 
-    public function addMigrationExtendsDataProvider()
+    public function addMigrationExtendsDataProvider(): array
     {
         return [
             'good' => [
@@ -340,7 +344,6 @@ class DataMigrationManagerTest extends TestCase
                 ->setMockClassName('Group2Migration')
                 ->getMock(),
         ];
-        /** @var DataMigration[] $definitions */
         $definitions = [
             'Group1Migration' => new DataMigration(['group' => 'Group1']),
             'Group2Migration' => new DataMigration(['group' => 'Group2']),
@@ -352,7 +355,7 @@ class DataMigrationManagerTest extends TestCase
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
-                function (\ReflectionClass $reflectionClass, string $annotationName) use ($definitions) {
+                function (ReflectionClass $reflectionClass, string $annotationName) use ($definitions) {
                     return $definitions[$reflectionClass->getName()] ?? null;
                 }
             );
@@ -365,32 +368,38 @@ class DataMigrationManagerTest extends TestCase
         $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
 
         // Inject the migrations
-        $refl = new \ReflectionClass($dataMigrationManager);
+        $refl = new ReflectionClass($dataMigrationManager);
         $migrationsProperty = $refl->getProperty('migrations');
         $migrationsProperty->setAccessible(true);
         $migrationsProperty->setValue($dataMigrationManager, new ArrayCollection($migrations));
 
         $expected = new ArrayCollection(['Group1Migration' => $migrations['Group1Migration']]);
         $this->assertEquals(
-            $expected, $dataMigrationManager->getMigrationsInGroup('Group1')
+            $expected,
+            $dataMigrationManager->getMigrationsInGroup('Group1')
         );
     }
 
     /**
      * @param DataMigrationInterface[]|MockObject[] $migrations
-     * @param DataMigration[]                       $definitions
-     * @param DataMigration[]                       $requested
-     * @param DataMigration[]|Collection            $expectedRunList
-     * @param string[]                              $expectedExtrasAdded
+     * @param DataMigration[] $definitions
+     * @param DataMigration[] $requested
+     * @param DataMigration[]|Collection $expectedRunList
+     * @param string[] $expectedExtrasAdded
      *
      * @dataProvider dependencyResolutionDataProvider
      */
-    public function testResolveDependencies($migrations, $definitions, $requested, $expectedRunList, $expectedExtrasAdded)
-    {
+    public function testResolveDependencies(
+        array $migrations,
+        array $definitions,
+        array $requested,
+        $expectedRunList,
+        array $expectedExtrasAdded
+    ) {
         $annotationReader = $this->createMock(Reader::class);
         $annotationReader->method('getClassAnnotation')
             ->willReturnCallback(
-                function (\ReflectionClass $reflectionClass, string $annotationName) use ($definitions) {
+                function (ReflectionClass $reflectionClass, string $annotationName) use ($definitions) {
                     return $definitions[$reflectionClass->getName()] ?? null;
                 }
             );
@@ -403,7 +412,7 @@ class DataMigrationManagerTest extends TestCase
         $dataMigrationManager = new DataMigrationManager($annotationReader, $driverManager, $parameterBag);
 
         // Inject the migrations
-        $refl = new \ReflectionClass($dataMigrationManager);
+        $refl = new ReflectionClass($dataMigrationManager);
         $migrationsProperty = $refl->getProperty('migrations');
         $migrationsProperty->setAccessible(true);
         $migrationsProperty->setValue($dataMigrationManager, new ArrayCollection($migrations));
@@ -413,7 +422,7 @@ class DataMigrationManagerTest extends TestCase
         $this->assertEquals($expectedExtrasAdded, $extrasAdded);
     }
 
-    public function dependencyResolutionDataProvider()
+    public function dependencyResolutionDataProvider(): array
     {
         /** @var DataMigrationInterface[]|MockObject[] $migrations */
         $migrations = [
@@ -426,7 +435,6 @@ class DataMigrationManagerTest extends TestCase
                 ->setMockClassName('DependentMigration')
                 ->getMock(),
         ];
-        /** @var DataMigration[] $definitions */
         $definitions = [
             'FirstMigration' => new DataMigration(['depends' => [get_class($migrations['DependentMigration'])]]),
             'DependentMigration' => new DataMigration([]),

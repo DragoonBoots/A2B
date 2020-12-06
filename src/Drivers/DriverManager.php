@@ -10,7 +10,6 @@ use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Exception\NonexistentDriverException;
 use ReflectionClass;
-use ReflectionException;
 
 class DriverManager implements DriverManagerInterface
 {
@@ -48,9 +47,7 @@ class DriverManager implements DriverManagerInterface
      *
      * @param SourceDriverInterface $sourceDriver
      *
-     * @throws ReflectionException
      * @internal
-     *
      */
     public function addSourceDriver(SourceDriverInterface $sourceDriver)
     {
@@ -66,9 +63,7 @@ class DriverManager implements DriverManagerInterface
      *
      * @param DestinationDriverInterface $destinationDriver
      *
-     * @throws ReflectionException
      * @internal
-     *
      */
     public function addDestinationDriver(DestinationDriverInterface $destinationDriver)
     {

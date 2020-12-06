@@ -8,6 +8,7 @@ Usage
 Use the FQCN of the result entity class as the `destination`.
 
 Be sure to override `defaultResult()` to return a new entity.
+
 ```php
 /**
  * {@inheritdoc}

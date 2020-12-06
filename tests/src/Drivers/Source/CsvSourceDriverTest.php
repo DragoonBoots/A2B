@@ -68,7 +68,7 @@ class CsvSourceDriverTest extends TestCase
         $this->driver->configure($this->definition);
     }
 
-    public function configureBadDataProvider()
+    public function configureBadDataProvider(): array
     {
         return [
             'nonexistent file' => ['no.csv', BadUriException::class],

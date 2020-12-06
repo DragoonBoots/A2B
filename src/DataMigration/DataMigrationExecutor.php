@@ -10,6 +10,9 @@ use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
 use DragoonBoots\A2B\Exception\NoIdSetException;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
+use DragoonBoots\A2B\Exception\NonexistentMigrationException;
+use RuntimeException;
+use Throwable;
 
 class DataMigrationExecutor implements DataMigrationExecutorInterface
 {
@@ -77,7 +80,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     /**
      * DataMigrationExecutor constructor.
      *
-     * @param DataMigrationMapperInterface     $mapper
+     * @param DataMigrationMapperInterface $mapper
      * @param MigrationReferenceStoreInterface $referenceStore
      */
     public function __construct(DataMigrationMapperInterface $mapper, MigrationReferenceStoreInterface $referenceStore)
@@ -97,13 +100,12 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
      */
     public function execute(
         DataMigrationInterface $migration,
         SourceDriverInterface $sourceDriver,
         DestinationDriverInterface $destinationDriver
-    ) {
+    ): array {
         gc_enable();
         $definition = $migration->getDefinition();
         $this->migration = $migration;
@@ -152,13 +154,11 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      *   The set of ids that identify this row in the destination, or NULL if
      *   the row is skipped.
      *
-     * @throws NoIdSetException
-     *   Thrown when there is no value set for an id in this row.
-     * @throws \DragoonBoots\A2B\Exception\NonexistentMigrationException
-     * @throws \DragoonBoots\A2B\Exception\NoDestinationException
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws NoIdSetException Thrown when there is no value set for an id in this row.
+     * @throws NoMappingForIdsException
+     * @throws NonexistentMigrationException
+     * @throws Throwable When an exception occurs inside the transform method,
+     * that exception is logged and rethrown
      */
     protected function executeRow(array $sourceRow): ?array
     {
@@ -180,8 +180,10 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             }
         } catch (NoMappingForIdsException $e) {
             $entity = $this->migration->defaultResult();
-        } catch (\Throwable $e) {
-            $this->outputFormatter->message("Error encountered reading existing data for source ids:\n".var_export($sourceIds, true));
+        } catch (Throwable $e) {
+            $this->outputFormatter->message(
+                "Error encountered reading existing data for source ids:\n".var_export($sourceIds, true)
+            );
             throw $e;
         }
         $entity = $this->migration->transform($sourceRow, $entity);
@@ -191,9 +193,14 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
                 // Write stubs first
                 $stubs = $this->mapper->getAndPurgeStubs();
                 foreach ($stubs as $serializedKey => $stub) {
-                    list('migrationId' => $stubMigrationId, 'sourceIds' => $stubSourceIds) = unserialize($serializedKey);
+                    ['migrationId' => $stubMigrationId, 'sourceIds' => $stubSourceIds] = unserialize($serializedKey);
                     $stubDestIds = $this->destinationDriver->write($stub);
-                    $this->mapper->addMapping($stubMigrationId, $stubSourceIds, $stubDestIds, DataMigrationMapper::STATUS_STUB);
+                    $this->mapper->addMapping(
+                        $stubMigrationId,
+                        $stubSourceIds,
+                        $stubDestIds,
+                        DataMigrationMapper::STATUS_STUB
+                    );
                 }
                 if (!empty($stubs)) {
                     // Flush the written stubs so they may be retrieved later.
@@ -204,8 +211,10 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
                 if ($flush) {
                     $this->destinationDriver->flush();
                 }
-            } catch (\Throwable $e) {
-                $this->outputFormatter->message("Error encountered writing data for source ids:\n".var_export($sourceIds, true));
+            } catch (Throwable $e) {
+                $this->outputFormatter->message(
+                    "Error encountered writing data for source ids:\n".var_export($sourceIds, true)
+                );
                 throw $e;
             }
             $this->mapper->addMapping($mapperMigrationKey, $sourceIds, $destIds);
@@ -228,7 +237,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      *   When memory usage reaches this percentage of available memory, attempt
      *   to clean up.  Defaults to 0.8 (80%)
      *
-     * @throws \Exception
+     * @throws RuntimeException
      *   Thrown when memory cannot be freed.
      *
      * @codeCoverageIgnore
@@ -247,7 +256,13 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
             gc_collect_cycles();
 
             if (memory_get_usage() >= $memoryPreLimit) {
-                throw new \Exception(sprintf('Cannot free enough memory to continue. (%s / %s bytes used)', memory_get_usage(), $this->memoryLimit));
+                throw new RuntimeException(
+                    sprintf(
+                        'Cannot free enough memory to continue. (%s / %s bytes used)',
+                        memory_get_usage(),
+                        $this->memoryLimit
+                    )
+                );
             }
             $this->outputFormatter->message('Memory freed, continuing...', OutputFormatterInterface::MESSAGE_INFO);
         }
@@ -256,14 +271,20 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     /**
      * {@inheritdoc}
      */
-    public function askAboutOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver)
-    {
+    public function askAboutOrphans(
+        array $orphans,
+        DataMigrationInterface $migration,
+        DestinationDriverInterface $destinationDriver
+    ) {
         $choices = [
             self::ORPHAN_KEEP => 'Keep all orphans',
             self::ORPHAN_REMOVE => 'Remove all orphans',
             self::ORPHAN_ASK => 'Make a decision for each orphan',
         ];
-        $q = sprintf('%d entities existed in the destination but do not exist in the source.  Keep them?', count($orphans));
+        $q = sprintf(
+            '%d entities existed in the destination but do not exist in the source.  Keep them?',
+            count($orphans)
+        );
         $decision = $this->outputFormatter->ask($q, $choices, self::ORPHAN_KEEP);
 
         if ($decision == self::ORPHAN_KEEP) {
@@ -287,8 +308,11 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
     /**
      * {@inheritdoc}
      */
-    public function writeOrphans(array $orphans, DataMigrationInterface $migration, DestinationDriverInterface $destinationDriver): void
-    {
+    public function writeOrphans(
+        array $orphans,
+        DataMigrationInterface $migration,
+        DestinationDriverInterface $destinationDriver
+    ): void {
         foreach ($orphans as $orphan) {
             $destIds = $destinationDriver->write($orphan);
 
@@ -342,8 +366,9 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
      */
     protected function findOrphans(array $oldIds, array $newIds): array
     {
-        $orphans = array_udiff(
-            $oldIds, $newIds,
+        return array_udiff(
+            $oldIds,
+            $newIds,
             function ($a, $b) {
                 $diff = 0;
                 foreach ($a as $key => $aValue) {
@@ -353,14 +378,14 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
                 return $diff;
             }
         );
-
-        return $orphans;
     }
 
     /**
      * Get the PHP memory limit
      *
      * @return int
+     * @noinspection PhpMissingBreakStatementInspection
+     * @noinspection PhpMissingBreakStatementInspection
      */
     private function phpMemoryLimit(): int
     {

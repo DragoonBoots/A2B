@@ -14,6 +14,7 @@ use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class MigrationReferenceStoreTest extends TestCase
 {
@@ -99,10 +100,17 @@ class MigrationReferenceStoreTest extends TestCase
             ->with(get_class($this->migration), $sourceIds)
             ->willReturn($destIds);
 
-        $this->assertEquals($expectedReferencedEntity, $this->referenceStore->get(get_class($this->migration), $sourceIds));
+        $this->assertEquals(
+            $expectedReferencedEntity,
+            $this->referenceStore->get(get_class($this->migration), $sourceIds)
+        );
 
         // Call a second time to ensure the cache is used instead of fetching again.
-        $this->assertEquals($expectedReferencedEntity, $this->referenceStore->get(get_class($this->migration), $sourceIds), 'Not using cached value');
+        $this->assertEquals(
+            $expectedReferencedEntity,
+            $this->referenceStore->get(get_class($this->migration), $sourceIds),
+            'Not using cached value'
+        );
     }
 
     public function testGetMapperFail()
@@ -166,7 +174,7 @@ class MigrationReferenceStoreTest extends TestCase
             ->with(get_class($this->migration), $sourceIds)
             ->willThrowException(new NoMappingForIdsException($sourceIds, get_class($this->migration)));
 
-        $stub = new \stdClass();
+        $stub = new stdClass();
         $this->mapper->expects($this->once())
             ->method('createStub')
             ->with($this->migration)
@@ -196,7 +204,7 @@ class MigrationReferenceStoreTest extends TestCase
             ->with(get_class($this->migration), $sourceIds)
             ->willReturn($destIds);
 
-        $stub = new \stdClass();
+        $stub = new stdClass();
         $this->mapper->expects($this->once())
             ->method('createStub')
             ->with($this->migration)

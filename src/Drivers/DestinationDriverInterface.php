@@ -57,7 +57,7 @@ interface DestinationDriverInterface
      * @see read()
      *
      */
-    public function readMultiple(array $destIdSet);
+    public function readMultiple(array $destIdSet): array;
 
     /**
      * Write the transformed data.
@@ -71,7 +71,7 @@ interface DestinationDriverInterface
      * @throws NoDestinationException
      *   Thrown when the destination is not configured.
      */
-    public function write($data);
+    public function write($data): ?array;
 
     /**
      * Flush remaining data that has not been written.

@@ -4,7 +4,7 @@
 namespace DragoonBoots\A2B\Drivers;
 
 use DragoonBoots\A2B\Annotations\IdField;
-use Symfony\Component\Finder\SplFileInfo;
+use SplFileInfo;
 
 /**
  * Helper methods for drivers that use YAML files.
@@ -25,7 +25,7 @@ trait YamlDriverTrait
      *
      * @return array
      */
-    protected function addIdsToEntity(array $ids, array $entity)
+    protected function addIdsToEntity(array $ids, array $entity): array
     {
         foreach ($ids as $id => $value) {
             $entity[$id] = $value;
@@ -48,7 +48,7 @@ trait YamlDriverTrait
      *
      * @return array
      */
-    protected function buildIdsFromFilePath(\SplFileInfo $fileInfo, array $ids): array
+    protected function buildIdsFromFilePath(SplFileInfo $fileInfo, array $ids): array
     {
         $pathParts = explode('/', $fileInfo->getPath());
         $pathParts[] = $fileInfo->getBasename('.'.$fileInfo->getExtension());
@@ -80,8 +80,7 @@ trait YamlDriverTrait
         }
 
         $fileName = array_pop($pathParts).'.'.$ext;
-        $filePath = sprintf('%s/%s/%s', $path, implode('/', $pathParts), $fileName);
 
-        return $filePath;
+        return sprintf('%s/%s/%s', $path, implode('/', $pathParts), $fileName);
     }
 }

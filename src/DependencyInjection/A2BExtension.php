@@ -19,9 +19,8 @@ class A2BExtension extends ConfigurableExtension implements CompilerPassInterfac
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
      */
-    public function loadInternal(array $config, ContainerBuilder $container)
+    public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
         $loader = new YamlFileLoader(
           $container,
@@ -31,7 +30,7 @@ class A2BExtension extends ConfigurableExtension implements CompilerPassInterfac
 
         // Register source and destination keys
         $migrationManagerDefinition = $container->getDefinition('a2b.data_migration_manager');
-        foreach ($config['sources'] as $source => $info) {
+        foreach ($mergedConfig['sources'] as $source => $info) {
             $migrationManagerDefinition->addMethodCall(
                 'addSource', [
                     $source,
@@ -40,7 +39,7 @@ class A2BExtension extends ConfigurableExtension implements CompilerPassInterfac
                 ]
             );
         }
-        foreach ($config['destinations'] as $source => $info) {
+        foreach ($mergedConfig['destinations'] as $source => $info) {
             $migrationManagerDefinition->addMethodCall(
                 'addDestination', [
                     $source,
@@ -115,7 +114,7 @@ class A2BExtension extends ConfigurableExtension implements CompilerPassInterfac
     /**
      * {@inheritdoc}
      */
-    public function getAlias()
+    public function getAlias(): string
     {
         return 'a2b';
     }

@@ -118,7 +118,7 @@ class CsvDestinationDriverTest extends TestCase
         $this->assertEquals($existingIds, $driver->getExistingIds());
     }
 
-    public function csvIdsDataProvider()
+    public function csvIdsDataProvider(): array
     {
         // destination and path
         $ret = $this->csvSourceDataProvider();
@@ -145,7 +145,7 @@ class CsvDestinationDriverTest extends TestCase
         return $ret;
     }
 
-    public function csvSourceDataProvider()
+    public function csvSourceDataProvider(): array
     {
         $ret = [];
 
@@ -168,7 +168,7 @@ class CsvDestinationDriverTest extends TestCase
         return $ret;
     }
 
-    public function csvDataProvider()
+    public function csvDataProvider(): array
     {
         // destination and path
         $ret = $this->csvSourceDataProvider();
@@ -211,7 +211,7 @@ class CsvDestinationDriverTest extends TestCase
         return $ret;
     }
 
-    public function csvMultipleDataProvider()
+    public function csvMultipleDataProvider(): array
     {
 
         // destination and path
@@ -267,7 +267,7 @@ class CsvDestinationDriverTest extends TestCase
      * @param string $destination
      * @param string $path
      * @param array $newRecord
-     * @param string $finalData
+     * @param array $finalData
      *
      * @dataProvider csvWriteDataProvider
      */
@@ -320,7 +320,7 @@ class CsvDestinationDriverTest extends TestCase
         $driver->write($newRecord);
     }
 
-    public function csvWriteDataProvider()
+    public function csvWriteDataProvider(): array
     {
         // destination and path
         $ret = $this->csvSourceDataProvider();

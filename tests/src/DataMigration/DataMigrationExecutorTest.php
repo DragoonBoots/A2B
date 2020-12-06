@@ -145,7 +145,7 @@ class DataMigrationExecutorTest extends TestCase
         $executor->execute($migration, $sourceDriver, $destinationDriver);
     }
 
-    public function testExecuteWithOrphans()
+    public function testExecuteWithOrphans(): array
     {
         $testSourceData = [
             [
@@ -347,13 +347,13 @@ class DataMigrationExecutorTest extends TestCase
 
     /**
      * @param string $decision
-     * @param bool   $written
-     * @param array  $context
+     * @param bool $written
+     * @param array $context
      *
      * @dataProvider orphanCheckDataProvider
      * @depends      testExecuteWithOrphans
      */
-    public function testAskAboutOrphansCheckEach($decision, $written, $context)
+    public function testAskAboutOrphansCheckEach(string $decision, bool $written, array $context)
     {
         /** @var DataMigrationInterface|MockObject $migration */
         /** @var DestinationDriverInterface|MockObject $destinationDriver */
@@ -405,7 +405,7 @@ class DataMigrationExecutorTest extends TestCase
         $executor->askAboutOrphans($orphans, $migration, $destinationDriver);
     }
 
-    public function orphanCheckDataProvider()
+    public function orphanCheckDataProvider(): array
     {
         return [
             'keep' => [

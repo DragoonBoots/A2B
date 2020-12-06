@@ -22,6 +22,8 @@ test:
 pages:
   stage: deploy
   when: always
+  only:
+    - master
   allow_failure: true
   image: sphinxdoc/sphinx
   script:

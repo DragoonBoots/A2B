@@ -10,14 +10,12 @@ test:
   before_script:
     # Install dependencies
     - apk update
-    - apk add git php7-dev gcc g++ make abuild binutils icu-dev zlib-dev libzip-dev
+    - apk add git php7-dev gcc g++ make abuild binutils icu-dev zlib-dev libzip-dev composer
     - docker-php-ext-install intl zip
     # Install & enable Xdebug for code coverage reports
     - pecl install xdebug
     - docker-php-ext-enable xdebug
-    # Install and run Composer
-    - curl -sS https://getcomposer.org/installer | php
-    - php composer.phar install
+    - composer install
   script:
     - vendor/bin/simple-phpunit --configuration phpunit.xml.dist --coverage-text --colors=never
 

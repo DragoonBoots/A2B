@@ -1,55 +1,60 @@
 {
-    "name": "dragoonboots/a2b",
-    "description": "PHP data migration/transformation library",
-    "type": "symfony-bundle",
-    "homepage": "https://dragoonboots.gitlab.io/a2b/index.html",
-    "readme": "https://gitlab.com/DragoonBoots/a2b/raw/master/README.md",
-    "support": {
-        "issues": "https://gitlab.com/DragoonBoots/a2b/issues",
-        "source": "https://gitlab.com/DragoonBoots/a2b",
-        "docs": "https://dragoonboots.gitlab.io/a2b/index.html"
-    },
-    "license": "LGPL-3.0-only",
-    "authors": [
-        {
-            "name": "Dan Keenan",
-            "email": "dk@dankeenan.org"
-        }
-    ],
-    "require": {
-        "php": "^7.3",
-        "ext-json": "*",
-        "doctrine/annotations": "^1.6",
-        "doctrine/collections": "^1.5",
-        "doctrine/doctrine-bundle": "^2.0",
-        "league/csv": "^9.1",
-        "doctrine/inflector": "^2.0",
-        "symfony/yaml": "^4.1|^5.0",
-        "symfony/framework-bundle": "^4.1|^5.0",
-        "symfony/var-dumper": "^4.1|^5.0",
-        "symfony/proxy-manager-bridge": "^4.1|^5.0",
-        "symfony/console": "^4.1|^5.0",
-        "marcj/topsort": "^1.1",
-        "symfony/finder": "^4.1|^5.0",
-        "doctrine/orm": "^2.6",
-        "symfony/property-access": "^4.1|^5.0"
-    },
-    "require-dev": {
-        "symfony/phpunit-bridge": "^4.1|^5.0",
-        "mikey179/vfsstream": "^1.6",
-        "symfony/maker-bundle": "^1.5"
-    },
-    "suggest": {
-        "symfony/maker-bundle": "Generate migrations from the command line."
-    },
-    "autoload": {
-        "psr-4": {
-            "DragoonBoots\\A2B\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "DragoonBoots\\A2B\\Tests\\": "tests/src"
-        }
+  "name": "dragoonboots/a2b",
+  "description": "PHP data migration/transformation library",
+  "type": "symfony-bundle",
+  "homepage": "https://dragoonboots.gitlab.io/a2b/index.html",
+  "readme": "https://gitlab.com/DragoonBoots/a2b/raw/master/README.md",
+  "support": {
+    "issues": "https://gitlab.com/DragoonBoots/a2b/issues",
+    "source": "https://gitlab.com/DragoonBoots/a2b",
+    "docs": "https://dragoonboots.gitlab.io/a2b/index.html"
+  },
+  "license": "LGPL-3.0-only",
+  "authors": [
+    {
+      "name": "Dan Keenan",
+      "email": "dk@dankeenan.org"
     }
+  ],
+  "require": {
+    "php": "^7.3",
+    "ext-json": "*",
+    "doctrine/annotations": "^1.6",
+    "doctrine/collections": "^1.5",
+    "doctrine/doctrine-bundle": "^2.0",
+    "league/csv": "^9.1",
+    "doctrine/inflector": "^2.0",
+    "symfony/yaml": "^4.1|^5.0",
+    "symfony/framework-bundle": "^4.1|^5.0",
+    "symfony/var-dumper": "^4.1|^5.0",
+    "symfony/proxy-manager-bridge": "^4.1|^5.0",
+    "symfony/console": "^4.1|^5.0",
+    "marcj/topsort": "^1.1",
+    "symfony/finder": "^4.1|^5.0",
+    "doctrine/orm": "^2.6",
+    "symfony/property-access": "^4.1|^5.0"
+  },
+  "require-dev": {
+    "symfony/phpunit-bridge": "^4.1|^5.0",
+    "mikey179/vfsstream": "^1.6",
+    "symfony/maker-bundle": "^1.5"
+  },
+  "suggest": {
+    "symfony/maker-bundle": "Generate migrations from the command line."
+  },
+  "autoload": {
+    "psr-4": {
+      "DragoonBoots\\A2B\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DragoonBoots\\A2B\\Tests\\": "tests/src"
+    }
+  },
+  "scripts": {
+    "build-doc": [
+        "sphinx-build -b html doc doc/_build"
+    ]
+  }
 }

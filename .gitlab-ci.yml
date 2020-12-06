@@ -25,9 +25,9 @@ pages:
   only:
     - master
   allow_failure: true
-  image: daux/daux.io
+  image: sphinxdoc/sphinx
   script:
-    - daux generate --source=docs --destination=public
+    - sphinx-build -b html doc public
   artifacts:
     paths:
       - public

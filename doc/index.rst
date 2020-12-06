@@ -47,11 +47,3 @@ Add the following to your composer.json
    }
 
 Then run ``composer require dragoonboots/a2b:dev-master``.
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

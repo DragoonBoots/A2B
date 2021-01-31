@@ -14,7 +14,6 @@ use DragoonBoots\A2B\Drivers\Destination\DebugDestinationDriver;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Drivers\SourceDriverInterface;
-use PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -320,15 +319,15 @@ class MigrateCommandTest extends TestCase
 
     /**
      * @param array $input
-     * @param InvokedRecorder $askAboutOrphansCount
-     * @param InvokedRecorder $writeOrphansCount
+     * @param int $askAboutOrphansCount
+     * @param int $writeOrphansCount
      *
      * @dataProvider orphanOptionDataProvider
      */
     public function testExecuteWithOrphans(
         array $input,
-        InvokedRecorder $askAboutOrphansCount,
-        InvokedRecorder $writeOrphansCount
+        int $askAboutOrphansCount,
+        int $writeOrphansCount
     ) {
         $this->setUpCommand();
         $this->driverManager->expects($this->atLeastOnce())
@@ -352,10 +351,10 @@ class MigrateCommandTest extends TestCase
             ->method('execute')
             ->with($this->migration1, $this->sourceDriver, $this->destinationDriver)
             ->willReturn($orphans);
-        $this->executor->expects($askAboutOrphansCount)
+        $this->executor->expects($askAboutOrphansCount ? $this->atLeast($askAboutOrphansCount) : $this->never())
             ->method('askAboutOrphans')
             ->with($orphans, $this->migration1, $this->destinationDriver);
-        $this->executor->expects($writeOrphansCount)
+        $this->executor->expects($writeOrphansCount ? $this->atLeast($writeOrphansCount) : $this->never())
             ->method('writeOrphans')
             ->with($orphans, $this->migration1, $this->destinationDriver);
         $tester = new CommandTester($this->command);
@@ -369,25 +368,25 @@ class MigrateCommandTest extends TestCase
                 // Input
                 [],
                 // askAboutOrphans count
-                $this->atLeastOnce(),
+                1,
                 // writeOrphans count
-                $this->never(),
+                0,
             ],
             'prune' => [
                 // Input
                 ['--prune' => true],
                 // askAboutOrphans count
-                $this->never(),
+                0,
                 // writeOrphans count
-                $this->never(),
+                0,
             ],
             'preserve' => [
                 // Input
                 ['--preserve' => true],
                 // askAboutOrphans count
-                $this->never(),
+                0,
                 // writeOrphans count
-                $this->atLeastOnce(),
+                1,
             ],
         ];
     }

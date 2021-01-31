@@ -17,29 +17,32 @@
     }
   ],
   "require": {
-    "php": "^7.3|^8.0",
-    "ext-json": "*",
     "doctrine/annotations": "^1.6",
     "doctrine/collections": "^1.5",
     "doctrine/doctrine-bundle": "^2.0",
-    "league/csv": "^9.1",
     "doctrine/inflector": "^2.0",
-    "symfony/yaml": "^4.1|^5.0",
-    "symfony/framework-bundle": "^4.1|^5.0",
-    "symfony/var-dumper": "^4.1|^5.0",
-    "symfony/proxy-manager-bridge": "^4.1|^5.0",
-    "symfony/console": "^4.1|^5.0",
-    "marcj/topsort": "^1.1",
-    "symfony/finder": "^4.1|^5.0",
     "doctrine/orm": "^2.6",
-    "symfony/property-access": "^4.1|^5.0"
+    "ext-json": "*",
+    "league/csv": "^9.1",
+    "marcj/topsort": "^1.1",
+    "php": "^7.3|^8.0",
+    "php-ds/php-ds": "^1.3",
+    "symfony/console": "^4.1|^5.0",
+    "symfony/doctrine-bridge": "<=5.2.1",
+    "symfony/finder": "^4.1|^5.0",
+    "symfony/framework-bundle": "^4.1|^5.0",
+    "symfony/property-access": "^4.1|^5.0",
+    "symfony/proxy-manager-bridge": "^4.1|^5.0",
+    "symfony/var-dumper": "^4.1|^5.0",
+    "symfony/yaml": "^4.1|^5.0"
   },
   "require-dev": {
-    "symfony/phpunit-bridge": "^4.1|^5.0",
     "mikey179/vfsstream": "^1.6",
-    "symfony/maker-bundle": "^1.5"
+    "symfony/maker-bundle": "^1.5",
+    "symfony/phpunit-bridge": "^4.1|^5.0"
   },
   "suggest": {
+    "ext-ds": "Can greatly increase performance",
     "symfony/maker-bundle": "Generate migrations from the command line."
   },
   "autoload": {
@@ -54,7 +57,7 @@
   },
   "scripts": {
     "build-doc": [
-        "sphinx-build -n -W --keep-going -b html doc doc/_build"
+      "sphinx-build -n -W --keep-going -b html doc doc/_build"
     ]
   }
 }

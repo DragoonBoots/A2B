@@ -6,6 +6,7 @@ namespace DragoonBoots\A2B\DataMigration;
 
 use DragoonBoots\A2B\Drivers\DriverManagerInterface;
 use DragoonBoots\A2B\Exception\NoMappingForIdsException;
+use Ds\Map;
 
 class MigrationReferenceStore implements MigrationReferenceStoreInterface
 {
@@ -30,7 +31,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
      *
      * @var array
      */
-    protected $entities = [];
+    protected $entities;
 
     /**
      * MigrationReferenceStore constructor.
@@ -44,6 +45,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
         $this->mapper = $mapper;
         $this->migrationManager = $migrationManager;
         $this->driverManager = $driverManager;
+        $this->entities = new Map();
     }
 
     /**
@@ -51,9 +53,9 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
      */
     public function get(string $migrationId, array $sourceIds, bool $stub = false)
     {
-        $key = serialize([$migrationId, $sourceIds]);
+        $key = [$migrationId, $sourceIds];
 
-        if (!array_key_exists($key, $this->entities)) {
+        if (!$this->entities->hasKey($key)) {
             $stubbed = false;
 
             $dataMigration = $this->migrationManager->getMigration($migrationId);
@@ -89,12 +91,12 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
             }
 
             if (!$stubbed) {
-                $this->entities[$key] = $entity;
+                $this->entities->put($key, $entity);
             }
 
             unset($destinationDriver);
         } else {
-            $entity = $this->entities[$key];
+            $entity = $this->entities->get($key);
         }
 
         return $entity;
@@ -106,6 +108,6 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
     public function freeMemory(): void
     {
         // Clear internal entity cache.
-        $this->entities = [];
+        $this->entities->clear();
     }
 }

@@ -33,3 +33,25 @@ jobs:
         run: composer install
       - name: Run tests
         run: vendor/bin/simple-phpunit --configuration phpunit.xml.dist --coverage-text --colors=never
+
+  pages:
+    runs-on: ubuntu-latest
+    # TODO
+    #    if: ${{github.ref == 'refs/heads/master'}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install conan sphinx
+      - name: Build pages
+        run: sphinx-build -n -W --keep-going -b html doc public
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ github.workspace }}/public

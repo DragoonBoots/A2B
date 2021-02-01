@@ -135,6 +135,7 @@ class DataMigrationExecutor implements DataMigrationExecutorInterface
         }
 
         // Cleanup
+        $migration->cleanup();
         $this->freeMemoryIfNeeded(0.5);
         unset(
             $this->migration,

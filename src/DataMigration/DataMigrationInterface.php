@@ -51,6 +51,13 @@ interface DataMigrationInterface
     public function defaultResult();
 
     /**
+     * Cleanup any cached data.
+     *
+     * The default implementation does nothing.
+     */
+    public function cleanup(): void;
+
+    /**
      * Get the settings defined for this migration.
      *
      * This will only be set for migrations retrieved from the

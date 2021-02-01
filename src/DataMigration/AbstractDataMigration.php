@@ -61,6 +61,14 @@ abstract class AbstractDataMigration implements DataMigrationInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function cleanup(): void
+    {
+        // Do nothing
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @codeCoverageIgnore

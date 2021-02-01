@@ -13,6 +13,7 @@ Introduction
 ------------
 
 A2B is a data migration tool for Symfony.  Features include:
+
 * Built-in and custom sources and destinations
 * Tracks previously migrated data, allowing old data to remain in use while new data is prepared
 * Supports complex data sources where one row may reference another

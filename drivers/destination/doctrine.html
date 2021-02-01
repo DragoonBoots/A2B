@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doctrine ORM &#8212; A2B 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="YAML" href="yaml.html" />
+    <link rel="prev" title="CSV" href="csv.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="yaml.html" title="YAML"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="csv.html" title="CSV"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../drivers.html" accesskey="U">Drivers</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Doctrine ORM</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="doctrine-orm">
+<h1>Doctrine ORM<a class="headerlink" href="#doctrine-orm" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">DoctrineDestinationDriver</span></code> writes to <a class="reference external" href="https://www.doctrine-project.org/projects/doctrine-orm/en/current/index.html">Doctrine ORM</a>
+entities.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Use the FQCN of the result entity class as the <code class="docutils literal notranslate"><span class="pre">destination</span></code>.</p>
+<p>Be sure to override <code class="docutils literal notranslate"><span class="pre">defaultResult()</span></code> to return a new entity.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * {@inheritdoc}</span>
+<span class="sd"> */</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">defaultResult</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nx">\App\Entity\Generation</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The default entity manager is used. The entity manager and repository
+for the applicable entity is available with
+<code class="docutils literal notranslate"><span class="pre">$destinationDriver-&gt;getEm()</span></code> and <code class="docutils literal notranslate"><span class="pre">$destinationDriver-&gt;getRepo()</span></code>.</p>
+<p>If the application requires multiple entity managers, be sure to declare
+the entity manager your migration requires in the service configuration:</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * @var EntityManagerInterface</span>
+<span class="sd"> */</span>
+<span class="k">protected</span> <span class="nv">$em</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">function</span> <span class="fm">__construct</span><span class="p">(</span><span class="nx">MigrationReferenceStoreInterface</span> <span class="nv">$referenceStore</span><span class="p">,</span> <span class="nx">EntityManagerInterface</span> <span class="nv">$em</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">parent</span><span class="o">::</span><span class="na">__construct</span><span class="p">(</span><span class="nv">$referenceStore</span><span class="p">);</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">em</span> <span class="o">=</span> <span class="nv">$em</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * {@inheritdoc}</span>
+<span class="sd"> * @param DoctrineDestinationDriver $destinationDriver</span>
+<span class="sd"> */</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setEm</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">em</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Doctrine ORM</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="csv.html"
+                        title="previous chapter">CSV</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="yaml.html"
+                        title="next chapter">YAML</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/drivers/destination/doctrine.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="yaml.html" title="YAML"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="csv.html" title="CSV"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../drivers.html" >Drivers</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Doctrine ORM</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Dan Keenan.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

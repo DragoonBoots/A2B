@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configuration &#8212; A2B 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Drivers" href="../drivers.html" />
+    <link rel="prev" title="Running Migrations" href="running_migrations.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../drivers.html" title="Drivers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="running_migrations.html" title="Running Migrations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../usage.html" accesskey="U">Usage</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Configuration</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>A2B is designed to work with most ETL needs out of the box. If you find
+something that may require additional configuration, <a class="reference external" href="https://gitlab.com/dragoonboots-packages/a2b/-/issues">file an
+issue</a>.</p>
+<div class="section" id="sources-and-destinations">
+<span id="config-sources-destinations"></span><h2>Sources and Destinations<a class="headerlink" href="#sources-and-destinations" title="Permalink to this headline">¶</a></h2>
+<p>Oftentimes data must be extracted from a single source (e.g. an old
+database) for many different migrations. To avoid repetition, a special
+key may be used.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">config/packages/a2b.yaml</span></code>, define static sources and destinations:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">a2b</span><span class="p">:</span>
+  <span class="nt">sources</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">old_db</span>
+      <span class="nt">uri</span><span class="p">:</span> <span class="s">&#39;sqlite:///srv/data/db.sqlite&#39;</span>
+      <span class="nt">driver</span><span class="p">:</span> <span class="s">&#39;DragoonBoots\A2B\Drivers\Source\DbalSourceDriver&#39;</span>
+  <span class="nt">destinations</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">entity_user</span>
+      <span class="nt">uri</span><span class="p">:</span> <span class="s">&#39;App\Entity\User&#39;</span>
+      <span class="nt">driver</span><span class="p">:</span> <span class="s">&#39;DragoonBoots\A2B\Drivers\Destination\DoctrineDestinationDriver&#39;</span>
+</pre></div>
+</div>
+<p>These can then be used in place of a URI in the migration definition:</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * Example migration</span>
+<span class="sd"> *</span>
+<span class="sd"> * @DataMigration(</span>
+<span class="sd"> *     name=&quot;Example&quot;,</span>
+<span class="sd"> *     group=&quot;Test&quot;,</span>
+<span class="sd"> *     source=&quot;old_db&quot;,</span>
+<span class="sd"> *     destination=&quot;entity_user&quot;,</span>
+<span class="sd"> *     sourceIds={@IdField(name=&quot;id&quot;)},</span>
+<span class="sd"> *     destinationIds={@IdField(name=&quot;id&quot;)}</span>
+<span class="sd"> * )</span>
+<span class="sd"> */</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#sources-and-destinations">Sources and Destinations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="running_migrations.html"
+                        title="previous chapter">Running Migrations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../drivers.html"
+                        title="next chapter">Drivers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/usage/configuration.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../drivers.html" title="Drivers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="running_migrations.html" title="Running Migrations"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../usage.html" >Usage</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Configuration</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Dan Keenan.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creating Migrations &#8212; A2B 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Running Migrations" href="running_migrations.html" />
+    <link rel="prev" title="Usage" href="../usage.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="running_migrations.html" title="Running Migrations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../usage.html" title="Usage"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../usage.html" accesskey="U">Usage</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Creating Migrations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="creating-migrations">
+<h1>Creating Migrations<a class="headerlink" href="#creating-migrations" title="Permalink to this headline">¶</a></h1>
+<p>All data migrations have some basic things in common:</p>
+<ul class="simple">
+<li><p>They must implement
+<code class="docutils literal notranslate"><span class="pre">DragoonBoots\A2B\DataMigration\DataMigrationInterface</span></code></p></li>
+<li><p>They will probably want to extend
+<code class="docutils literal notranslate"><span class="pre">DragoonBoots\A2B\DataMigration\AbstractDataMigration</span></code></p></li>
+<li><p>They must be annotated with
+<code class="docutils literal notranslate"><span class="pre">DragoonBoots\A2B\Annotations\DataMigration</span></code></p></li>
+</ul>
+<div class="section" id="maker">
+<h2>Maker<a class="headerlink" href="#maker" title="Permalink to this headline">¶</a></h2>
+<p>If you have the <a class="reference external" href="https://symfony.com/doc/current/bundles/SymfonyMakerBundle/index.html">Symfony MakerBundle</a>
+installed, you may generate a basic data migration skeleton:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>php bin/console make:a2b:migration &lt;Migration Name&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="definition">
+<h2>Definition<a class="headerlink" href="#definition" title="Permalink to this headline">¶</a></h2>
+<p>All data migrations have their configuration defined in their
+<code class="docutils literal notranslate"><span class="pre">&#64;DataMigration</span></code> annotation. Here’s an example:</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="k">use</span> <span class="nx">DragoonBoots\A2B\Annotations\DataMigration</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">DragoonBoots\A2B\Annotations\IdField</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">DragoonBoots\A2B\DataMigration\AbstractDataMigration</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">DragoonBoots\A2B\DataMigration\DataMigrationInterface</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">DragoonBoots\A2B\Drivers\DestinationDriverInterface</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">DragoonBoots\A2B\Drivers\SourceDriverInterface</span><span class="p">;</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * Example migration</span>
+<span class="sd"> *</span>
+<span class="sd"> * @DataMigration(</span>
+<span class="sd"> *     name=&quot;Example&quot;,</span>
+<span class="sd"> *     group=&quot;Test&quot;,</span>
+<span class="sd"> *     source=&quot;sqlite:///%kernel.project_dir%/resources/sourcedb.sqlite&quot;,</span>
+<span class="sd"> *     sourceDriver=&quot;DragoonBoots\A2B\Drivers\Source\DbalSourceDriver&quot;,</span>
+<span class="sd"> *     destination=&quot;/%kernel.project_dir%/resources/data/data.csv&quot;,</span>
+<span class="sd"> *     destinationDriver=&quot;DragoonBoots\A2B\Drivers\Destination\CsvDestinationDriver&quot;,</span>
+<span class="sd"> *     sourceIds={@IdField(name=&quot;id&quot;)},</span>
+<span class="sd"> *     destinationIds={@IdField(name=&quot;identifier&quot;, type=&quot;string&quot;)},</span>
+<span class="sd"> *     depends={&quot;App\Migrations\DependentMigration&quot;}</span>
+<span class="sd"> * )</span>
+<span class="sd"> */</span>
+ <span class="k">public</span> <span class="k">class</span> <span class="nc">ExampleMigration</span> <span class="k">extends</span> <span class="nx">AbstractDataMigration</span>
+ <span class="p">{</span>
+    <span class="c1">// Implementation</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="name">
+<h3>name<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h3>
+<p>The user-friendly name of the migration. This should (but isn’t
+necessarily required to) be unique.</p>
+</div>
+<div class="section" id="group">
+<h3>group<a class="headerlink" href="#group" title="Permalink to this headline">¶</a></h3>
+<p>Migrations may be separated into logical groups. When running
+migrations, groups may be used to run only a subset.</p>
+</div>
+<div class="section" id="source-destination">
+<h3>source/destination<a class="headerlink" href="#source-destination" title="Permalink to this headline">¶</a></h3>
+<p>Set the source/destination for this migration. This is used differently
+depending on the selected driver. See the <a class="reference internal" href="../drivers.html"><span class="doc">list of
+drivers</span></a> for details on valid values.</p>
+<p>Common values may be defined in configuration to avoid repeating the
+same URL. See <a class="reference internal" href="configuration.html#config-sources-destinations"><span class="std std-ref">Sources and Destinations</span></a> for details.</p>
+</div>
+<div class="section" id="sourcedriver-destinationdriver">
+<h3>sourceDriver/destinationDriver<a class="headerlink" href="#sourcedriver-destinationdriver" title="Permalink to this headline">¶</a></h3>
+<p>Specify the FQCN of the desired driver here.</p>
+</div>
+<div class="section" id="sourceids-destinationids">
+<h3>sourceIds/destinationIds<a class="headerlink" href="#sourceids-destinationids" title="Permalink to this headline">¶</a></h3>
+<p>A list of <code class="docutils literal notranslate"><span class="pre">&#64;IdField</span></code> annotations specifying ids. This is used to map
+source rows to their destinations and allow for updating. Each
+<code class="docutils literal notranslate"><span class="pre">&#64;IdField</span></code> has a <code class="docutils literal notranslate"><span class="pre">name</span></code> field for the name of the source/destination
+id and an optional <code class="docutils literal notranslate"><span class="pre">type</span></code> field to specify the data type. Valid data
+types are <code class="docutils literal notranslate"><span class="pre">int</span></code> and <code class="docutils literal notranslate"><span class="pre">string</span></code>; the default is <code class="docutils literal notranslate"><span class="pre">int</span></code>.</p>
+</div>
+<div class="section" id="depends">
+<h3>depends<a class="headerlink" href="#depends" title="Permalink to this headline">¶</a></h3>
+<p><em>(optional)</em> A list of migration FQCNs that must be run before this
+migration.</p>
+</div>
+<div class="section" id="flush">
+<span id="creating-migrations-definition-flush"></span><h3>flush<a class="headerlink" href="#flush" title="Permalink to this headline">¶</a></h3>
+<p><em>(optional)</em> Set this to <code class="docutils literal notranslate"><span class="pre">true</span></code> to flush transformed entities to the
+destination immediately, instead of waiting until all entities have been
+transformed. The effect this can have depends on the destination driver
+in use.</p>
+</div>
+<div class="section" id="extends">
+<span id="creating-migrations-definition-extends"></span><h3>extends<a class="headerlink" href="#extends" title="Permalink to this headline">¶</a></h3>
+<p><em>(optional)</em> The name of a migration that this logically extends. This
+is uncommon, but may be useful if migrated data references itself and
+requires multiple passes to process. When a migration extends a
+different migration, it will share mapper data with the parent
+migration. <em>Note that the parent migration is not automatically added as
+a dependency!</em> For this to succeed, the source and destination
+properties must match.</p>
+</div>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>At the beginning of the migration process, the <code class="docutils literal notranslate"><span class="pre">configureSource()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">configureDestination()</span></code> methods are called. This is where the
+selected drivers are configured for running the migration. For example,
+if the source is a database, the source query is set in
+<code class="docutils literal notranslate"><span class="pre">configureSource</span></code>.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="k">public</span> <span class="k">function</span> <span class="nf">configureSource</span><span class="p">(</span><span class="nx">SourceDriverInterface</span> <span class="nv">$sourceDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Configure the source driver</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Configure the destination driver</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>See the driver documentation for details on how it must be configured.</p>
+<div class="section" id="default-result">
+<h3>Default result<a class="headerlink" href="#default-result" title="Permalink to this headline">¶</a></h3>
+<p>If the entity being migrated does not exist in the target, the
+migration’s <code class="docutils literal notranslate"><span class="pre">defaultResult()</span></code> method is called to retrieve an empty
+entity. This could be an empty array (the default implementation) or a
+new Doctrine ORM entity. This default result is then passed to
+<code class="docutils literal notranslate"><span class="pre">transform()</span></code> to be worked on.</p>
+</div>
+</div>
+<div class="section" id="transformation">
+<h2>Transformation<a class="headerlink" href="#transformation" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">transform()</span></code> method is where the meat of the migration occurs.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="k">public</span> <span class="k">function</span> <span class="nf">transform</span><span class="p">(</span><span class="k">array</span> <span class="nv">$sourceData</span><span class="p">,</span> <span class="nv">$destinationData</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Migrate data</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">$sourceData</span></code> is a single row from the source driver.
+<code class="docutils literal notranslate"><span class="pre">$destinationData</span></code> is the result as it currently exists in the
+destination (for updating) or a new result from <code class="docutils literal notranslate"><span class="pre">defaultResult()</span></code>.</p>
+<p>Once the result has been appropriately transformed, it is returned to be
+written to the destination.</p>
+<div class="section" id="getting-data-from-other-migrations">
+<h3>Getting data from other migrations<a class="headerlink" href="#getting-data-from-other-migrations" title="Permalink to this headline">¶</a></h3>
+<p>If the migration requires data from other migrations, use the reference
+store:</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="nv">$sourceIds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span> <span class="o">=&gt;</span> <span class="nv">$sourceData</span><span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">]];</span>
+<span class="nv">$referencedEntity</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">referenceStore</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="nx">OtherMigration</span><span class="o">::</span><span class="na">class</span><span class="p">,</span> <span class="nv">$sourceIds</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This will read the data written from the given migration (in this
+example, OtherMigration) with the given set of source ids.</p>
+<div class="section" id="handling-broken-references">
+<h4>Handling broken references<a class="headerlink" href="#handling-broken-references" title="Permalink to this headline">¶</a></h4>
+<p>On occasion, the transformation must reference an entity that does not
+yet exist. Stub entities can be automatically generated to handle this
+case. At present, this functionality is only available for the
+<a class="reference internal" href="../drivers/destination/doctrine.html"><span class="doc">DoctrineDestinationDriver</span></a>
+to help with entity relationships.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This process can seriously impact performance. It should only
+be used as a last resort when dependent migrations are not possible,
+e.g. an entity that references other entities of the same type.</p>
+</div>
+<p>To avoid odd bugs in the migration process, set <a class="reference internal" href="#creating-migrations-definition-flush"><span class="std std-ref">flush</span></a>
+to <code class="docutils literal notranslate"><span class="pre">true</span></code> in the <code class="docutils literal notranslate"><span class="pre">&#64;DataMigration</span></code> annotation. Skipping this step
+could lead to the stub and/or entities referencing it not being updated
+properly when it is migrated.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">true</span></code> as the final argument to <code class="docutils literal notranslate"><span class="pre">referenceStore-&gt;get()</span></code> to
+receive a stub if the entity does not exist in the destination. This
+stub will be generated from that migration’s <code class="docutils literal notranslate"><span class="pre">defaultResult()</span></code> method
+with random data filled in the non-nullable fields to allow it to be
+written to the database.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="nv">$sourceIds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span> <span class="o">=&gt;</span> <span class="nv">$sourceData</span><span class="p">[</span><span class="s1">&#39;reference&#39;</span><span class="p">]];</span>
+<span class="nv">$referencedEntity</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">referenceStore</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="nx">OtherMigration</span><span class="o">::</span><span class="na">class</span><span class="p">,</span> <span class="nv">$sourceIds</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If the transformation logic must behave differently on stubs, check if
+the entity id field(s) are set. Id fields are not automatically filled
+in by the stub generation process.</p>
+<p>If a stub is created, any created entities will be flushed to the
+database immediately.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An alternative to the stubbing process is to write a separate
+migration that acts as a second pass. Use the <a class="reference internal" href="#creating-migrations-definition-extends"><span class="std std-ref">extends</span></a>
+property in the annotation to declare a migration as an extension. For this
+to succeed, the source and destination properties must match. Depending on
+the data, this may have a less severe performance impact.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Creating Migrations</a><ul>
+<li><a class="reference internal" href="#maker">Maker</a></li>
+<li><a class="reference internal" href="#definition">Definition</a><ul>
+<li><a class="reference internal" href="#name">name</a></li>
+<li><a class="reference internal" href="#group">group</a></li>
+<li><a class="reference internal" href="#source-destination">source/destination</a></li>
+<li><a class="reference internal" href="#sourcedriver-destinationdriver">sourceDriver/destinationDriver</a></li>
+<li><a class="reference internal" href="#sourceids-destinationids">sourceIds/destinationIds</a></li>
+<li><a class="reference internal" href="#depends">depends</a></li>
+<li><a class="reference internal" href="#flush">flush</a></li>
+<li><a class="reference internal" href="#extends">extends</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li><a class="reference internal" href="#default-result">Default result</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transformation">Transformation</a><ul>
+<li><a class="reference internal" href="#getting-data-from-other-migrations">Getting data from other migrations</a><ul>
+<li><a class="reference internal" href="#handling-broken-references">Handling broken references</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../usage.html"
+                        title="previous chapter">Usage</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="running_migrations.html"
+                        title="next chapter">Running Migrations</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/usage/creating_migrations.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="running_migrations.html" title="Running Migrations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../usage.html" title="Usage"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../usage.html" >Usage</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Creating Migrations</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Dan Keenan.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

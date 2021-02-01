@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upgrading &#8212; A2B 2.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="YAML" href="drivers/destination/yaml.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="drivers/destination/yaml.html" title="YAML"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">A2B 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Upgrading</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="upgrading">
+<h1>Upgrading<a class="headerlink" href="#upgrading" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="x-to-2-x">
+<h2>1.x to 2.x<a class="headerlink" href="#x-to-2-x" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Sources and Destinations are no longer URLs. This allows using PHP
+streams or other complex sources. It also cleans up many edge cases
+around what is a valid URL (e.g. class names).</p></li>
+<li><p>Because of this, drivers now must be specified in the migration
+annotation.</p></li>
+<li><p>If you use source/destination keys, there is a new <code class="docutils literal notranslate"><span class="pre">driver</span></code> option
+that must be specified along with the name and uri. (See <a class="reference internal" href="usage/configuration.html"><span class="doc">Configuration</span></a>)</p></li>
+<li><p>The <a class="reference internal" href="drivers/destination/doctrine.html"><span class="doc">DoctrineDestinationDriver</span></a> now
+uses proper backslashes (“<code class="docutils literal notranslate"><span class="pre">\</span></code>”) for class names.</p></li>
+<li><p>If your project uses custom drivers, note that they no longer depend
+on the URI Parser. Update your code accordingly.</p>
+<ul>
+<li><p>Driver annotations no longer specify supported schemes.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">sourceIds</span></code> and <code class="docutils literal notranslate"><span class="pre">destIds</span></code> properties of source and
+destination drivers respectively have both been renamed to <code class="docutils literal notranslate"><span class="pre">ids</span></code>
+to simplify maintenance.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">sourceUri</span></code> and <code class="docutils literal notranslate"><span class="pre">destUri</span></code> properties of source and
+destination drivers respectively have both been removed. Get the
+source/destination from the migration definition instead.</p></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Upgrading</a><ul>
+<li><a class="reference internal" href="#x-to-2-x">1.x to 2.x</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="drivers/destination/yaml.html"
+                        title="previous chapter">YAML</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/upgrading.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="drivers/destination/yaml.html" title="YAML"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">A2B 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Upgrading</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Dan Keenan.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,332 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YAML &#8212; A2B 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Upgrading" href="../../upgrading.html" />
+    <link rel="prev" title="Doctrine ORM" href="doctrine.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../upgrading.html" title="Upgrading"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="doctrine.html" title="Doctrine ORM"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../drivers.html" accesskey="U">Drivers</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">YAML</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="yaml">
+<h1>YAML<a class="headerlink" href="#yaml" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">YamlDestinationDriver</span></code> writes all results from a migration to a
+series of YAML files.</p>
+<p>One YAML file is created for each migrated entity. If your migration has
+more than one id defined, subdirectories will be created, as in the
+example below:</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * @DataMigration(</span>
+<span class="sd"> *     name=&quot;Example Yaml Migration&quot;,</span>
+<span class="sd"> *     source=&quot;sqlite:///%kernel.project_dir%/resources/source.sqlite&quot;,</span>
+<span class="sd"> *     sourceIds={@IdField(name=&quot;id&quot;)},</span>
+<span class="sd"> *     destination=&quot;/%kernel.project_dir%/resources/data/example&quot;,</span>
+<span class="sd"> *     destinationIds={@IdField(name=&quot;group&quot;, type=&quot;string&quot;), @IdField(name=&quot;identifier&quot;, type=&quot;string&quot;)}</span>
+<span class="sd"> * )</span>
+<span class="sd"> */</span>
+</pre></div>
+</div>
+<p>where the source data is:</p>
+<table class="colwidths-auto docutils align-left">
+<thead>
+<tr class="row-odd"><th class="head"><p>group</p></th>
+<th class="head"><p>identifier</p></th>
+<th class="head"><p>value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>group1</p></td>
+<td><p>entity1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>group1</p></td>
+<td><p>entity2</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>group2</p></td>
+<td><p>entity3</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>group2</p></td>
+<td><p>entity4</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>will result in this file structure:</p>
+<ul class="simple">
+<li><p>resources/</p>
+<ul>
+<li><p>data/</p>
+<ul>
+<li><p>example/</p>
+<ul>
+<li><p>group1/</p>
+<ul>
+<li><p>entity1.yaml</p></li>
+<li><p>entity2.yaml</p></li>
+</ul>
+</li>
+<li><p>group2/</p>
+<ul>
+<li><p>entity3.yaml</p></li>
+<li><p>entity4.yaml</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>The <a class="reference external" href="https://symfony.com/doc/current/contributing/code/standards.html">Symfony Coding
+Standards</a>
+specify 4 spaces for each level of indentation. However, this tends to
+muck up YAML files with nested lists and maps. As such, all generated
+YAML files use 2 spaces for each level of indentation.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>If the destination directory does not exist, it will be created. All
+subdirectories and YAML files will be created under the directory specified.
+in the <code class="docutils literal notranslate"><span class="pre">destination</span></code> annotation field.</p>
+<p>Some options and flags may be set to configure the YAML dumper:</p>
+<div class="section" id="array-inlining">
+<h3>Array inlining<a class="headerlink" href="#array-inlining" title="Permalink to this headline">¶</a></h3>
+<p>See
+<a class="reference external" href="https://symfony.com/doc/current/components/yaml.html#array-expansion-and-inlining">here</a>
+for more examples on what this affects.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * {@inheritdoc}</span>
+<span class="sd"> * @param YamlDestinationDriver $destinationDriver</span>
+<span class="sd"> */</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Start inlining arrays 5 levels deep</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setOption</span><span class="p">(</span><span class="s1">&#39;inline&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Array inlining is not compatible with automatic reference generation.</p>
+</div>
+</div>
+<div class="section" id="automatic-reference-generation">
+<h3>Automatic reference generation<a class="headerlink" href="#automatic-reference-generation" title="Permalink to this headline">¶</a></h3>
+<p>YAML supports aliases to refer to previously defined content. This is an
+example from the <a class="reference external" href="http://yaml.org/spec/1.2/spec.html">YAML Spec</a>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">First occurrence</span><span class="p">:</span> <span class="nl">&amp;anchor</span> <span class="l l-Scalar l-Scalar-Plain">Foo</span>
+<span class="nt">Second occurrence</span><span class="p">:</span> <span class="nv">*anchor</span>
+<span class="nt">Override anchor</span><span class="p">:</span> <span class="nl">&amp;anchor</span> <span class="l l-Scalar l-Scalar-Plain">Bar</span>
+<span class="nt">Reuse anchor</span><span class="p">:</span> <span class="nv">*anchor</span>
+</pre></div>
+</div>
+<p>The driver can search the output for repeated content and create these
+anchors.</p>
+<p>A few caveats:</p>
+<ul class="simple">
+<li><p>This will significantly increase the time output takes, as the driver
+must create a list of every single value in the result to search for
+repetition.</p></li>
+<li><p>Because this process must occur after the YAML representation has
+been created, it is not compatible with inline array representations.</p></li>
+<li><p>As an automatic process, the driver has no way of determining if two
+repeated values are equal in context. Examine the output before
+editing manually to ensure that a referenced value is used where
+appropriate.</p></li>
+</ul>
+<p>To enable this feature:</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * {@inheritdoc}</span>
+<span class="sd"> * @param YamlDestinationDriver $destinationDriver</span>
+<span class="sd"> */</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Automaticlly generate references for all keys</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setOption</span><span class="p">(</span><span class="s1">&#39;refs&#39;</span><span class="p">,</span> <span class="k">true</span><span class="p">);</span>
+
+    <span class="c1">// Generate references only for keys matching these regular expressions</span>
+    <span class="c1">// Depth is shown with a period (&quot;.&quot;) between each level</span>
+    <span class="c1">// Matches &quot;first.effect&quot;, &quot;test.first.effect&quot;, but not &quot;second.effect&quot;.</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setOption</span><span class="p">(</span><span class="s1">&#39;refs&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;include&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span>
+        <span class="s1">&#39;`.*first\.effect`&#39;</span><span class="p">,</span>
+    <span class="p">]]);</span>
+
+    <span class="c1">// Generate references only for keys NOT matching these regular expressions</span>
+    <span class="c1">// Matches &quot;test.effect&quot; but not &quot;test.short_effect&quot;.</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setOption</span><span class="p">(</span><span class="s1">&#39;refs&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;exclude&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span>
+        <span class="s1">&#39;`.*short_effect.*`&#39;</span><span class="p">,</span>
+    <span class="p">]]);</span>
+
+    <span class="c1">// Generate references with complex requirements</span>
+    <span class="c1">// Matches &quot;test.name&quot;, &quot;test.effect&quot;, but not &quot;test.short_effect&quot;, &quot;other.short_effect&quot;</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setOption</span><span class="p">(</span><span class="s1">&#39;refs&#39;</span><span class="p">,</span> <span class="p">[</span>
+        <span class="s1">&#39;include&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span>
+            <span class="s1">&#39;`test\..+`&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;exclude&#39;</span> <span class="o">=&gt;</span> <span class="p">[</span>
+            <span class="s1">&#39;`.+\.short_effect`&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="advanced-flags">
+<h3>Advanced flags<a class="headerlink" href="#advanced-flags" title="Permalink to this headline">¶</a></h3>
+<p>The Symfony YAML dumper supports a number of flags for advanced use
+cases. See
+<a class="reference external" href="https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags">here</a>
+for a list of flags with examples.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * {@inheritdoc}</span>
+<span class="sd"> * @param YamlDestinationDriver $destinationDriver</span>
+<span class="sd"> */</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Dump objects as YAML maps</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setFlag</span><span class="p">(</span><span class="nx">Yaml</span><span class="o">::</span><span class="na">DUMP_OBJECT_AS_MAP</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>By default, strings with multiple lines (i.e. with one or more <code class="docutils literal notranslate"><span class="pre">\n</span></code>
+characters) are dumped as multi-line literals:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">string</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+    <span class="no">Multiple</span>
+    <span class="no">Line</span>
+    <span class="no">String</span>
+</pre></div>
+</div>
+<p>To change this behavior, use <code class="docutils literal notranslate"><span class="pre">unsetFlag()</span></code>.</p>
+<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+
+<span class="sd">/**</span>
+<span class="sd"> * {@inheritdoc}</span>
+<span class="sd"> * @param YamlDestinationDriver $destinationDriver</span>
+<span class="sd"> */</span>
+<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// Inline multi-line string literals</span>
+    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">unsetFlag</span><span class="p">(</span><span class="nx">Yaml</span><span class="o">::</span><span class="na">DUMP_MULTI_LINE_LITERAL_BLOCK</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">YAML</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#usage">Usage</a><ul>
+<li><a class="reference internal" href="#array-inlining">Array inlining</a></li>
+<li><a class="reference internal" href="#automatic-reference-generation">Automatic reference generation</a></li>
+<li><a class="reference internal" href="#advanced-flags">Advanced flags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="doctrine.html"
+                        title="previous chapter">Doctrine ORM</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../upgrading.html"
+                        title="next chapter">Upgrading</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/drivers/destination/yaml.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../upgrading.html" title="Upgrading"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="doctrine.html" title="Doctrine ORM"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">A2B 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../drivers.html" >Drivers</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">YAML</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Dan Keenan.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+    </div>
+  </body>
+</html>

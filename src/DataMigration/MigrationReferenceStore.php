@@ -36,12 +36,15 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
     /**
      * MigrationReferenceStore constructor.
      *
-     * @param DataMigrationMapperInterface  $mapper
+     * @param DataMigrationMapperInterface $mapper
      * @param DataMigrationManagerInterface $migrationManager
-     * @param DriverManagerInterface        $driverManager
+     * @param DriverManagerInterface $driverManager
      */
-    public function __construct(DataMigrationMapperInterface $mapper, DataMigrationManagerInterface $migrationManager, DriverManagerInterface $driverManager)
-    {
+    public function __construct(
+        DataMigrationMapperInterface $mapper,
+        DataMigrationManagerInterface $migrationManager,
+        DriverManagerInterface $driverManager
+    ) {
         $this->mapper = $mapper;
         $this->migrationManager = $migrationManager;
         $this->driverManager = $driverManager;
@@ -53,14 +56,18 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
      */
     public function get(string $migrationId, array $sourceIds, bool $stub = false)
     {
-        $key = [$migrationId, $sourceIds];
+        // Ensure all keys are stored in the same order.
+        ksort($sourceIds);
+        $key = serialize([$migrationId, $sourceIds]);
 
         if (!$this->entities->hasKey($key)) {
             $stubbed = false;
 
             $dataMigration = $this->migrationManager->getMigration($migrationId);
             $migrationDefinition = $dataMigration->getDefinition();
-            $destinationDriver = clone ($this->driverManager->getDestinationDriver($migrationDefinition->getDestinationDriver()));
+            $destinationDriver = clone($this->driverManager->getDestinationDriver(
+                $migrationDefinition->getDestinationDriver()
+            ));
             $destinationDriver->configure($migrationDefinition);
 
             // If the driver does not support stubbing, disallow it even if
@@ -74,8 +81,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
                 $entity = $destinationDriver->read($destIds);
             } catch (NoMappingForIdsException $e) {
                 if ($stub) {
-                    $entity = $this->mapper->createStub($dataMigration, $sourceIds);
-                    $stubbed = true;
+                    $entity = null;
                 } else {
                     throw $e;
                 }
@@ -93,8 +99,6 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
             if (!$stubbed) {
                 $this->entities->put($key, $entity);
             }
-
-            unset($destinationDriver);
         } else {
             $entity = $this->entities->get($key);
         }

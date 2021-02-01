@@ -1,9 +1,7 @@
 A2B
 ===
 
-[![pipeline status](https://gitlab.com/dragoonboots-packages/a2b/badges/master/pipeline.svg)](https://gitlab.com/dragoonboots-packages/a2b/-/commits/master)
-
-[![coverage report](https://gitlab.com/dragoonboots-packages/a2b/badges/master/coverage.svg)](https://gitlab.com/dragoonboots-packages/a2b/-/commits/master)
+![CI](https://github.com/DragoonBoots/A2B/workflows/CI/badge.svg)
 
 A2B is an Extract/Transform/Load tool for Symfony.  Features include:
 - Built-in and custom sources and destinations

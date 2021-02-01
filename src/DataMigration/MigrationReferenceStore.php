@@ -27,6 +27,13 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
     protected $driverManager;
 
     /**
+     * Cache configured destination drivers
+     *
+     * @var Map
+     */
+    protected $destinationDriverCache;
+
+    /**
      * Cache retrieved entities.
      *
      * @var array
@@ -49,6 +56,7 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
         $this->migrationManager = $migrationManager;
         $this->driverManager = $driverManager;
         $this->entities = new Map();
+        $this->destinationDriverCache = new Map();
     }
 
     /**
@@ -64,11 +72,16 @@ class MigrationReferenceStore implements MigrationReferenceStoreInterface
             $stubbed = false;
 
             $dataMigration = $this->migrationManager->getMigration($migrationId);
-            $migrationDefinition = $dataMigration->getDefinition();
-            $destinationDriver = clone($this->driverManager->getDestinationDriver(
-                $migrationDefinition->getDestinationDriver()
-            ));
-            $destinationDriver->configure($migrationDefinition);
+            if (!$this->destinationDriverCache->hasKey($migrationId)) {
+                $migrationDefinition = $dataMigration->getDefinition();
+                $destinationDriver = clone($this->driverManager->getDestinationDriver(
+                    $migrationDefinition->getDestinationDriver()
+                ));
+                $destinationDriver->configure($migrationDefinition);
+                $this->destinationDriverCache->put($migrationId, $destinationDriver);
+            } else {
+                $destinationDriver = $this->destinationDriverCache->get($migrationId);
+            }
 
             // If the driver does not support stubbing, disallow it even if
             // it has been requested.

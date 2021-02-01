@@ -12,7 +12,7 @@ A2B
 Introduction
 ------------
 
-A2B is a data miration tool for Symfony.  Features include:
+A2B is a data migration tool for Symfony.  Features include:
 * Built-in and custom sources and destinations
 * Tracks previously migrated data, allowing old data to remain in use while new data is prepared
 * Supports complex data sources where one row may reference another
@@ -40,8 +40,8 @@ Add the following to your composer.json
    {
      "repositories": [
        {
-         "type": "composer",
-         "url": "https://gitlab.com/api/v4/group/dragoonboots-packages/-/packages/composer/packages.json"
+         "type": "vcs",
+         "url": "https://github.com/DragoonBoots/A2B.git"
        }
      ]
    }

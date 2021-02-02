@@ -2,6 +2,7 @@
 
 namespace DragoonBoots\A2B\Tests\Drivers\Destination;
 
+use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
 use DragoonBoots\A2B\Annotations\DataMigration;
@@ -65,6 +66,9 @@ class DoctrineDestinationDriverTest extends TestCase
         $this->em->method('getRepository')
             ->with(TestEntity::class)
             ->willReturn($this->repo);
+        $connection = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
+        $this->em->method('getConnection')
+            ->willReturn($connection);
 
         $this->propertyAccess = PropertyAccess::createPropertyAccessor();
 

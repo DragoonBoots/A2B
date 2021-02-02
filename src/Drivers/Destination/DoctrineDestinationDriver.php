@@ -2,8 +2,8 @@
 
 namespace DragoonBoots\A2B\Drivers\Destination;
 
-use Doctrine\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
@@ -50,6 +50,13 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
     private $persistedCount = 0;
 
     /**
+     * Some drivers require a flush for IDs to be populated.
+     *
+     * @var bool
+     */
+    private $flushImmediately;
+
+    /**
      * DoctrineDestinationDriver constructor.
      *
      * @param EntityManagerInterface $em
@@ -61,6 +68,13 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
 
         $this->defaultEm = $em;
         $this->propertyAccess = $propertyAccess;
+
+        // SQLite requires a flush for ids to populate
+        if ($em->getConnection()->getDatabasePlatform()->getName() === 'sqlite') {
+            $this->flushImmediately = true;
+        } else {
+            $this->flushImmediately = false;
+        }
     }
 
     /**
@@ -143,7 +157,7 @@ class DoctrineDestinationDriver extends AbstractDestinationDriver
     {
         $this->em->persist($data);
         $this->persistedCount++;
-        if ($this->persistedCount % 100 == 0) {
+        if ($this->flushImmediately || $this->persistedCount % 100 == 0) {
             // Avoids out-of-memory errors when persisting a large number of
             // entities at once.
             $this->em->flush();

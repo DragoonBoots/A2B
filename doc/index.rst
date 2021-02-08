@@ -42,7 +42,7 @@ Add the following to your composer.json
      "repositories": [
        {
          "type": "vcs",
-         "url": "https://github.com/DragoonBoots/A2B.git"
+         "url": "https://github.com/danielskeenan/A2B.git"
        }
      ]
    }

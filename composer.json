@@ -2,12 +2,12 @@
   "name": "dragoonboots/a2b",
   "description": "PHP data migration/transformation library",
   "type": "symfony-bundle",
-  "homepage": "https://dragoonboots.github.io/A2B/",
-  "readme": "https://github.com/DragoonBoots/A2B/blob/master/README.md",
+  "homepage": "https://danielskeenan.github.io/A2B/",
+  "readme": "https://github.com/danielskeenan/A2B/blob/master/README.md",
   "support": {
-    "issues": "https://github.com/DragoonBoots/A2B/issues",
-    "source": "https://github.com/DragoonBoots/A2B",
-    "docs": "https://dragoonboots.github.io/A2B/"
+    "issues": "https://github.com/danielskeenan/A2B/issues",
+    "source": "https://github.com/danielskeenan/A2B",
+    "docs": "https://danielskeenan.github.io/A2B/"
   },
   "license": "LGPL-3.0-only",
   "authors": [

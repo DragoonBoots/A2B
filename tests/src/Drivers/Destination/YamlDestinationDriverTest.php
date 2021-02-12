@@ -5,10 +5,10 @@ namespace DragoonBoots\A2B\Tests\Drivers\Destination;
 use ArrayIterator;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\IdField;
-use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\Destination\YamlDestinationDriver;
 use DragoonBoots\A2B\Factory\FinderFactory;
 use DragoonBoots\A2B\Tests\Drivers\FinderTestTrait;
+use DragoonBoots\YamlFormatter\Yaml\YamlDumper;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamFile;
@@ -20,7 +20,6 @@ use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Yaml\Parser as YamlParser;
-use Symfony\Component\Yaml\Yaml;
 
 class YamlDestinationDriverTest extends TestCase
 {
@@ -59,21 +58,18 @@ class YamlDestinationDriverTest extends TestCase
                 ],
             ]
         );
-
         $driver = new YamlDestinationDriver($this->yamlParser, $this->yamlDumper, $this->finderFactory);
-        $refl = new ReflectionClass($driver);
         $driver->configure($definition);
-
         $this->assertDirectoryIsWritable($path);
 
-        $newInline = 5;
-        $driver->setOption('inline', $newInline);
+        $refl = new ReflectionClass($driver);
         $optionsProperty = $refl->getProperty('options');
         $optionsProperty->setAccessible(true);
-        $this->assertEquals($newInline, $optionsProperty->getValue($driver)['inline']);
-        $driver->setFlag(Yaml::DUMP_OBJECT_AS_MAP);
-        $driver->unsetFlag(Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
-        $this->assertEquals([Yaml::DUMP_OBJECT_AS_MAP], array_values($optionsProperty->getValue($driver)['flags']));
+
+        $newIndent = 4;
+        $driver->setOption('indent', $newIndent);
+        $this->assertEquals($newIndent, $optionsProperty->getValue($driver)['indent']);
+        // Refs options tested when writing anchors
     }
 
     public function testRead()
@@ -323,7 +319,7 @@ class YamlDestinationDriverTest extends TestCase
         $this->assertEquals($expected, $file->getContent());
 
         // Test that output is valid yaml
-        $parsedEntity = Yaml::parse($file->getContent());
+        $parsedEntity = $this->yamlParser->parse($file->getContent());
         $parsedEntity['group'] = $newEntity['group'];
         $parsedEntity['identifier'] = $newEntity['identifier'];
         $this->assertEquals($newEntity, $parsedEntity);
@@ -454,8 +450,7 @@ YAML
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('data'));
         vfsStream::copyFromFileSystem(TEST_RESOURCES_ROOT.'/Drivers/Destination/YamlDestinationDriverTest');
 
-        $this->yamlDumper = new YamlDumper(2);
-
+        $this->yamlDumper = new YamlDumper();
         $this->yamlParser = new YamlParser();
 
         $this->finder = $this->createMock(Finder::class);

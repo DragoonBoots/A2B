@@ -81,29 +81,6 @@ in the ``destination`` annotation field.
 
 Some options and flags may be set to configure the YAML dumper:
 
-Array inlining
-~~~~~~~~~~~~~~
-
-See
-`here <https://symfony.com/doc/current/components/yaml.html#array-expansion-and-inlining>`_
-for more examples on what this affects.
-
-.. code:: php
-
-   <?php
-
-   /**
-    * {@inheritdoc}
-    * @param YamlDestinationDriver $destinationDriver
-    */
-   public function configureDestination(DestinationDriverInterface $destinationDriver)
-   {
-       // Start inlining arrays 5 levels deep
-       $destinationDriver->setOption('inline', 5);
-   }
-
-.. note:: Array inlining is not compatible with automatic reference generation.
-
 Automatic reference generation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -170,52 +147,4 @@ To enable this feature:
                '`.+\.short_effect`',
            ]
        ]);
-   }
-
-Advanced flags
-~~~~~~~~~~~~~~
-
-The Symfony YAML dumper supports a number of flags for advanced use
-cases. See
-`here <https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags>`__
-for a list of flags with examples.
-
-.. code:: php
-
-   <?php
-
-   /**
-    * {@inheritdoc}
-    * @param YamlDestinationDriver $destinationDriver
-    */
-   public function configureDestination(DestinationDriverInterface $destinationDriver)
-   {
-       // Dump objects as YAML maps
-       $destinationDriver->setFlag(Yaml::DUMP_OBJECT_AS_MAP);
-   }
-
-By default, strings with multiple lines (i.e. with one or more ``\n``
-characters) are dumped as multi-line literals:
-
-.. code:: yaml
-
-   string: |
-       Multiple
-       Line
-       String
-
-To change this behavior, use ``unsetFlag()``.
-
-.. code:: php
-
-   <?php
-
-   /**
-    * {@inheritdoc}
-    * @param YamlDestinationDriver $destinationDriver
-    */
-   public function configureDestination(DestinationDriverInterface $destinationDriver)
-   {
-       // Inline multi-line string literals
-       $destinationDriver->unsetFlag(Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
    }

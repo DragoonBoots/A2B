@@ -4,20 +4,19 @@
 namespace DragoonBoots\A2B\Drivers\Destination;
 
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use DragoonBoots\A2B\Annotations\DataMigration;
 use DragoonBoots\A2B\Annotations\Driver;
 use DragoonBoots\A2B\Drivers\AbstractDestinationDriver;
-use DragoonBoots\A2B\Drivers\Destination\Yaml\YamlDumper;
 use DragoonBoots\A2B\Drivers\DestinationDriverInterface;
 use DragoonBoots\A2B\Drivers\YamlDriverTrait;
 use DragoonBoots\A2B\Factory\FinderFactory;
+use DragoonBoots\YamlFormatter\AnchorBuilder\AnchorBuilderOptions;
+use DragoonBoots\YamlFormatter\Yaml\YamlDumper;
+use DragoonBoots\YamlFormatter\Yaml\YamlDumperOptions;
 use RangeException;
 use SplFileInfo;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Parser as YamlParser;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Destination driver for yaml files
@@ -28,14 +27,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
 {
 
     use YamlDriverTrait;
-
-    const DEFAULT_OPTIONS = [
-        'inline' => PHP_INT_MAX,
-        'refs' => false,
-        'flags' => [Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK],
-    ];
-
-    const INDENT_SPACES = 2;
 
     /**
      * @var YamlParser
@@ -57,12 +48,25 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      */
     protected $finder;
 
+    private const OPTION_INDENT = 'indent';
+    private const OPTION_REFS = 'refs';
+    private const OPTION_REFS_INCLUDE = 'include';
+    private const OPTION_REFS_EXCLUDE = 'exclude';
+    private const OPTIONS = [
+        self::OPTION_INDENT,
+        self::OPTION_REFS,
+    ];
+    private const OPTIONS_REFS = [
+        self::OPTION_REFS_INCLUDE,
+        self::OPTION_REFS_EXCLUDE,
+    ];
+
     /**
-     * YAML dumper options
+     * Dumper options
      *
      * @var array
      */
-    protected $options = self::DEFAULT_OPTIONS;
+    private $options = [];
 
     /**
      * YamlDestinationDriver constructor.
@@ -89,7 +93,6 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     public function configure(DataMigration $definition)
     {
         parent::configure($definition);
-        $this->options = self::DEFAULT_OPTIONS;
 
         if (!is_dir($this->migrationDefinition->getDestination())) {
             mkdir($this->migrationDefinition->getDestination(), 0755, true);
@@ -195,12 +198,8 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
             unset($data[$idField->getName()]);
         }
 
-        if ($this->options['refs']) {
-            $useAnchors = $this->compileAnchors($data);
-        } else {
-            $useAnchors = null;
-        }
-        $yaml = $this->dumpYaml($data, $useAnchors);
+        $this->yamlDumper->setOptions($this->buildDumperOptions());
+        $yaml = $this->yamlDumper->dump($data);
         // Ensure file always has a newline at the end.
         $yaml = rtrim($yaml)."\n";
 
@@ -215,130 +214,46 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
     }
 
     /**
-     * Dump the data into YAML format according to configured options.
+     * Build the options for the YAML dumper
      *
-     * @param array $data
-     * @param array|null $useAnchors
-     * @param int $depth
-     *   The depth of this dump stage, for internal use.
-     *
-     * @return string
+     * @return YamlDumperOptions
      */
-    protected function dumpYaml(array $data, ?array $useAnchors, $depth = 0): string
+    private function buildDumperOptions(): YamlDumperOptions
     {
-        $flagValue = 0;
-        foreach ($this->options['flags'] as $flag) {
-            $flagValue |= $flag;
+        $options = new YamlDumperOptions();
+        if (isset($this->options[self::OPTION_INDENT])) {
+            $options->setIndentation($this->options[self::OPTION_INDENT]);
         }
-
-        return $this->yamlDumper->dump(
-            $data,
-            $this->options['inline'],
-            $depth * self::INDENT_SPACES,
-            $flagValue,
-            $useAnchors
-        );
-    }
-
-    /**
-     * Create a list of possible anchors to use.
-     *
-     * @param array $data
-     * @param array|null $useAnchors
-     *   An array, passed by reference, to store a a list of anchors that should
-     *   be used.
-     * @param array|null $anchors
-     *   An array, passed by reference, to store the possible anchors in.
-     *   Anchors are named by separating their first path with a "."
-     * @param Collection|null $path
-     *
-     * @return array
-     *   A map of anchor names and their values.
-     */
-    protected function compileAnchors(
-        array $data,
-        ?array &$useAnchors = null,
-        ?array &$anchors = null,
-        ?Collection $path = null
-    ): ?array {
-        if (!isset($anchors)) {
-            $anchors = [];
-        }
-        if (!isset($useAnchors)) {
-            $useAnchors = [];
-        }
-        if (!isset($path)) {
-            $path = new ArrayCollection();
-        }
-        foreach ($data as $key => $value) {
-            $valuePath = clone $path;
-            $valuePath->add($key);
-            $anchorKey = implode('.', $valuePath->toArray());
-
-            // Should an anchor be built for this path?
-            $include = $this->options['refs']['include'] ?? ['`.+`'];
-            $exclude = $this->options['refs']['exclude'] ?? [];
-            $buildAnchor = false;
-            foreach ($include as $includePattern) {
-                $buildAnchor = (preg_match($includePattern, $anchorKey) === 1);
-                if ($buildAnchor) {
-                    break;
-                }
-            }
-            // None of the include patterns match, so don't bother
-            // checking the exclude patterns.
-            if (!$buildAnchor) {
-                continue;
-            }
-            foreach ($exclude as $excludePattern) {
-                $buildAnchor = (preg_match($excludePattern, $anchorKey) === 0);
-                if (!$buildAnchor) {
-                    break;
-                }
-            }
-            if (!$buildAnchor) {
-                continue;
-            }
-
-            // Use the anchor if this is an array or the final key in the key
-            // path matches (this means these values are likely similar
-            // contextually.
-            $useAnchor = false;
-            foreach ($anchors as $checkAnchorKey => $checkValue) {
-                $anchorPath = new ArrayCollection(explode('.', $checkAnchorKey));
-                if ($checkValue === $value && (is_array($value) || $anchorPath->last() === $valuePath->last())) {
-                    $useAnchor = $checkAnchorKey;
-                    break;
-                }
-            }
-
-            if ($useAnchor !== false) {
-                $useAnchors[$useAnchor] = $value;
+        if (isset($this->options[self::OPTION_REFS])) {
+            if ($this->options[self::OPTION_REFS] === false) {
+                $options->setAnchors(null);
             } else {
-                $anchors[$anchorKey] = $value;
-                if (is_array($value)) {
-                    $this->compileAnchors($value, $useAnchors, $anchors, $valuePath);
+                $anchorOptions = new AnchorBuilderOptions();
+                if ($this->options[self::OPTION_REFS] === true) {
+                    $anchorOptions->setInclude([])->setExclude([]);
+                } else {
+                    if (isset($this->options[self::OPTION_REFS][self::OPTION_REFS_INCLUDE])) {
+                        $anchorOptions->setInclude($this->options[self::OPTION_REFS][self::OPTION_REFS_INCLUDE]);
+                    }
+                    if (isset($this->options[self::OPTION_REFS][self::OPTION_REFS_EXCLUDE])) {
+                        $anchorOptions->setExclude($this->options[self::OPTION_REFS][self::OPTION_REFS_EXCLUDE]);
+                    }
                 }
+                $options->setAnchors($anchorOptions);
             }
         }
 
-        return $useAnchors;
+        return $options;
     }
 
     /**
      * Set an option for the YAML dumper.
      *
      * Valid options are:
-     * - inline: The level at which the output switches from expanded
-     *   (multiline) arrays to the inline representation.  Reference generation
-     *   is not available with inline arrays.
-     * - refs: Automatically generate YAML anchors and references.  *This is a
-     *   slow process!*  See the
-     * [docs](https://dragoonboots.gitlab.io/a2b/Drivers/Destination/YamlDestinationDriver.html) for further detail.
-     * - flags: Special flags for the YAML dumper.  See
-     *   https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
-     *   for valid flags.  *This will overwrite all flags, including defaults.*
-     *   Use setFlag() and unsetFlag() to control flags.
+     * - indent: Number of spaces to use for indentation
+     * - refs: Automatically generate YAML anchors and references.  *This is a slow process!*  See the
+     *   [docs](https://dragoonboots.gitlab.io/a2b/Drivers/Destination/YamlDestinationDriver.html)
+     *   for further detail.
      *
      * @param string $option
      * @param mixed $value
@@ -347,48 +262,25 @@ class YamlDestinationDriver extends AbstractDestinationDriver implements Destina
      */
     public function setOption(string $option, $value): YamlDestinationDriver
     {
+        // Validate
+        if (!in_array($option, self::OPTIONS)) {
+            throw new \LogicException('Invalid option '.$option);
+        } elseif ($option === self::OPTION_INDENT && !is_int($value)) {
+            throw new \LogicException('Option '.$option.' must be an integer');
+        } elseif ($option === self::OPTION_REFS) {
+            if (is_array($value)) {
+                foreach ($value as $k => $v) {
+                    if (!in_array($k, self::OPTIONS_REFS)) {
+                        throw new \LogicException(
+                            'Option '.$option.' keys must be one of '.implode(', ', self::OPTIONS_REFS)
+                        );
+                    }
+                }
+            } elseif (!is_bool($value)) {
+                throw new \LogicException('Option '.$option.' must be an array or boolean');
+            }
+        }
         $this->options[$option] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Set a special flag for the YAML dumper.
-     *
-     * Call this once per flag to allow them to be merged with the defaults.
-     *
-     * @see https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
-     *
-     * @param $flag
-     *
-     * @return self
-     */
-    public function setFlag($flag): YamlDestinationDriver
-    {
-        if (!in_array($flag, $this->options['flags'])) {
-            $this->options['flags'][] = $flag;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Unset a special flag for the YAML dumper.
-     *
-     * Call this once per flag to allow them to be merged with the defaults.
-     *
-     * @see https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags
-     *
-     * @param $flag
-     *
-     * @return $this
-     */
-    public function unsetFlag($flag): YamlDestinationDriver
-    {
-        $key = array_search($flag, $this->options['flags']);
-        if ($key !== false) {
-            unset($this->options['flags'][$key]);
-        }
 
         return $this;
     }

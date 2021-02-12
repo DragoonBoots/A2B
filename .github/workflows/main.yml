@@ -30,9 +30,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.cache_dirs.outputs.composer_cache }}
-          key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.json') }}
+          key: ${{ runner.os }}-php-${{ matrix.php }}-$ {{ secrets.CACHE_VERSION }}-${{ hashFiles('**/composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-${{ matrix.php }}-
+            ${{ runner.os }}-php-${{ matrix.php }}-$ {{ secrets.CACHE_VERSION }}-
       - name: Install dependencies
         run: composer install
       - name: Run tests

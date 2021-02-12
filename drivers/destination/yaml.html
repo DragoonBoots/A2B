@@ -128,29 +128,6 @@ YAML files use 2 spaces for each level of indentation.</p>
 subdirectories and YAML files will be created under the directory specified.
 in the <code class="docutils literal notranslate"><span class="pre">destination</span></code> annotation field.</p>
 <p>Some options and flags may be set to configure the YAML dumper:</p>
-<div class="section" id="array-inlining">
-<h3>Array inlining<a class="headerlink" href="#array-inlining" title="Permalink to this headline">¶</a></h3>
-<p>See
-<a class="reference external" href="https://symfony.com/doc/current/components/yaml.html#array-expansion-and-inlining">here</a>
-for more examples on what this affects.</p>
-<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
-
-<span class="sd">/**</span>
-<span class="sd"> * {@inheritdoc}</span>
-<span class="sd"> * @param YamlDestinationDriver $destinationDriver</span>
-<span class="sd"> */</span>
-<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="c1">// Start inlining arrays 5 levels deep</span>
-    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setOption</span><span class="p">(</span><span class="s1">&#39;inline&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Array inlining is not compatible with automatic reference generation.</p>
-</div>
-</div>
 <div class="section" id="automatic-reference-generation">
 <h3>Automatic reference generation<a class="headerlink" href="#automatic-reference-generation" title="Permalink to this headline">¶</a></h3>
 <p>YAML supports aliases to refer to previously defined content. This is an
@@ -214,48 +191,6 @@ appropriate.</p></li>
 </pre></div>
 </div>
 </div>
-<div class="section" id="advanced-flags">
-<h3>Advanced flags<a class="headerlink" href="#advanced-flags" title="Permalink to this headline">¶</a></h3>
-<p>The Symfony YAML dumper supports a number of flags for advanced use
-cases. See
-<a class="reference external" href="https://symfony.com/doc/current/components/yaml.html#advanced-usage-flags">here</a>
-for a list of flags with examples.</p>
-<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
-
-<span class="sd">/**</span>
-<span class="sd"> * {@inheritdoc}</span>
-<span class="sd"> * @param YamlDestinationDriver $destinationDriver</span>
-<span class="sd"> */</span>
-<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="c1">// Dump objects as YAML maps</span>
-    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">setFlag</span><span class="p">(</span><span class="nx">Yaml</span><span class="o">::</span><span class="na">DUMP_OBJECT_AS_MAP</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>By default, strings with multiple lines (i.e. with one or more <code class="docutils literal notranslate"><span class="pre">\n</span></code>
-characters) are dumped as multi-line literals:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">string</span><span class="p">:</span> <span class="p p-Indicator">|</span>
-    <span class="no">Multiple</span>
-    <span class="no">Line</span>
-    <span class="no">String</span>
-</pre></div>
-</div>
-<p>To change this behavior, use <code class="docutils literal notranslate"><span class="pre">unsetFlag()</span></code>.</p>
-<div class="highlight-php notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
-
-<span class="sd">/**</span>
-<span class="sd"> * {@inheritdoc}</span>
-<span class="sd"> * @param YamlDestinationDriver $destinationDriver</span>
-<span class="sd"> */</span>
-<span class="k">public</span> <span class="k">function</span> <span class="nf">configureDestination</span><span class="p">(</span><span class="nx">DestinationDriverInterface</span> <span class="nv">$destinationDriver</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="c1">// Inline multi-line string literals</span>
-    <span class="nv">$destinationDriver</span><span class="o">-&gt;</span><span class="na">unsetFlag</span><span class="p">(</span><span class="nx">Yaml</span><span class="o">::</span><span class="na">DUMP_MULTI_LINE_LITERAL_BLOCK</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 
@@ -271,9 +206,7 @@ characters) are dumped as multi-line literals:</p>
 <li><a class="reference internal" href="#">YAML</a><ul>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
 <li><a class="reference internal" href="#usage">Usage</a><ul>
-<li><a class="reference internal" href="#array-inlining">Array inlining</a></li>
 <li><a class="reference internal" href="#automatic-reference-generation">Automatic reference generation</a></li>
-<li><a class="reference internal" href="#advanced-flags">Advanced flags</a></li>
 </ul>
 </li>
 </ul>

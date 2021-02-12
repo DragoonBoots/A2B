@@ -19,7 +19,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           ini-values: display_errors=On
-          extensions: xdebug, intl, pdo_sqlite, zip
+          extensions: ds, xdebug, intl, pdo_sqlite, zip
           coverage: xdebug
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"

@@ -18,6 +18,7 @@
   ],
   "require": {
     "php": "^7.3|^8.0",
+    "ext-ds": "*",
     "ext-json": "*",
     "doctrine/annotations": "^1.6",
     "doctrine/collections": "^1.5",
@@ -43,7 +44,6 @@
     "symfony/phpunit-bridge": "^5.0"
   },
   "suggest": {
-    "ext-ds": "Can greatly increase performance",
     "symfony/maker-bundle": "Generate migrations from the command line."
   },
   "config": {
